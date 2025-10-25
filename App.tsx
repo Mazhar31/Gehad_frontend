@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 // FIX: Added file extension to import to resolve module error.
 import Sidebar from './components/Sidebar.tsx';
@@ -31,6 +32,12 @@ function App() {
   const [authPage, setAuthPage] = useState<'login' | null>(null);
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [adminProfile, setAdminProfile] = useState({
+    name: 'Admin',
+    position: 'Super Admin',
+    email: 'admin@example.com',
+    avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026702d'
+  });
 
   const handleNavigate = (page: string) => {
     setCurrentPage(page);
@@ -53,6 +60,10 @@ function App() {
     setAuthPage(page);
   };
 
+  const handleAdminProfileUpdate = (updatedProfile: typeof adminProfile) => {
+    setAdminProfile(updatedProfile);
+  };
+
 
   const renderPage = () => {
     switch (currentPage) {
@@ -71,7 +82,7 @@ function App() {
       case 'payment-plans':
         return <PaymentPlansPage />;
       case 'settings':
-        return <SettingsPage />;
+        return <SettingsPage userProfile={adminProfile} onProfileUpdate={handleAdminProfileUpdate} />;
       default:
         return <DashboardPage onNavigate={handleNavigate} />;
     }
@@ -95,7 +106,7 @@ function App() {
           onLogout={handleLogout}
         />
         <div className="flex-1 flex flex-col overflow-hidden">
-          <Header title={currentPage} onMenuClick={() => setSidebarOpen(true)} />
+          <Header title={currentPage} onMenuClick={() => setSidebarOpen(true)} userProfile={adminProfile} />
           <main className="flex-1 overflow-x-hidden overflow-y-auto bg-dark-bg">
             <div className="container mx-auto px-4 sm:px-6 py-6">
               {renderPage()}

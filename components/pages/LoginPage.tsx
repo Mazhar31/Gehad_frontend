@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { KeyIcon, EnvelopeIcon } from '../icons.tsx';
-import { useData } from '../DataContext.tsx';
+import { EnvelopeIcon, KeyIcon } from '../icons.tsx';
 
 const ProjectileLogo: React.FC<{ className?: string }> = ({ className }) => (
     <svg width="32" height="32" viewBox="0 0 32" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
@@ -22,46 +21,44 @@ interface LoginPageProps {
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => {
-    const { users } = useData();
     const [step, setStep] = useState<'credentials' | 'verification' | 'forgotPassword' | 'resetSent'>('credentials');
-    const [email, setEmail] = useState('admin@projectile.app');
+    const [email, setEmail] = useState('admin@example.com');
     const [password, setPassword] = useState('password123');
     const [verificationCode, setVerificationCode] = useState('');
     const [error, setError] = useState('');
+    const [pendingRole, setPendingRole] = useState<'admin' | 'user' | null>(null);
 
     const handleCredentialsSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        // In a real app, you would validate credentials against a backend here
-        if (email && password) {
-            setStep('verification');
+        if (email.toLowerCase() === 'admin@example.com') {
+            if (password === 'password123') {
+                setPendingRole('admin');
+                setStep('verification');
+            } else {
+                setError('Invalid email or password.');
+            }
         } else {
-            setError('Please enter your email and password.');
+            // For demonstration, any other email grants access to the user dashboard after 2FA.
+            setPendingRole('user');
+            setStep('verification');
         }
     };
 
     const handleVerificationSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        // Using temporary hardcoded verification code
-        if (verificationCode === '555555') {
-            if (email === 'admin@projectile.app') {
-                onLoginSuccess('admin');
-            } else {
-                onLoginSuccess('user');
-            }
+        if (verificationCode === '555555' && pendingRole) {
+            onLoginSuccess(pendingRole);
         } else {
-            setError('Invalid verification code. Please try again.');
+            setError('Invalid verification code.');
         }
     };
 
     const handleForgotPasswordSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        const userExists = users.some(user => user.email.toLowerCase() === email.toLowerCase());
-
-        if (userExists) {
-            // Simulate sending a reset email
+        if (email.toLowerCase() === 'admin@example.com') {
             console.log(`Password reset requested for ${email}`);
             setStep('resetSent');
         } else {
@@ -82,10 +79,19 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
     const getDescription = () => {
         switch (step) {
             case 'credentials': return 'Welcome back! Please enter your details.';
-            case 'verification': return 'Enter the 6-digit code.';
+            case 'verification': return 'Please enter the 6-digit code from your authenticator app.';
             case 'forgotPassword': return 'Enter your email address and we will send you a link to reset your password.';
             case 'resetSent': return `We've sent a password reset link to ${email}. Please check your inbox.`;
             default: return '';
+        }
+    };
+
+    const goBack = () => {
+        setError('');
+        if (step === 'credentials') {
+            onNavigate(null);
+        } else {
+            setStep('credentials');
         }
     };
 
@@ -141,29 +147,23 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
                 )}
 
                 {step === 'verification' && (
-                    <form onSubmit={handleVerificationSubmit} className="bg-card-bg/80 border border-border-color p-8 rounded-2xl shadow-lg space-y-6">
-                        <div className="text-center">
-                            <div className="inline-block bg-dark-bg p-3 rounded-full border border-border-color">
-                                <KeyIcon className="w-6 h-6 text-accent-blue" />
-                            </div>
-                        </div>
+                     <form onSubmit={handleVerificationSubmit} className="bg-card-bg/80 border border-border-color p-8 rounded-2xl shadow-lg space-y-6">
                         <div>
-                             <label htmlFor="verification-code" className="sr-only">Verification Code</label>
-                             <input
-                                type="text"
-                                id="verification-code"
+                            <label htmlFor="verificationCode" className="block text-sm font-medium text-secondary-text mb-2 text-center">Verification Code</label>
+                            <input 
+                                type="text" 
+                                id="verificationCode" 
                                 value={verificationCode}
-                                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
-                                maxLength={6}
+                                onChange={(e) => setVerificationCode(e.target.value)}
                                 required
-                                className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 text-center text-2xl tracking-[0.5em] font-mono focus:ring-2 focus:ring-accent-blue focus:outline-none"
-                                placeholder="••••••"
-                                autoComplete="one-time-code"
-                             />
+                                maxLength={6}
+                                className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 text-center text-2xl tracking-[1em] focus:ring-2 focus:ring-accent-blue focus:outline-none"
+                                placeholder="_ _ _ _ _ _"
+                            />
                         </div>
                         {error && <p className="text-red-400 text-sm text-center">{error}</p>}
                         <button type="submit" className="w-full bg-accent-lime text-black font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity">
-                           Verify Code
+                           Verify
                         </button>
                     </form>
                 )}
@@ -202,7 +202,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
 
 
                  <p className="text-center text-secondary-text mt-6">
-                    <button onClick={() => step === 'credentials' ? onNavigate(null) : setStep('credentials')} className="font-semibold text-accent-blue hover:underline">
+                    <button onClick={goBack} className="font-semibold text-accent-blue hover:underline">
                         {step === 'credentials' ? '← Back to Home' : '← Back to Login'}
                     </button>
                 </p>

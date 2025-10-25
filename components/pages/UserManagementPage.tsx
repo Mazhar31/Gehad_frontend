@@ -2,13 +2,15 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { User, Client, Project } from '../../types.ts';
 import Modal from '../Modal.tsx';
 import UserCard from '../UserCard.tsx';
-import { PlusIcon } from '../icons.tsx';
+import { PlusIcon, MagnifyingGlassIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
 
 const UserManagementPage: React.FC = () => {
     const { users, clients, projects, handleSaveUser, handleDeleteUser } = useData();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [filterClientId, setFilterClientId] = useState('All');
 
     if (!users || !clients || !projects || !handleSaveUser || !handleDeleteUser) {
         return <div>Loading...</div>;
@@ -40,21 +42,53 @@ const UserManagementPage: React.FC = () => {
         return client?.company || 'No Client Assigned';
     };
 
+    const filteredUsers = useMemo(() => {
+        return users.filter(user => {
+            const clientMatch = filterClientId === 'All' || user.clientId === filterClientId;
+            const searchMatch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                user.email.toLowerCase().includes(searchTerm.toLowerCase());
+            return clientMatch && searchMatch;
+        });
+    }, [users, searchTerm, filterClientId]);
+
     return (
         <div>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
                 <h2 className="text-2xl font-bold text-white">User Management</h2>
-                <button 
-                    onClick={() => handleOpenModal()}
-                    className="flex items-center space-x-2 bg-accent-blue text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                    <PlusIcon className="w-5 h-5" />
-                    <span>New User</span>
-                </button>
+                 <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                    <div className="relative w-full sm:w-auto">
+                        <input
+                            type="search"
+                            placeholder="Search by name or email..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="bg-card-bg text-white placeholder-secondary-text rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-accent-blue w-full sm:w-64"
+                        />
+                        <MagnifyingGlassIcon className="w-5 h-5 text-secondary-text absolute top-1/2 left-3 transform -translate-y-1/2" />
+                    </div>
+                    <select
+                        value={filterClientId}
+                        onChange={(e) => setFilterClientId(e.target.value)}
+                        className="bg-card-bg text-white placeholder-secondary-text rounded-lg py-2 px-4 focus:outline-none focus:ring-2 focus:ring-accent-blue w-full sm:w-auto"
+                        aria-label="Filter by client"
+                    >
+                        <option value="All">All Clients</option>
+                        {clients.map(client => (
+                            <option key={client.id} value={client.id}>{client.company}</option>
+                        ))}
+                    </select>
+                    <button 
+                        onClick={() => handleOpenModal()}
+                        className="flex items-center space-x-2 bg-accent-blue text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors w-full sm:w-auto justify-center flex-shrink-0"
+                    >
+                        <PlusIcon className="w-5 h-5" />
+                        <span>New User</span>
+                    </button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {users.map((user) => (
+                {filteredUsers.map((user) => (
                     <UserCard 
                         key={user.id} 
                         user={user}

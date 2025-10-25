@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import {
     ChartTrendingUpIcon,
@@ -189,6 +190,26 @@ const integrations = [
 ];
 
 const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({ onNavigate }) => {
+    const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
+    const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+
+    const handleContactChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setContactForm(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleContactSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        // In a real application, you would handle the form submission here (e.g., send to an API).
+        console.log('Form submitted:', contactForm);
+        setIsFormSubmitted(true);
+        setContactForm({ name: '', email: '', message: '' });
+
+        // Hide the success message after a few seconds
+        setTimeout(() => {
+            setIsFormSubmitted(false);
+        }, 5000);
+    };
 
     return (
         <div className="bg-dark-bg text-primary-text scroll-smooth">
@@ -340,42 +361,88 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                             <h2 className="text-4xl font-extrabold tracking-tighter text-white">Get in Touch</h2>
                             <p className="mt-4 text-lg text-secondary-text">Have questions? We'd love to hear from you.</p>
                         </div>
-                        <div className="mt-12 max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
-                            <div className="bg-card-bg border border-border-color rounded-2xl p-8 space-y-6">
-                                 <h3 className="text-2xl font-bold text-white">Contact Information</h3>
-                                <div className="flex items-start space-x-4">
-                                    <PhoneIcon className="w-6 h-6 text-accent-blue mt-1" />
-                                    <div>
-                                        <h4 className="font-semibold text-white">Call Us</h4>
-                                        <p className="text-secondary-text">+1 (555) 123-4567</p>
-                                    </div>
+                        <div className="mt-12 max-w-6xl mx-auto">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                                {/* Form Card */}
+                                <div className="bg-card-bg border border-border-color rounded-2xl p-8">
+                                    <h3 className="text-2xl font-bold text-white mb-6">Send us a message</h3>
+                                    {isFormSubmitted ? (
+                                        <div className="flex items-center space-x-3 bg-green-500/10 text-green-300 p-4 rounded-lg">
+                                            <CheckCircleIcon className="w-6 h-6" />
+                                            <p>Thank you! Your message has been sent successfully.</p>
+                                        </div>
+                                    ) : (
+                                        <form onSubmit={handleContactSubmit} className="space-y-4">
+                                            <div>
+                                                <label htmlFor="name" className="block text-sm font-medium text-secondary-text mb-2">Your Name</label>
+                                                <input type="text" id="name" name="name" value={contactForm.name} onChange={handleContactChange} required className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none" />
+                                            </div>
+                                            <div>
+                                                <label htmlFor="email" className="block text-sm font-medium text-secondary-text mb-2">Your Email</label>
+                                                <input type="email" id="email" name="email" value={contactForm.email} onChange={handleContactChange} required className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none" />
+                                            </div>
+                                            <div>
+                                                <label htmlFor="message" className="block text-sm font-medium text-secondary-text mb-2">Message</label>
+                                                <textarea id="message" name="message" rows={4} value={contactForm.message} onChange={handleContactChange} required className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none"></textarea>
+                                            </div>
+                                            <button type="submit" className="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                                                Send Message
+                                            </button>
+                                        </form>
+                                    )}
                                 </div>
-                                <div className="flex items-start space-x-4">
-                                    <EnvelopeIcon className="w-6 h-6 text-accent-blue mt-1" />
-                                    <div>
-                                        <h4 className="font-semibold text-white">Email Us</h4>
-                                        <p className="text-secondary-text">contact@projex.app</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start space-x-4">
-                                    <MapPinIcon className="w-6 h-6 text-accent-blue mt-1" />
-                                    <div>
-                                        <h4 className="font-semibold text-white">Our Office</h4>
-                                        <p className="text-secondary-text">Sheikh Zayed Road, Dubai, UAE</p>
-                                    </div>
+                                 {/* Map */}
+                                <div className="overflow-hidden rounded-2xl border border-border-color h-full">
+                                    <iframe
+                                        src="https://maps.google.com/maps?q=dubai&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                                        width="100%"
+                                        height="100%"
+                                        style={{ border: 0, minHeight: '450px' }}
+                                        allowFullScreen={false}
+                                        loading="lazy"
+                                        referrerPolicy="no-referrer-when-downgrade"
+                                        className="grayscale invert-[1] hue-rotate-[180deg]"
+                                    ></iframe>
                                 </div>
                             </div>
-                            <div className="overflow-hidden rounded-2xl border border-border-color">
-                                <iframe
-                                    src="https://maps.google.com/maps?q=dubai&t=&z=13&ie=UTF8&iwloc=&output=embed"
-                                    width="100%"
-                                    height="100%"
-                                    style={{ border: 0, minHeight: '400px' }}
-                                    allowFullScreen={false}
-                                    loading="lazy"
-                                    referrerPolicy="no-referrer-when-downgrade"
-                                    className="grayscale invert-[1] hue-rotate-[180deg]"
-                                ></iframe>
+
+                            {/* Contact Info Card - Below */}
+                            <div className="mt-12">
+                                <div className="bg-card-bg border border-border-color rounded-2xl p-6">
+                                    <h3 className="text-xl font-bold text-white mb-6">Contact Information</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                                        <div className="flex items-start space-x-3">
+                                            <div className="bg-dark-bg p-2 rounded-lg text-accent-blue flex-shrink-0">
+                                                <MapPinIcon className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-semibold text-white">Our Office</h4>
+                                                <p className="text-secondary-text">
+                                                    123 Innovation Drive, Suite 456<br />
+                                                    Tech City, TX 75001, USA
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start space-x-3">
+                                            <div className="bg-dark-bg p-2 rounded-lg text-accent-blue flex-shrink-0">
+                                                <PhoneIcon className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-semibold text-white">Phone</h4>
+                                                <p className="text-secondary-text">(555) 123-4567</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start space-x-3">
+                                            <div className="bg-dark-bg p-2 rounded-lg text-accent-blue flex-shrink-0">
+                                                <EnvelopeIcon className="w-5 h-5" />
+                                            </div>
+                                            <div>
+                                                <h4 className="font-semibold text-white">Email</h4>
+                                                <p className="text-secondary-text">contact@projex.com</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
