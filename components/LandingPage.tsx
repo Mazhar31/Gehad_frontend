@@ -1,5 +1,4 @@
 
-
 import React, { useState } from 'react';
 import {
     ChartTrendingUpIcon,
@@ -24,7 +23,6 @@ import {
     Bars3Icon,
     XMarkIcon
 } from './icons.tsx';
-import { useData } from './DataContext.tsx';
 
 const Logo: React.FC = () => (
     <div className="flex items-center space-x-2">
@@ -191,7 +189,6 @@ const integrations = [
 ];
 
 const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({ onNavigate }) => {
-    const { heroImage } = useData();
 
     return (
         <div className="bg-dark-bg text-primary-text scroll-smooth">
@@ -218,7 +215,7 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                     <div className="mt-16 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                         <div className="bg-gradient-to-b from-sidebar-bg to-dark-bg p-2 rounded-3xl shadow-2xl shadow-blue-900/20">
                             <img 
-                                src={heroImage || "https://storage.googleapis.com/aistudio-hosting/generative-ai-studio/assets/app-placeholder.png"} 
+                                src="https://storage.cloud.google.com/ai-studio-bucket-1089004137383-us-west1/IMG_3464.JPG"
                                 alt="Projectile App Dashboard" 
                                 className="rounded-2xl border border-border-color" 
                             />
@@ -343,64 +340,42 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                             <h2 className="text-4xl font-extrabold tracking-tighter text-white">Get in Touch</h2>
                             <p className="mt-4 text-lg text-secondary-text">Have questions? We'd love to hear from you.</p>
                         </div>
-                        <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-                            <div className="bg-card-bg border border-border-color rounded-2xl p-8">
-                                <h3 className="text-2xl font-bold text-white mb-6">Send us a message</h3>
-                                <form action="#" method="POST" className="space-y-6">
+                        <div className="mt-12 max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
+                            <div className="bg-card-bg border border-border-color rounded-2xl p-8 space-y-6">
+                                 <h3 className="text-2xl font-bold text-white">Contact Information</h3>
+                                <div className="flex items-start space-x-4">
+                                    <PhoneIcon className="w-6 h-6 text-accent-blue mt-1" />
                                     <div>
-                                        <label htmlFor="name" className="block text-sm font-medium text-secondary-text mb-2">Full Name</label>
-                                        <input type="text" id="name" name="name" className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none" />
+                                        <h4 className="font-semibold text-white">Call Us</h4>
+                                        <p className="text-secondary-text">+1 (555) 123-4567</p>
                                     </div>
+                                </div>
+                                <div className="flex items-start space-x-4">
+                                    <EnvelopeIcon className="w-6 h-6 text-accent-blue mt-1" />
                                     <div>
-                                        <label htmlFor="email" className="block text-sm font-medium text-secondary-text mb-2">Email</label>
-                                        <input type="email" id="email" name="email" className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none" />
+                                        <h4 className="font-semibold text-white">Email Us</h4>
+                                        <p className="text-secondary-text">contact@projex.app</p>
                                     </div>
+                                </div>
+                                <div className="flex items-start space-x-4">
+                                    <MapPinIcon className="w-6 h-6 text-accent-blue mt-1" />
                                     <div>
-                                        <label htmlFor="message" className="block text-sm font-medium text-secondary-text mb-2">Message</label>
-                                        <textarea id="message" name="message" rows={4} className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none"></textarea>
+                                        <h4 className="font-semibold text-white">Our Office</h4>
+                                        <p className="text-secondary-text">Sheikh Zayed Road, Dubai, UAE</p>
                                     </div>
-                                    <button type="submit" className="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">
-                                        Send Message
-                                    </button>
-                                </form>
+                                </div>
                             </div>
-                             <div className="space-y-8">
-                                <div className="bg-card-bg border border-border-color rounded-2xl p-8 space-y-6">
-                                     <h3 className="text-2xl font-bold text-white">Contact Information</h3>
-                                    <div className="flex items-start space-x-4">
-                                        <PhoneIcon className="w-6 h-6 text-accent-blue mt-1" />
-                                        <div>
-                                            <h4 className="font-semibold text-white">Call Us</h4>
-                                            <p className="text-secondary-text">+1 (555) 123-4567</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-start space-x-4">
-                                        <EnvelopeIcon className="w-6 h-6 text-accent-blue mt-1" />
-                                        <div>
-                                            <h4 className="font-semibold text-white">Email Us</h4>
-                                            <p className="text-secondary-text">contact@projex.app</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-start space-x-4">
-                                        <MapPinIcon className="w-6 h-6 text-accent-blue mt-1" />
-                                        <div>
-                                            <h4 className="font-semibold text-white">Our Office</h4>
-                                            <p className="text-secondary-text">Sheikh Zayed Road, Dubai, UAE</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="overflow-hidden rounded-2xl border border-border-color">
-                                    <iframe
-                                        src="https://maps.google.com/maps?q=dubai&t=&z=13&ie=UTF8&iwloc=&output=embed"
-                                        width="100%"
-                                        height="300"
-                                        style={{ border: 0 }}
-                                        allowFullScreen={false}
-                                        loading="lazy"
-                                        referrerPolicy="no-referrer-when-downgrade"
-                                        className="grayscale invert-[1] hue-rotate-[180deg]"
-                                    ></iframe>
-                                </div>
+                            <div className="overflow-hidden rounded-2xl border border-border-color">
+                                <iframe
+                                    src="https://maps.google.com/maps?q=dubai&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 0, minHeight: '400px' }}
+                                    allowFullScreen={false}
+                                    loading="lazy"
+                                    referrerPolicy="no-referrer-when-downgrade"
+                                    className="grayscale invert-[1] hue-rotate-[180deg]"
+                                ></iframe>
                             </div>
                         </div>
                     </div>

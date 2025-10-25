@@ -22,11 +22,6 @@ const getInitialState = <T,>(key: string, defaultValue: T): T => {
     return defaultValue;
 };
 
-const heroImageDataBase64 = `data:image/png;base64,${[
-    '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',
-].join('')}`;
-
-
 interface DataContextType {
     projects: Project[];
     clients: Client[];
@@ -34,8 +29,6 @@ interface DataContextType {
     paymentPlans: PaymentPlan[];
     invoices: Invoice[];
     users: User[];
-    heroImage: string | null;
-    setHeroImage: (image: string | null) => void;
     handleSaveProject: (project: Project) => void;
     handleDeleteProject: (projectId: string) => void;
     handleSaveClient: (client: Client) => void;
@@ -59,7 +52,6 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [paymentPlans, setPaymentPlans] = useState<PaymentPlan[]>(() => getInitialState('app_payment_plans', PAYMENT_PLANS_DATA));
     const [invoices, setInvoices] = useState<Invoice[]>(() => getInitialState('app_invoices', INVOICES_DATA));
     const [users, setUsers] = useState<User[]>(() => getInitialState('app_users', USERS_DATA));
-    const [heroImage, setHeroImage] = useState<string | null>(() => getInitialState('app_heroImage', heroImageDataBase64));
 
 
     // Effects to save state to localStorage whenever it changes
@@ -69,7 +61,6 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     useEffect(() => { localStorage.setItem('app_payment_plans', JSON.stringify(paymentPlans)); }, [paymentPlans]);
     useEffect(() => { localStorage.setItem('app_invoices', JSON.stringify(invoices)); }, [invoices]);
     useEffect(() => { localStorage.setItem('app_users', JSON.stringify(users)); }, [users]);
-    useEffect(() => { localStorage.setItem('app_heroImage', JSON.stringify(heroImage)); }, [heroImage]);
 
 
     // Auto-generate and reconcile subscription invoices whenever projects or plans change
@@ -252,8 +243,6 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         paymentPlans,
         invoices,
         users,
-        heroImage,
-        setHeroImage,
         handleSaveProject,
         handleDeleteProject,
         handleSaveClient,
