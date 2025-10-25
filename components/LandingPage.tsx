@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import {
     ChartTrendingUpIcon,
@@ -271,8 +272,8 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                                 <div className="bg-accent-blue/10 text-accent-blue p-4 rounded-full mb-4">
                                     <Squares2X2Icon className="w-8 h-8" />
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-2">Dashboards</h3>
-                                <p className="text-secondary-text text-sm">The price is tailored to the number of client-facing dashboards you need to deploy.</p>
+                                <h3 className="text-xl font-bold text-white mb-2">User Dashboard</h3>
+                                <p className="text-secondary-text text-sm">The price is tailored to the number of user dashboards you need to deploy.</p>
                            </div>
                            <div className="bg-card-bg border border-border-color rounded-2xl p-6 flex flex-col items-center text-center transition-transform hover:scale-105">
                                 <div className="bg-accent-green/10 text-accent-green p-4 rounded-full mb-4">
