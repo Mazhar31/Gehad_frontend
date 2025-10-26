@@ -7,10 +7,18 @@ import { useData } from '../DataContext.tsx';
 
 const UserDashboard: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
     const [currentPage, setCurrentPage] = useState<'projects' | 'invoices' | 'profile'>('projects');
-    const { clients, projects, invoices, users, handleSaveInvoice, handleSaveUser } = useData();
+    const { clients, projects, invoices, currentUser, handleSaveInvoice, handleSaveUser } = useData();
 
-    // Mocking the logged-in user. Let's take the first user from the list.
-    const currentUser = users[0]; // Alice Martin from Innovate Inc.
+    if (!currentUser) {
+        // This should theoretically not be reached if App.tsx logic is correct,
+        // but it's a good safeguard.
+        return (
+            <div className="bg-dark-bg min-h-screen flex items-center justify-center">
+                <p className="text-white">Loading user data or user not found...</p>
+            </div>
+        );
+    }
+    
     const userClient = clients.find(c => c.id === currentUser.clientId);
 
     useEffect(() => {
@@ -20,8 +28,8 @@ const UserDashboard: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
         }
     }, [currentPage, currentUser.role]);
 
-    if (!currentUser || !userClient) {
-        return <div>Error: Could not load user data.</div>;
+    if (!userClient) {
+        return <div className="bg-dark-bg min-h-screen flex items-center justify-center"><p className="text-white">Error: Could not load user's client data.</p></div>;
     }
     
     const userProjects = projects.filter(p => currentUser.projectIds?.includes(p.id));

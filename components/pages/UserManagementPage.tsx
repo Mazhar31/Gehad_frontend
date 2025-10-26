@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { User, Client, Project } from '../../types.ts';
 import Modal from '../Modal.tsx';
 import UserCard from '../UserCard.tsx';
-import { PlusIcon, MagnifyingGlassIcon } from '../icons.tsx';
+import { PlusIcon, MagnifyingGlassIcon, ArrowDownTrayIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
 
 const UserManagementPage: React.FC = () => {
@@ -42,6 +42,20 @@ const UserManagementPage: React.FC = () => {
         return client?.company || 'No Client Assigned';
     };
 
+    const handleExportEmails = () => {
+        const csvContent = "data:text/csv;charset=utf-8," 
+            + "email\n" // CSV header
+            + users.map(u => u.email).join("\n");
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "user_emails.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     const filteredUsers = useMemo(() => {
         return users.filter(user => {
             const clientMatch = filterClientId === 'All' || user.clientId === filterClientId;
@@ -77,6 +91,13 @@ const UserManagementPage: React.FC = () => {
                             <option key={client.id} value={client.id}>{client.company}</option>
                         ))}
                     </select>
+                    <button 
+                        onClick={handleExportEmails}
+                        className="flex items-center space-x-2 bg-accent-teal text-white px-4 py-2 rounded-lg hover:bg-teal-600 transition-colors w-full sm:w-auto justify-center flex-shrink-0"
+                    >
+                        <ArrowDownTrayIcon className="w-5 h-5" />
+                        <span>Export Emails</span>
+                    </button>
                     <button 
                         onClick={() => handleOpenModal()}
                         className="flex items-center space-x-2 bg-accent-blue text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors w-full sm:w-auto justify-center flex-shrink-0"
@@ -178,15 +199,15 @@ const UserForm: React.FC<{
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Password is not saved in this mock setup. In a real app, this would be hashed.
-        const { password, ...userData } = formData;
+        // In a real app, passwords would be hashed.
+        // This now correctly passes the entire form data, including the password, to the save handler.
         onSave({ 
-            ...userData, 
-            id: user?.id || '', 
-            avatarUrl: user?.avatarUrl || '',
-            dashboardAccess: formData.dashboardAccess as 'view-only' | 'view-and-edit',
+            ...user, // Spread existing user data first to preserve fields not in the form (like id, avatarUrl)
+            ...formData, // Spread form data to apply updates
+            // Ensure types are correct
             role: formData.role as 'superuser' | 'normal',
-        });
+            dashboardAccess: formData.dashboardAccess as 'view-only' | 'view-and-edit',
+        } as User);
     };
 
     return (

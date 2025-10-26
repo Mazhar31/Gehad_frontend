@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { EnvelopeIcon, KeyIcon } from '../icons.tsx';
+import { useData } from '../DataContext.tsx';
 
 const ProjectileLogo: React.FC<{ className?: string }> = ({ className }) => (
     <svg width="32" height="32" viewBox="0 0 32" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
@@ -16,11 +17,12 @@ const ProjectileLogo: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 interface LoginPageProps {
-    onLoginSuccess: (role: 'admin' | 'user') => void;
+    onLoginSuccess: (role: 'admin' | 'user', userEmail?: string) => void;
     onNavigate: (page: null) => void;
 }
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => {
+    const { users } = useData();
     const [step, setStep] = useState<'credentials' | 'verification' | 'forgotPassword' | 'resetSent'>('credentials');
     const [email, setEmail] = useState('admin@example.com');
     const [password, setPassword] = useState('password123');
@@ -31,25 +33,33 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
     const handleCredentialsSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        if (email.toLowerCase() === 'admin@example.com') {
-            if (password === 'password123') {
-                setPendingRole('admin');
-                setStep('verification');
-            } else {
-                setError('Invalid email or password.');
-            }
-        } else {
-            // For demonstration, any other email grants access to the user dashboard after 2FA.
+
+        // Check for admin user
+        if (email.toLowerCase() === 'admin@example.com' && password === 'password123') {
+            setPendingRole('admin');
+            setStep('verification');
+            return;
+        }
+        
+        // Check for registered user
+        const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+        // Check the user's stored password.
+        if (user && user.password && password === user.password) {
             setPendingRole('user');
             setStep('verification');
+            return;
         }
+
+        setError('Invalid email or password.');
     };
 
     const handleVerificationSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        // For demo purposes, verification code is static.
         if (verificationCode === '555555' && pendingRole) {
-            onLoginSuccess(pendingRole);
+            onLoginSuccess(pendingRole, email);
         } else {
             setError('Invalid verification code.');
         }
@@ -58,13 +68,16 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
     const handleForgotPasswordSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        if (email.toLowerCase() === 'admin@example.com') {
+        // Check if email exists in either admin or users list
+        const userExists = users.some(u => u.email.toLowerCase() === email.toLowerCase());
+        if (email.toLowerCase() === 'admin@example.com' || userExists) {
             console.log(`Password reset requested for ${email}`);
             setStep('resetSent');
         } else {
             setError('This email address is not registered.');
         }
     };
+
 
     const getTitle = () => {
         switch (step) {

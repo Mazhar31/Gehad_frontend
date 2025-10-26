@@ -74,6 +74,15 @@ export interface User {
   clientId: string;
   avatarUrl: string;
   role: 'superuser' | 'normal';
+  password?: string;
   dashboardAccess?: 'view-only' | 'view-and-edit';
   projectIds?: string[];
+}
+
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  createdAt: string;
 }

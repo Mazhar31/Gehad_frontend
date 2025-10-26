@@ -24,11 +24,11 @@ import UserManagementPage from './components/pages/UserManagementPage.tsx';
 import LandingPage from './components/LandingPage.tsx';
 import LoginPage from './components/pages/LoginPage.tsx';
 import UserDashboard from './components/user/UserDashboard.tsx';
+import { useData } from './components/DataContext.tsx';
 
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState<'admin' | 'user' | null>(null);
+  const { isLoggedIn, userRole, login, logout } = useData();
   const [authPage, setAuthPage] = useState<'login' | null>(null);
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -44,15 +44,13 @@ function App() {
     setSidebarOpen(false); // Close sidebar on navigation
   };
   
-  const handleLoginSuccess = (role: 'admin' | 'user') => {
-    setIsLoggedIn(true);
-    setUserRole(role);
+  const handleLoginSuccess = (role: 'admin' | 'user', userEmail?: string) => {
+    login(role, userEmail);
     setAuthPage(null);
   };
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUserRole(null);
+    logout();
     setCurrentPage('dashboard'); // Reset to default page on logout
   };
 

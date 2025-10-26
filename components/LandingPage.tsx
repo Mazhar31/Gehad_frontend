@@ -1,5 +1,6 @@
 
 
+
 import React, { useState } from 'react';
 import {
     ChartTrendingUpIcon,
@@ -24,6 +25,7 @@ import {
     Bars3Icon,
     XMarkIcon
 } from './icons.tsx';
+import { useData } from './DataContext.tsx';
 
 const Logo: React.FC = () => (
     <div className="flex items-center space-x-2">
@@ -190,6 +192,7 @@ const integrations = [
 ];
 
 const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({ onNavigate }) => {
+    const { handleSaveContactMessage } = useData();
     const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
     const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
@@ -200,8 +203,9 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
 
     const handleContactSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // In a real application, you would handle the form submission here (e.g., send to an API).
-        console.log('Form submitted:', contactForm);
+        // This now calls the central handler to store the message and simulate the email.
+        handleSaveContactMessage(contactForm);
+        
         setIsFormSubmitted(true);
         setContactForm({ name: '', email: '', message: '' });
 

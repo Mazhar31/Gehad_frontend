@@ -1,5 +1,5 @@
 // FIX: Created mock data for clients, projects, invoices, categories, and payment plans to resolve import errors and populate the application with data.
-import { Client, Project, Invoice, Category, PaymentPlan, User } from './types.ts';
+import { Client, Project, Invoice, Category, PaymentPlan, User, ContactMessage } from './types.ts';
 
 export const CLIENTS_DATA: Client[] = [
   { id: 'c-1', company: 'Innovate Inc.', email: 'john.doe@innovate.com', mobile: '555-0101', address: '123 Innovation Dr, Techville, TX', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704d' },
@@ -48,8 +48,10 @@ export const INVOICES_DATA: Invoice[] = [
 ];
 
 export const USERS_DATA: User[] = [
-  { id: 'u-1', name: 'Alice Martin', email: 'alice.m@innovate.com', position: 'Project Manager', clientId: 'c-1', avatarUrl: 'https://i.pravatar.cc/150?u=u1', role: 'superuser', dashboardAccess: 'view-and-edit', projectIds: ['p-1', 'p-5'] },
-  { id: 'u-2', name: 'Bob Johnson', email: 'bob.j@solutions.co', position: 'Lead Developer', clientId: 'c-2', avatarUrl: 'https://i.pravatar.cc/150?u=u2', role: 'normal', dashboardAccess: 'view-only', projectIds: ['p-2'] },
-  { id: 'u-3', name: 'Charlie Brown', email: 'charlie.b@techgiants.com', position: 'UX Designer', clientId: 'c-3', avatarUrl: 'https://i.pravatar.cc/150?u=u3', role: 'normal', dashboardAccess: 'view-only', projectIds: ['p-3'] },
-  { id: 'u-4', name: 'Diana Prince', email: 'diana.p@webwizards.io', position: 'QA Engineer', clientId: 'c-4', avatarUrl: 'https://i.pravatar.cc/150?u=u4', role: 'normal', dashboardAccess: 'view-only', projectIds: ['p-4'] },
+  { id: 'u-1', name: 'Alice Martin', email: 'alice.m@innovate.com', position: 'Project Manager', clientId: 'c-1', avatarUrl: 'https://i.pravatar.cc/150?u=u1', role: 'superuser', password: 'password', dashboardAccess: 'view-and-edit', projectIds: ['p-1', 'p-5'] },
+  { id: 'u-2', name: 'Bob Johnson', email: 'bob.j@solutions.co', position: 'Lead Developer', clientId: 'c-2', avatarUrl: 'https://i.pravatar.cc/150?u=u2', role: 'normal', password: 'password', dashboardAccess: 'view-only', projectIds: ['p-2'] },
+  { id: 'u-3', name: 'Charlie Brown', email: 'charlie.b@techgiants.com', position: 'UX Designer', clientId: 'c-3', avatarUrl: 'https://i.pravatar.cc/150?u=u3', role: 'normal', password: 'password', dashboardAccess: 'view-only', projectIds: ['p-3'] },
+  { id: 'u-4', name: 'Diana Prince', email: 'diana.p@webwizards.io', position: 'QA Engineer', clientId: 'c-4', avatarUrl: 'https://i.pravatar.cc/150?u=u4', role: 'normal', password: 'password', dashboardAccess: 'view-only', projectIds: ['p-4'] },
 ];
+
+export const CONTACT_MESSAGES_DATA: ContactMessage[] = [];

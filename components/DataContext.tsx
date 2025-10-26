@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { Project, Client, Category, PaymentPlan, Invoice, User } from '../types.ts';
+import { Project, Client, Category, PaymentPlan, Invoice, User, ContactMessage } from '../types.ts';
 import { 
     PROJECTS_DATA, 
     CLIENTS_DATA, 
     CATEGORIES_DATA, 
     PAYMENT_PLANS_DATA,
     INVOICES_DATA,
-    USERS_DATA
+    USERS_DATA,
+    CONTACT_MESSAGES_DATA
 } from '../constants.ts';
 
 // Helper to get initial state from localStorage or use default
@@ -29,6 +30,7 @@ interface DataContextType {
     paymentPlans: PaymentPlan[];
     invoices: Invoice[];
     users: User[];
+    contactMessages: ContactMessage[];
     handleSaveProject: (project: Project) => void;
     handleDeleteProject: (projectId: string) => void;
     handleSaveClient: (client: Client) => void;
@@ -41,6 +43,12 @@ interface DataContextType {
     handleDeleteUser: (userId: string) => void;
     handleSaveInvoice: (invoice: Invoice) => void;
     handleDeleteInvoice: (invoiceId: string) => void;
+    handleSaveContactMessage: (message: Omit<ContactMessage, 'id' | 'createdAt'>) => void;
+    isLoggedIn: boolean;
+    userRole: 'admin' | 'user' | null;
+    currentUser: User | null;
+    login: (role: 'admin' | 'user', userEmail?: string) => void;
+    logout: () => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -52,7 +60,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [paymentPlans, setPaymentPlans] = useState<PaymentPlan[]>(() => getInitialState('app_payment_plans', PAYMENT_PLANS_DATA));
     const [invoices, setInvoices] = useState<Invoice[]>(() => getInitialState('app_invoices', INVOICES_DATA));
     const [users, setUsers] = useState<User[]>(() => getInitialState('app_users', USERS_DATA));
-
+    const [contactMessages, setContactMessages] = useState<ContactMessage[]>(() => getInitialState('app_contact_messages', CONTACT_MESSAGES_DATA));
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => getInitialState('app_isLoggedIn', false));
+    const [userRole, setUserRole] = useState<'admin' | 'user' | null>(() => getInitialState('app_userRole', null));
+    const [currentUser, setCurrentUser] = useState<User | null>(() => getInitialState('app_currentUser', null));
 
     // Effects to save state to localStorage whenever it changes
     useEffect(() => { localStorage.setItem('app_projects', JSON.stringify(projects)); }, [projects]);
@@ -61,7 +72,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     useEffect(() => { localStorage.setItem('app_payment_plans', JSON.stringify(paymentPlans)); }, [paymentPlans]);
     useEffect(() => { localStorage.setItem('app_invoices', JSON.stringify(invoices)); }, [invoices]);
     useEffect(() => { localStorage.setItem('app_users', JSON.stringify(users)); }, [users]);
-
+    useEffect(() => { localStorage.setItem('app_contact_messages', JSON.stringify(contactMessages)); }, [contactMessages]);
+    useEffect(() => { localStorage.setItem('app_isLoggedIn', JSON.stringify(isLoggedIn)); }, [isLoggedIn]);
+    useEffect(() => { localStorage.setItem('app_userRole', JSON.stringify(userRole)); }, [userRole]);
+    useEffect(() => { localStorage.setItem('app_currentUser', JSON.stringify(currentUser)); }, [currentUser]);
 
     // Auto-generate and reconcile subscription invoices whenever projects or plans change
     useEffect(() => {
@@ -204,7 +218,14 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // User Handlers
     const handleSaveUser = (userData: User) => {
         if (userData.id && users.some(u => u.id === userData.id)) {
-            setUsers(users.map(u => u.id === userData.id ? userData : u));
+            setUsers(users.map(u => {
+                if (u.id === userData.id) {
+                    // If the provided password is empty or null, keep the existing one.
+                    const newPassword = (userData.password && userData.password.trim() !== '') ? userData.password : u.password;
+                    return { ...u, ...userData, password: newPassword };
+                }
+                return u;
+            }));
         } else {
             const newUser = { 
                 ...userData, 
@@ -212,6 +233,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 avatarUrl: `https://i.pravatar.cc/150?u=${Date.now()}`,
                 dashboardAccess: userData.dashboardAccess || 'view-only',
                 projectIds: userData.projectIds || [],
+                // Set a default password if none is provided for a new user.
+                password: userData.password || 'password'
             };
             setUsers([newUser, ...users]);
         }
@@ -235,6 +258,34 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setInvoices(invoices.filter(i => i.id !== invoiceId));
     };
 
+    // Contact Message Handler
+    const handleSaveContactMessage = (messageData: Omit<ContactMessage, 'id' | 'createdAt'>) => {
+        const newMessage: ContactMessage = {
+            ...messageData,
+            id: `msg-${Date.now()}`,
+            createdAt: new Date().toISOString(),
+        };
+        setContactMessages(prev => [newMessage, ...prev]);
+        // The following console logs simulate the backend operations as requested.
+        console.log('Message stored locally (simulating Google Cloud storage):', newMessage);
+    };
+
+    // Auth Handlers
+    const login = (role: 'admin' | 'user', userEmail?: string) => {
+        setIsLoggedIn(true);
+        setUserRole(role);
+        if (role === 'user' && userEmail) {
+            const userToLogin = users.find(u => u.email.toLowerCase() === userEmail.toLowerCase());
+            setCurrentUser(userToLogin || null);
+        }
+    };
+
+    const logout = () => {
+        setIsLoggedIn(false);
+        setUserRole(null);
+        setCurrentUser(null);
+    };
+
 
     const value = {
         projects,
@@ -243,6 +294,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         paymentPlans,
         invoices,
         users,
+        contactMessages,
         handleSaveProject,
         handleDeleteProject,
         handleSaveClient,
@@ -255,6 +307,12 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         handleDeleteUser,
         handleSaveInvoice,
         handleDeleteInvoice,
+        handleSaveContactMessage,
+        isLoggedIn,
+        userRole,
+        currentUser,
+        login,
+        logout,
     };
 
     return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
