@@ -1,5 +1,6 @@
 
 
+
 import React, { useState } from 'react';
 // FIX: Added file extension to import to resolve module error.
 import Sidebar from './components/Sidebar.tsx';
@@ -25,6 +26,7 @@ import LandingPage from './components/LandingPage.tsx';
 import LoginPage from './components/pages/LoginPage.tsx';
 import UserDashboard from './components/user/UserDashboard.tsx';
 import { useData } from './components/DataContext.tsx';
+import DeployKpiDashboardPage from './components/pages/DeployKpiDashboardPage.tsx';
 
 
 function App() {
@@ -79,6 +81,8 @@ function App() {
         return <CategoriesPage />;
       case 'payment-plans':
         return <PaymentPlansPage />;
+      case 'deploy-kpi-dashboard':
+        return <DeployKpiDashboardPage />;
       case 'settings':
         return <SettingsPage userProfile={adminProfile} onProfileUpdate={handleAdminProfileUpdate} />;
       default:

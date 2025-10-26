@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { EnvelopeIcon, KeyIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
 
@@ -26,9 +26,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
     const [step, setStep] = useState<'credentials' | 'verification' | 'forgotPassword' | 'resetSent'>('credentials');
     const [email, setEmail] = useState('admin@example.com');
     const [password, setPassword] = useState('password123');
-    const [verificationCode, setVerificationCode] = useState('');
+    const [verificationCode, setVerificationCode] = useState(new Array(6).fill(''));
     const [error, setError] = useState('');
     const [pendingRole, setPendingRole] = useState<'admin' | 'user' | null>(null);
+    const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
     const handleCredentialsSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -57,8 +58,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
     const handleVerificationSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        const code = verificationCode.join('');
         // For demo purposes, verification code is static.
-        if (verificationCode === '555555' && pendingRole) {
+        if (code === '555555' && pendingRole) {
             onLoginSuccess(pendingRole, email);
         } else {
             setError('Invalid verification code.');
@@ -75,6 +77,36 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
             setStep('resetSent');
         } else {
             setError('This email address is not registered.');
+        }
+    };
+
+    const handleCodeChange = (element: HTMLInputElement, index: number) => {
+        if (isNaN(Number(element.value))) return false;
+
+        setVerificationCode([...verificationCode.map((d, idx) => (idx === index ? element.value : d))]);
+
+        // Focus next input
+        if (element.value !== '' && element.nextSibling) {
+            (element.nextSibling as HTMLInputElement).focus();
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+        // Move focus to previous input on backspace if current input is empty
+        if (e.key === 'Backspace' && !verificationCode[index] && e.currentTarget.previousSibling) {
+            (e.currentTarget.previousSibling as HTMLInputElement).focus();
+        }
+    };
+
+    const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+        const paste = e.clipboardData.getData('text');
+        if (/^\d{6}$/.test(paste)) {
+            const digits = paste.split('');
+            setVerificationCode(digits);
+            // Focus the last input after paste
+            if (inputRefs.current[5]) {
+                inputRefs.current[5]!.focus();
+            }
         }
     };
 
@@ -162,17 +194,25 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
                 {step === 'verification' && (
                      <form onSubmit={handleVerificationSubmit} className="bg-card-bg/80 border border-border-color p-8 rounded-2xl shadow-lg space-y-6">
                         <div>
-                            <label htmlFor="verificationCode" className="block text-sm font-medium text-secondary-text mb-2 text-center">Verification Code</label>
-                            <input 
-                                type="text" 
-                                id="verificationCode" 
-                                value={verificationCode}
-                                onChange={(e) => setVerificationCode(e.target.value)}
-                                required
-                                maxLength={6}
-                                className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 text-center text-2xl tracking-[1em] focus:ring-2 focus:ring-accent-blue focus:outline-none"
-                                placeholder="_ _ _ _ _ _"
-                            />
+                            <label className="block text-sm font-medium text-secondary-text mb-4 text-center">Verification Code</label>
+                             <div className="flex justify-center gap-2" onPaste={handlePaste}>
+                                {verificationCode.map((data, index) => {
+                                    return (
+                                        <input
+                                            className="w-12 h-14 text-center text-2xl font-bold bg-dark-bg border border-border-color text-white rounded-lg focus:ring-2 focus:ring-accent-blue focus:outline-none"
+                                            type="text"
+                                            name="otp"
+                                            maxLength={1}
+                                            key={index}
+                                            value={data}
+                                            onChange={e => handleCodeChange(e.target, index)}
+                                            onFocus={e => e.target.select()}
+                                            onKeyDown={e => handleKeyDown(e, index)}
+                                            ref={el => inputRefs.current[index] = el}
+                                        />
+                                    );
+                                })}
+                            </div>
                         </div>
                         {error && <p className="text-red-400 text-sm text-center">{error}</p>}
                         <button type="submit" className="w-full bg-accent-lime text-black font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity">

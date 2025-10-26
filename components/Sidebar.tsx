@@ -1,7 +1,8 @@
 
+
 import React from 'react';
 // FIX: Added file extension to import to resolve module error.
-import { HomeIcon, FolderIcon, UsersIcon, DocumentTextIcon, TagIcon, CreditCardIcon, Cog6ToothIcon, XMarkIcon, UserGroupIcon, ArrowLeftOnRectangleIcon } from './icons.tsx';
+import { HomeIcon, FolderIcon, UsersIcon, DocumentTextIcon, TagIcon, CreditCardIcon, Cog6ToothIcon, XMarkIcon, UserGroupIcon, ArrowLeftOnRectangleIcon, CpuChipIcon } from './icons.tsx';
 
 interface SidebarProps {
   currentPage: string;
@@ -46,6 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onCl
         { icon: DocumentTextIcon, label: 'Invoices', page: 'invoices' },
         { icon: TagIcon, label: 'Categories', page: 'categories' },
         { icon: CreditCardIcon, label: 'Payment Plans', page: 'payment-plans' },
+        { icon: CpuChipIcon, label: 'Deploy KPI Dashboard', page: 'deploy-kpi-dashboard' },
     ];
 
     return (
@@ -66,7 +68,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onCl
                 <div className="flex justify-between items-center mb-8">
                     <div className="flex items-center">
                         <div className="bg-accent-blue p-2 rounded-lg">
-                             <svg className="w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                             <svg className="w-6 h-6 text-white" xmlns="http://www.w.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.517l2.74-1.22m0 0l-5.94-2.28a11.95 11.95 0 00-5.814 5.517L9 18.75l-6.75-6.75" />
                             </svg>
                         </div>

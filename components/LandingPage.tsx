@@ -2,6 +2,7 @@
 
 
 
+
 import React, { useState } from 'react';
 import {
     ChartTrendingUpIcon,
@@ -348,27 +349,27 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                         <h2 className="text-4xl font-extrabold tracking-tighter text-white">A Pricing Structure That Scales With You</h2>
                         <p className="mt-4 text-lg text-secondary-text">Our pricing is simple and transparent. You only pay for what you need. No hidden fees, ever.</p>
-                        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-                           <div className="bg-card-bg border border-border-color rounded-2xl p-6 flex flex-col items-center text-center transition-transform hover:scale-105">
-                                <div className="bg-accent-blue/10 text-accent-blue p-4 rounded-full mb-4">
-                                    <Squares2X2Icon className="w-8 h-8" />
+                        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+                           <div className="bg-card-bg border border-border-color rounded-2xl p-8 flex flex-col items-center text-center transition-transform hover:scale-105 h-full">
+                                <div className="bg-accent-blue/10 text-accent-blue p-5 rounded-full mb-6">
+                                    <Squares2X2Icon className="w-10 h-10" />
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-2">User Dashboard</h3>
-                                <p className="text-secondary-text text-sm">The price is tailored to the number of user dashboards you need to deploy.</p>
+                                <h3 className="text-2xl font-bold text-white mb-4">User Dashboard</h3>
+                                <p className="text-secondary-text text-base">The price is tailored to the number of user dashboards you need to deploy.</p>
                            </div>
-                           <div className="bg-card-bg border border-border-color rounded-2xl p-6 flex flex-col items-center text-center transition-transform hover:scale-105">
-                                <div className="bg-accent-green/10 text-accent-green p-4 rounded-full mb-4">
-                                    <UsersIcon className="w-8 h-8" />
+                           <div className="bg-card-bg border border-border-color rounded-2xl p-8 flex flex-col items-center text-center transition-transform hover:scale-105 h-full">
+                                <div className="bg-accent-green/10 text-accent-green p-5 rounded-full mb-6">
+                                    <UsersIcon className="w-10 h-10" />
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-2">Users</h3>
-                                <p className="text-secondary-text text-sm">Pricing adjusts based on the total number of unique users who require access.</p>
+                                <h3 className="text-2xl font-bold text-white mb-4">Users</h3>
+                                <p className="text-secondary-text text-base">Pricing adjusts based on the total number of unique users who require access.</p>
                            </div>
-                           <div className="bg-card-bg border border-border-color rounded-2xl p-6 flex flex-col items-center text-center transition-transform hover:scale-105">
-                                <div className="bg-accent-pink/10 text-accent-pink p-4 rounded-full mb-4">
-                                    <PuzzlePieceIcon className="w-8 h-8" />
+                           <div className="bg-card-bg border border-border-color rounded-2xl p-8 flex flex-col items-center text-center transition-transform hover:scale-105 h-full">
+                                <div className="bg-accent-pink/10 text-accent-pink p-5 rounded-full mb-6">
+                                    <PuzzlePieceIcon className="w-10 h-10" />
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-2">Add-ins</h3>
-                                <p className="text-secondary-text text-sm">Enhance your experience with powerful add-ins, priced individually for flexibility.</p>
+                                <h3 className="text-2xl font-bold text-white mb-4">Add-ins</h3>
+                                <p className="text-secondary-text text-base">Enhance your experience with powerful add-ins, priced individually for flexibility.</p>
                            </div>
                         </div>
                         <div className="mt-12">
