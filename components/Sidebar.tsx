@@ -1,5 +1,6 @@
 
 
+
 import React from 'react';
 // FIX: Added file extension to import to resolve module error.
 import { HomeIcon, FolderIcon, UsersIcon, DocumentTextIcon, TagIcon, CreditCardIcon, Cog6ToothIcon, XMarkIcon, UserGroupIcon, ArrowLeftOnRectangleIcon, CpuChipIcon } from './icons.tsx';
@@ -10,6 +11,11 @@ interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
   onLogout: () => void;
+  adminProfile: {
+    name: string;
+    position: string;
+    avatarUrl: string;
+  };
 }
 
 const NavItem: React.FC<{
@@ -38,7 +44,7 @@ const NavItem: React.FC<{
   </li>
 );
 
-const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onClose, onLogout }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onClose, onLogout, adminProfile }) => {
     const navItems = [
         { icon: HomeIcon, label: 'Dashboard', page: 'dashboard' },
         { icon: FolderIcon, label: 'Projects', page: 'projects' },
@@ -68,7 +74,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onCl
                 <div className="flex justify-between items-center mb-8">
                     <div className="flex items-center">
                         <div className="bg-accent-blue p-2 rounded-lg">
-                             <svg className="w-6 h-6 text-white" xmlns="http://www.w.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                             <svg className="w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.517l2.74-1.22m0 0l-5.94-2.28a11.95 11.95 0 00-5.814 5.517L9 18.75l-6.75-6.75" />
                             </svg>
                         </div>
@@ -94,22 +100,32 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onCl
                     </ul>
                 </nav>
 
-                <div className="mt-auto">
-                    <div className="border-t border-border-color my-4"></div>
-                    <NavItem
-                        icon={Cog6ToothIcon}
-                        label="Settings"
-                        page="settings"
-                        isActive={currentPage === 'settings'}
-                        onClick={() => onNavigate('settings')}
-                    />
-                     <NavItem
-                        icon={ArrowLeftOnRectangleIcon}
-                        label="Sign Out"
-                        page="logout"
-                        isActive={false}
-                        onClick={onLogout}
-                    />
+                <div className="mt-auto border-t border-border-color pt-4">
+                    <div className="flex items-center">
+                        <img src={adminProfile.avatarUrl} alt="Admin" className="w-10 h-10 rounded-full" />
+                        <div className="ml-3 flex-1 overflow-hidden">
+                            <p className="text-sm font-semibold text-white truncate">{adminProfile.name}</p>
+                            <p className="text-xs text-secondary-text truncate">{adminProfile.position}</p>
+                        </div>
+                        <button
+                            onClick={() => onNavigate('settings')}
+                            className={`p-2 rounded-lg transition-colors ${
+                                currentPage === 'settings'
+                                    ? 'bg-accent-blue text-white'
+                                    : 'text-secondary-text hover:bg-white/10 hover:text-white'
+                            }`}
+                            aria-label="Settings"
+                        >
+                            <Cog6ToothIcon className="w-5 h-5" />
+                        </button>
+                        <button
+                            onClick={onLogout}
+                            className="p-2 ml-1 rounded-lg text-secondary-text hover:bg-white/10 hover:text-white transition-colors"
+                            aria-label="Sign Out"
+                        >
+                            <ArrowLeftOnRectangleIcon className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
             </aside>
         </>

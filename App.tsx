@@ -1,6 +1,7 @@
 
 
 
+
 import React, { useState } from 'react';
 // FIX: Added file extension to import to resolve module error.
 import Sidebar from './components/Sidebar.tsx';
@@ -106,6 +107,7 @@ function App() {
           isOpen={isSidebarOpen}
           onClose={() => setSidebarOpen(false)}
           onLogout={handleLogout}
+          adminProfile={adminProfile}
         />
         <div className="flex-1 flex flex-col overflow-hidden">
           <Header title={currentPage} onMenuClick={() => setSidebarOpen(true)} userProfile={adminProfile} />
