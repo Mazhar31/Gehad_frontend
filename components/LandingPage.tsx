@@ -1,6 +1,7 @@
 
 
 
+
 import React, { useState } from 'react';
 import {
     ChartTrendingUpIcon,
@@ -23,7 +24,8 @@ import {
     SignalIcon,
     ShieldCheckIcon,
     Bars3Icon,
-    XMarkIcon
+    XMarkIcon,
+    ArrowTopRightOnSquareIcon
 } from './icons.tsx';
 import { useData } from './DataContext.tsx';
 
@@ -57,6 +59,7 @@ const Header: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({ onNa
     const navLinks = [
         { href: '#home', label: 'Home' },
         { href: '#features', label: 'Features' },
+        { href: '#portfolio', label: 'Portfolio' },
         { href: '#pricing', label: 'Pricing' },
         { href: '#faq', label: 'FAQ' },
         { href: '#contact', label: 'Contact' },
@@ -196,6 +199,30 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
     const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
     const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
+    const portfolioCases = [
+      {
+        category: 'E-commerce',
+        title: 'Innovate Inc. Marketplace',
+        description: 'A complete overhaul of a legacy e-commerce platform, boosting performance by 200% and increasing user engagement through a modern UI/UX design.',
+        imageUrl: 'https://images.unsplash.com/photo-1522199755839-a2bacb67c546?q=80&w=800&auto=format&fit=crop',
+        link: '#'
+      },
+      {
+        category: 'Mobile App',
+        title: 'Solutions Co. Banking App',
+        description: 'Developed a secure and intuitive mobile banking application for iOS and Android, featuring biometric login and real-time transaction tracking.',
+        imageUrl: 'https://images.unsplash.com/photo-1607252650355-f7fd0460ccdb?q=80&w=800&auto=format&fit=crop',
+        link: '#'
+      },
+      {
+        category: 'SaaS Platform',
+        title: 'CloudFlow CRM',
+        description: 'Built a scalable CRM platform from the ground up, enabling businesses to manage customer relationships with advanced analytics and automation tools.',
+        imageUrl: 'https://images.unsplash.com/photo-1556740758-90de374c12ad?q=80&w=800&auto=format&fit=crop',
+        link: '#'
+      }
+    ];
+
     const handleContactChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setContactForm(prev => ({ ...prev, [name]: value }));
@@ -279,6 +306,38 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                         <div className="flex justify-center items-center flex-wrap gap-x-8 gap-y-4">
                             {integrations.map(tool => (
                                 <tool.icon key={tool.name} className="w-8 h-8 text-secondary-text hover:text-white transition-colors" />
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Portfolio Section */}
+                <section id="portfolio" className="py-20">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="text-center">
+                            <h2 className="text-4xl font-extrabold tracking-tighter text-white">Our Work in Action</h2>
+                            <p className="mt-4 text-lg text-secondary-text max-w-2xl mx-auto">
+                                We deliver high-quality solutions that solve real-world problems and drive business growth.
+                            </p>
+                        </div>
+                        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {portfolioCases.map((caseItem, index) => (
+                                <div key={index} className="bg-card-bg rounded-2xl overflow-hidden group transition-all duration-300 hover:shadow-xl hover:shadow-blue-900/20 border border-border-color">
+                                    <div className="aspect-video overflow-hidden">
+                                        <img src={caseItem.imageUrl} alt={caseItem.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                    </div>
+                                    <div className="p-6">
+                                        <p className="text-sm font-medium text-accent-blue mb-2">{caseItem.category}</p>
+                                        <h3 className="text-xl font-bold text-white mb-3">{caseItem.title}</h3>
+                                        <p className="text-secondary-text text-sm mb-6 h-20">
+                                            {caseItem.description}
+                                        </p>
+                                        <a href={caseItem.link} className="inline-flex items-center font-semibold text-white group-hover:text-accent-blue transition-colors">
+                                            View Case Study
+                                            <ArrowTopRightOnSquareIcon className="w-4 h-4 ml-2" />
+                                        </a>
+                                    </div>
+                                </div>
                             ))}
                         </div>
                     </div>
