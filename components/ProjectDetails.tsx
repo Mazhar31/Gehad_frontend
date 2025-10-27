@@ -1,6 +1,6 @@
 import React from 'react';
-import { Project, Client, Category, PaymentPlan } from '../types.ts';
-import { TagIcon, CreditCardIcon, BanknotesIcon, CalendarDaysIcon, ClockIcon, CheckCircleIcon, ArrowTopRightOnSquareIcon, UsersIcon } from './icons.tsx';
+import { Project, Client, Category, PaymentPlan, Department, Group } from '../types.ts';
+import { TagIcon, CreditCardIcon, BanknotesIcon, CalendarDaysIcon, ClockIcon, CheckCircleIcon, ArrowTopRightOnSquareIcon, UsersIcon, UserGroupIcon, FolderIcon } from './icons.tsx';
 
 const getStatusInfo = (status: Project['status']) => {
     switch (status) {
@@ -33,12 +33,16 @@ interface ProjectDetailsProps {
     project: Project;
     client?: Client;
     category?: Category;
+    department?: Department;
     plan?: PaymentPlan;
+    groups?: Group[];
 }
 
-const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project, client, category, plan }) => {
+const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project, client, category, department, plan, groups }) => {
     const statusInfo = getStatusInfo(project.status);
     const StatusIcon = statusInfo.icon;
+    const group = client?.groupId ? groups?.find(g => g.id === client.groupId) : undefined;
+
 
     const formattedBudget = project.budget 
         ? new Intl.NumberFormat('en-US', {
@@ -84,9 +88,11 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project, client, catego
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <DetailItem icon={UsersIcon} label="Client" value={client?.company} />
+                <DetailItem icon={FolderIcon} label="Client Group" value={group?.name} />
                 <DetailItem icon={CalendarDaysIcon} label="Start Date" value={project.startDate} />
                 <DetailItem icon={BanknotesIcon} label="Budget" value={formattedBudget} />
                 <DetailItem icon={TagIcon} label="Category" value={category?.name} />
+                <DetailItem icon={UserGroupIcon} label="Department" value={department?.name} />
                 <DetailItem 
                     icon={CreditCardIcon} 
                     label="Payment Plan" 

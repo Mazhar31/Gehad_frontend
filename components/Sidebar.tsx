@@ -1,9 +1,12 @@
 
 
 
+
+
+
 import React from 'react';
 // FIX: Added file extension to import to resolve module error.
-import { HomeIcon, FolderIcon, UsersIcon, DocumentTextIcon, TagIcon, CreditCardIcon, Cog6ToothIcon, XMarkIcon, UserGroupIcon, ArrowLeftOnRectangleIcon, CpuChipIcon } from './icons.tsx';
+import { HomeIcon, FolderIcon, UsersIcon, DocumentTextIcon, TagIcon, CreditCardIcon, Cog6ToothIcon, XMarkIcon, UserGroupIcon, ArrowLeftOnRectangleIcon, CpuChipIcon, PhotoIcon } from './icons.tsx';
 
 interface SidebarProps {
   currentPage: string;
@@ -51,9 +54,10 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onCl
         { icon: UsersIcon, label: 'Clients', page: 'clients' },
         { icon: UserGroupIcon, label: 'User Management', page: 'user-management' },
         { icon: DocumentTextIcon, label: 'Invoices', page: 'invoices' },
-        { icon: TagIcon, label: 'Categories', page: 'categories' },
+        { icon: TagIcon, label: 'Organization Management', page: 'organization-management' },
         { icon: CreditCardIcon, label: 'Payment Plans', page: 'payment-plans' },
         { icon: CpuChipIcon, label: 'Deploy KPI Dashboard', page: 'deploy-kpi-dashboard' },
+        { icon: PhotoIcon, label: 'Portfolio', page: 'portfolio' },
     ];
 
     return (
@@ -78,7 +82,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onCl
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.517l2.74-1.22m0 0l-5.94-2.28a11.95 11.95 0 00-5.814 5.517L9 18.75l-6.75-6.75" />
                             </svg>
                         </div>
-                        <span className="text-xl font-bold ml-3">Projex</span>
+                        <span className="text-xl font-bold ml-3">OneQlek</span>
                     </div>
                     <button onClick={onClose} className="lg:hidden p-1 text-secondary-text hover:text-white">
                         <XMarkIcon className="w-6 h-6" />

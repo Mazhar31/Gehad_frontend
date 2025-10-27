@@ -113,7 +113,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
 
     const getTitle = () => {
         switch (step) {
-            case 'credentials': return 'Log in to Projectile';
+            case 'credentials': return 'Log in to OneQlek';
             case 'verification': return 'Two-Factor Authentication';
             case 'forgotPassword': return 'Reset Your Password';
             case 'resetSent': return 'Check Your Email';
@@ -200,7 +200,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
                                     return (
                                         <input
                                             className="w-12 h-14 text-center text-2xl font-bold bg-dark-bg border border-border-color text-white rounded-lg focus:ring-2 focus:ring-accent-blue focus:outline-none"
-                                            type="text"
+                                            type="tel"
+                                            inputMode="numeric"
+                                            pattern="[0-9]*"
+                                            autoComplete="one-time-code"
                                             name="otp"
                                             maxLength={1}
                                             key={index}

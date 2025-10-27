@@ -20,6 +20,7 @@ const InvoicesPage: React.FC = () => {
     const { invoices, clients, projects, handleSaveInvoice, handleDeleteInvoice } = useData();
     const [isFormModalOpen, setFormModalOpen] = useState(false);
     const [isViewModalOpen, setViewModalOpen] = useState(false);
+    const [isConfirmSendModalOpen, setConfirmSendModalOpen] = useState(false);
     const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
     const [viewingInvoice, setViewingInvoice] = useState<Invoice | null>(null);
     const [filterStatus, setFilterStatus] = useState<string>('All');
@@ -47,6 +48,7 @@ const InvoicesPage: React.FC = () => {
         setViewingInvoice(null);
         setFormModalOpen(false);
         setViewModalOpen(false);
+        setConfirmSendModalOpen(false);
     };
 
     const onSave = (invoiceData: Invoice) => {
@@ -240,7 +242,7 @@ const InvoicesPage: React.FC = () => {
                      <div className="bg-sidebar-bg text-white">
                          <div className="p-4 flex justify-end space-x-2 no-print">
                               <button 
-                                onClick={() => handleSendInvoice(viewingInvoice, clients.find(c => c.id === viewingInvoice.clientId))}
+                                onClick={() => setConfirmSendModalOpen(true)}
                                 className="flex items-center space-x-2 bg-accent-teal text-white px-4 py-2 rounded-lg hover:bg-teal-600 transition-colors"
                              >
                                  <EnvelopeIcon className="w-5 h-5" />
@@ -282,6 +284,48 @@ const InvoicesPage: React.FC = () => {
                     `}</style>
                 </Modal>
             )}
+            
+            {isConfirmSendModalOpen && viewingInvoice && (() => {
+                const client = clients.find(c => c.id === viewingInvoice.clientId);
+                return (
+                    <Modal title="Confirm Send Invoice" onClose={() => setConfirmSendModalOpen(false)}>
+                        <div className="p-2 text-white">
+                            <h3 className="text-lg font-semibold mb-2">Send Invoice to Client</h3>
+                            <p className="text-secondary-text mb-4">
+                                You are about to send invoice <strong>{viewingInvoice.invoiceNumber}</strong> to <strong>{client?.company || 'N/A'}</strong>.
+                            </p>
+                            <div className="bg-dark-bg p-4 rounded-lg border border-border-color mb-6">
+                                <p className="text-sm text-secondary-text">The invoice will be sent to the registered email address:</p>
+                                <p className="font-semibold text-white mt-1">{client?.email || 'No email address on file'}</p>
+                            </div>
+
+                            {!client?.email && (
+                                <p className="text-red-400 text-sm mb-6 -mt-4">
+                                    Warning: This client does not have a registered email address. The invoice cannot be sent.
+                                </p>
+                            )}
+                            
+                            <div className="flex justify-end space-x-4">
+                                <button 
+                                    onClick={() => setConfirmSendModalOpen(false)} 
+                                    className="bg-gray-600 px-4 py-2 rounded-lg hover:bg-gray-700">
+                                    Cancel
+                                </button>
+                                <button 
+                                    onClick={() => {
+                                        handleSendInvoice(viewingInvoice, client);
+                                        setConfirmSendModalOpen(false);
+                                    }}
+                                    disabled={!client?.email}
+                                    className="bg-accent-blue px-4 py-2 rounded-lg hover:bg-blue-600 disabled:bg-gray-500 disabled:cursor-not-allowed"
+                                >
+                                    Send Invoice
+                                </button>
+                            </div>
+                        </div>
+                    </Modal>
+                );
+            })()}
         </div>
     );
 };

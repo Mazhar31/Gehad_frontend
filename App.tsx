@@ -2,6 +2,8 @@
 
 
 
+
+
 import React, { useState } from 'react';
 // FIX: Added file extension to import to resolve module error.
 import Sidebar from './components/Sidebar.tsx';
@@ -16,7 +18,7 @@ import ClientsPage from './components/pages/ClientsPage.tsx';
 // FIX: Added file extension to import to resolve module error.
 import InvoicesPage from './components/pages/InvoicesPage.tsx';
 // FIX: Added file extension to import to resolve module error.
-import CategoriesPage from './components/pages/CategoriesPage.tsx';
+import OrganizationManagementPage from './components/pages/OrganizationManagementPage.tsx';
 // FIX: Added file extension to import to resolve module error.
 import PaymentPlansPage from './components/pages/PaymentPlansPage.tsx';
 // FIX: Added file extension to import to resolve module error.
@@ -28,6 +30,7 @@ import LoginPage from './components/pages/LoginPage.tsx';
 import UserDashboard from './components/user/UserDashboard.tsx';
 import { useData } from './components/DataContext.tsx';
 import DeployKpiDashboardPage from './components/pages/DeployKpiDashboardPage.tsx';
+import PortfolioPage from './components/pages/PortfolioPage.tsx';
 
 
 function App() {
@@ -78,12 +81,14 @@ function App() {
         return <UserManagementPage />;
       case 'invoices':
         return <InvoicesPage />;
-      case 'categories':
-        return <CategoriesPage />;
+      case 'organization-management':
+        return <OrganizationManagementPage />;
       case 'payment-plans':
         return <PaymentPlansPage />;
       case 'deploy-kpi-dashboard':
         return <DeployKpiDashboardPage />;
+      case 'portfolio':
+        return <PortfolioPage />;
       case 'settings':
         return <SettingsPage userProfile={adminProfile} onProfileUpdate={handleAdminProfileUpdate} />;
       default:

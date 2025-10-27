@@ -1,22 +1,22 @@
 import React, { useState, useMemo, useRef } from 'react';
 // FIX: Added file extension to import to resolve module error.
-import { Client } from '../../types.ts';
+import { Client, Group } from '../../types.ts';
 // FIX: Added file extension to import to resolve module error.
 import ClientCard from '../ClientCard.tsx';
 // FIX: Added file extension to import to resolve module error.
 import Modal from '../Modal.tsx';
 // FIX: Added file extension to import to resolve module error.
-import { PlusIcon, EnvelopeIcon, PhoneIcon, MapPinIcon, MagnifyingGlassIcon } from '../icons.tsx';
+import { PlusIcon, EnvelopeIcon, PhoneIcon, MapPinIcon, MagnifyingGlassIcon, FolderIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
 
 const ClientsPage: React.FC = () => {
-    const { clients, projects, paymentPlans, handleSaveClient, handleDeleteClient } = useData();
+    const { clients, projects, paymentPlans, groups, handleSaveClient, handleDeleteClient } = useData();
     const [isEditModalOpen, setEditModalOpen] = useState(false);
     const [isDetailsModalOpen, setDetailsModalOpen] = useState(false);
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
 
-    if (!clients || !projects || !paymentPlans || !handleSaveClient || !handleDeleteClient) {
+    if (!clients || !projects || !paymentPlans || !groups || !handleSaveClient || !handleDeleteClient) {
         return <div>Loading...</div>
     }
 
@@ -50,6 +50,10 @@ const ClientsPage: React.FC = () => {
             client.company.toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [clients, searchTerm]);
+    
+    const getGroupName = (groupId?: string) => {
+        return groups.find(g => g.id === groupId)?.name;
+    };
 
     return (
         <div>
@@ -78,6 +82,7 @@ const ClientsPage: React.FC = () => {
                     <ClientCard 
                         key={client.id} 
                         client={client}
+                        groupName={getGroupName(client.groupId)}
                         onViewDetails={() => handleOpenDetailsModal(client)}
                         onEdit={() => handleOpenEditModal(client)}
                         onDelete={() => onDelete(client.id)}
@@ -91,6 +96,7 @@ const ClientsPage: React.FC = () => {
                         client={selectedClient} 
                         onSave={onSave} 
                         onCancel={handleCloseModals}
+                        groups={groups}
                     />
                 </Modal>
             )}
@@ -101,6 +107,7 @@ const ClientsPage: React.FC = () => {
                         client={selectedClient} 
                         projects={projects.filter(p => p.clientId === selectedClient.id)}
                         plans={paymentPlans}
+                        groupName={getGroupName(selectedClient.groupId)}
                     />
                 </Modal>
             )}
@@ -109,11 +116,12 @@ const ClientsPage: React.FC = () => {
 };
 
 // Details view component
-const ClientDetails: React.FC<{ client: Client, projects: any[], plans: any[] }> = ({ client, projects, plans }) => (
+const ClientDetails: React.FC<{ client: Client, projects: any[], plans: any[], groupName?: string }> = ({ client, projects, plans, groupName }) => (
     <div className="text-white">
         <div className="flex flex-col items-center text-center">
             <img src={client.avatarUrl} alt={client.company} className="w-24 h-24 rounded-full mb-4 ring-4 ring-dark-bg object-cover" />
             <h3 className="font-bold text-white text-2xl">{client.company}</h3>
+            {groupName && <p className="text-sm text-secondary-text">{groupName}</p>}
         </div>
         <div className="border-t border-border-color my-6"></div>
         <div className="space-y-4 text-sm">
@@ -157,12 +165,14 @@ const ClientForm: React.FC<{
     client: Client | null;
     onSave: (client: Client) => void;
     onCancel: () => void;
-}> = ({ client, onSave, onCancel }) => {
+    groups: Group[];
+}> = ({ client, onSave, onCancel, groups }) => {
     const [formData, setFormData] = useState({
         company: client?.company || '',
         email: client?.email || '',
         mobile: client?.mobile || '',
         address: client?.address || '',
+        groupId: client?.groupId || '',
     });
     const [avatarPreview, setAvatarPreview] = useState<string>(client?.avatarUrl || 'https://i.pravatar.cc/150');
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -182,7 +192,7 @@ const ClientForm: React.FC<{
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
@@ -213,6 +223,13 @@ const ClientForm: React.FC<{
                     </button>
                     <p className="text-xs text-secondary-text mt-1">PNG, JPG, GIF up to 10MB</p>
                 </div>
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-secondary-text mb-1">Group (Optional)</label>
+                <select name="groupId" value={formData.groupId} onChange={handleChange} className="w-full bg-dark-bg border border-border-color rounded-md p-2">
+                    <option value="">No Group</option>
+                    {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+                </select>
             </div>
             <div>
                 <label className="block text-sm font-medium text-secondary-text mb-1">Company</label>

@@ -7,12 +7,13 @@ import { EllipsisVerticalIcon, PencilSquareIcon, TrashIcon, EnvelopeIcon, PhoneI
 
 interface ClientCardProps {
     client: Client;
+    groupName?: string;
     onViewDetails: () => void;
     onEdit: () => void;
     onDelete: () => void;
 }
 
-const ClientCard: React.FC<ClientCardProps> = ({ client, onViewDetails, onEdit, onDelete }) => {
+const ClientCard: React.FC<ClientCardProps> = ({ client, groupName, onViewDetails, onEdit, onDelete }) => {
     const [menuOpen, setMenuOpen] = useState(false);
 
     return (
@@ -41,7 +42,9 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onViewDetails, onEdit, 
                 onClick={onViewDetails}
             >
                 <img src={client.avatarUrl} alt={client.company} className="w-24 h-24 rounded-full mb-4 ring-4 ring-dark-bg" />
-                <h3 className="font-bold text-white text-lg flex-grow">{client.company}</h3>
+                <h3 className="font-bold text-white text-lg">{client.company}</h3>
+                {groupName && <p className="text-xs text-secondary-text">{groupName}</p>}
+                <div className="flex-grow"></div>
             </div>
             
             <div className="w-full border-t border-border-color mt-auto flex">

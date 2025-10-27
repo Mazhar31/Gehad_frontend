@@ -12,14 +12,14 @@ import { useData } from '../DataContext.tsx';
 import ProjectDetails from '../ProjectDetails.tsx';
 
 const ProjectsPage: React.FC = () => {
-    const { projects, clients, categories, paymentPlans, handleSaveProject, handleDeleteProject } = useData();
+    const { projects, clients, categories, departments, paymentPlans, groups, handleSaveProject, handleDeleteProject } = useData();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterClientId, setFilterClientId] = useState('All');
 
-    if (!projects || !clients || !categories || !paymentPlans || !handleSaveProject || !handleDeleteProject) {
+    if (!projects || !clients || !categories || !departments || !paymentPlans || !groups || !handleSaveProject || !handleDeleteProject) {
         return <div>Loading...</div>
     }
 
@@ -121,6 +121,7 @@ const ProjectsPage: React.FC = () => {
                         onCancel={handleCloseModals}
                         clients={clients}
                         categories={categories}
+                        departments={departments}
                         paymentPlans={paymentPlans}
                     />
                 </Modal>
@@ -132,7 +133,9 @@ const ProjectsPage: React.FC = () => {
                         project={selectedProject}
                         client={clients.find(c => c.id === selectedProject.clientId)}
                         category={categories.find(c => c.id === selectedProject.categoryId)}
+                        department={departments.find(d => d.id === selectedProject.departmentId)}
                         plan={paymentPlans.find(p => p.id === selectedProject.planId)}
+                        groups={groups}
                     />
                 </Modal>
             )}
@@ -147,13 +150,15 @@ const ProjectForm: React.FC<{
     onCancel: () => void;
     clients: any[];
     categories: any[];
+    departments: any[];
     paymentPlans: any[];
-}> = ({ project, onSave, onCancel, clients, categories, paymentPlans }) => {
+}> = ({ project, onSave, onCancel, clients, categories, departments, paymentPlans }) => {
     const [formData, setFormData] = useState({
         name: project?.name || '',
         clientId: project?.clientId || '',
         planId: project?.planId || '',
         categoryId: project?.categoryId || '',
+        departmentId: project?.departmentId || '',
         status: project?.status || 'In Progress',
         startDate: project?.startDate || new Date().toISOString().slice(0, 10),
         dashboardUrl: project?.dashboardUrl || '',
@@ -234,6 +239,13 @@ const ProjectForm: React.FC<{
                 <select name="categoryId" value={formData.categoryId} onChange={handleChange} className="w-full bg-dark-bg border border-border-color rounded-md p-2" required>
                     <option value="">Select a category</option>
                     {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+            </div>
+             <div>
+                <label className="block text-sm font-medium text-secondary-text mb-1">Department</label>
+                <select name="departmentId" value={formData.departmentId} onChange={handleChange} className="w-full bg-dark-bg border border-border-color rounded-md p-2" required>
+                    <option value="">Select a department</option>
+                    {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
                 </select>
             </div>
              <div>

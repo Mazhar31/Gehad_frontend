@@ -1,5 +1,15 @@
 // FIX: Created type definitions for Client, Project, Invoice, Category, PaymentPlan, and Fund to resolve type errors throughout the application.
 
+export interface Group {
+  id: string;
+  name: string;
+}
+
+export interface Department {
+  id: string;
+  name: string;
+}
+
 export interface Client {
   id: string;
   company: string;
@@ -7,6 +17,7 @@ export interface Client {
   mobile?: string;
   address?: string;
   avatarUrl: string;
+  groupId?: string;
 }
 
 export interface Project {
@@ -15,6 +26,7 @@ export interface Project {
   clientId: string;
   planId: string;
   categoryId: string;
+  departmentId: string;
   status: 'In Progress' | 'Completed' | 'On Hold';
   budget?: number;
   progress?: number;
@@ -85,4 +97,13 @@ export interface ContactMessage {
   email: string;
   message: string;
   createdAt: string;
+}
+
+export interface PortfolioCase {
+  id: string;
+  category: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  link?: string;
 }

@@ -1,13 +1,16 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { Project, Client, Category, PaymentPlan, Invoice, User, ContactMessage } from '../types.ts';
+import { Project, Client, Category, PaymentPlan, Invoice, User, ContactMessage, PortfolioCase, Department, Group } from '../types.ts';
 import { 
     PROJECTS_DATA, 
     CLIENTS_DATA, 
     CATEGORIES_DATA, 
+    DEPARTMENTS_DATA,
     PAYMENT_PLANS_DATA,
     INVOICES_DATA,
     USERS_DATA,
-    CONTACT_MESSAGES_DATA
+    CONTACT_MESSAGES_DATA,
+    PORTFOLIO_CASES_DATA,
+    GROUPS_DATA
 } from '../constants.ts';
 
 // Helper to get initial state from localStorage or use default
@@ -27,16 +30,23 @@ interface DataContextType {
     projects: Project[];
     clients: Client[];
     categories: Category[];
+    departments: Department[];
+    groups: Group[];
     paymentPlans: PaymentPlan[];
     invoices: Invoice[];
     users: User[];
     contactMessages: ContactMessage[];
+    portfolioCases: PortfolioCase[];
     handleSaveProject: (project: Project) => void;
     handleDeleteProject: (projectId: string) => void;
     handleSaveClient: (client: Client) => void;
     handleDeleteClient: (clientId: string) => void;
     handleSaveCategory: (category: Category) => void;
     handleDeleteCategory: (categoryId: string) => void;
+    handleSaveDepartment: (department: Department) => void;
+    handleDeleteDepartment: (departmentId: string) => void;
+    handleSaveGroup: (group: Group) => void;
+    handleDeleteGroup: (groupId: string) => void;
     handleSavePlan: (plan: PaymentPlan) => void;
     handleDeletePlan: (planId: string) => void;
     handleSaveUser: (user: User) => void;
@@ -44,6 +54,8 @@ interface DataContextType {
     handleSaveInvoice: (invoice: Invoice) => void;
     handleDeleteInvoice: (invoiceId: string) => void;
     handleSaveContactMessage: (message: Omit<ContactMessage, 'id' | 'createdAt'>) => void;
+    handleSavePortfolioCase: (caseItem: PortfolioCase) => void;
+    handleDeletePortfolioCase: (caseId: string) => void;
     isLoggedIn: boolean;
     userRole: 'admin' | 'user' | null;
     currentUser: User | null;
@@ -57,10 +69,13 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [projects, setProjects] = useState<Project[]>(() => getInitialState('app_projects', PROJECTS_DATA));
     const [clients, setClients] = useState<Client[]>(() => getInitialState('app_clients', CLIENTS_DATA));
     const [categories, setCategories] = useState<Category[]>(() => getInitialState('app_categories', CATEGORIES_DATA));
+    const [departments, setDepartments] = useState<Department[]>(() => getInitialState('app_departments', DEPARTMENTS_DATA));
+    const [groups, setGroups] = useState<Group[]>(() => getInitialState('app_groups', GROUPS_DATA));
     const [paymentPlans, setPaymentPlans] = useState<PaymentPlan[]>(() => getInitialState('app_payment_plans', PAYMENT_PLANS_DATA));
     const [invoices, setInvoices] = useState<Invoice[]>(() => getInitialState('app_invoices', INVOICES_DATA));
     const [users, setUsers] = useState<User[]>(() => getInitialState('app_users', USERS_DATA));
     const [contactMessages, setContactMessages] = useState<ContactMessage[]>(() => getInitialState('app_contact_messages', CONTACT_MESSAGES_DATA));
+    const [portfolioCases, setPortfolioCases] = useState<PortfolioCase[]>(() => getInitialState('app_portfolio_cases', PORTFOLIO_CASES_DATA));
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => getInitialState('app_isLoggedIn', false));
     const [userRole, setUserRole] = useState<'admin' | 'user' | null>(() => getInitialState('app_userRole', null));
     const [currentUser, setCurrentUser] = useState<User | null>(() => getInitialState('app_currentUser', null));
@@ -69,10 +84,13 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     useEffect(() => { localStorage.setItem('app_projects', JSON.stringify(projects)); }, [projects]);
     useEffect(() => { localStorage.setItem('app_clients', JSON.stringify(clients)); }, [clients]);
     useEffect(() => { localStorage.setItem('app_categories', JSON.stringify(categories)); }, [categories]);
+    useEffect(() => { localStorage.setItem('app_departments', JSON.stringify(departments)); }, [departments]);
+    useEffect(() => { localStorage.setItem('app_groups', JSON.stringify(groups)); }, [groups]);
     useEffect(() => { localStorage.setItem('app_payment_plans', JSON.stringify(paymentPlans)); }, [paymentPlans]);
     useEffect(() => { localStorage.setItem('app_invoices', JSON.stringify(invoices)); }, [invoices]);
     useEffect(() => { localStorage.setItem('app_users', JSON.stringify(users)); }, [users]);
     useEffect(() => { localStorage.setItem('app_contact_messages', JSON.stringify(contactMessages)); }, [contactMessages]);
+    useEffect(() => { localStorage.setItem('app_portfolio_cases', JSON.stringify(portfolioCases)); }, [portfolioCases]);
     useEffect(() => { localStorage.setItem('app_isLoggedIn', JSON.stringify(isLoggedIn)); }, [isLoggedIn]);
     useEffect(() => { localStorage.setItem('app_userRole', JSON.stringify(userRole)); }, [userRole]);
     useEffect(() => { localStorage.setItem('app_currentUser', JSON.stringify(currentUser)); }, [currentUser]);
@@ -201,6 +219,37 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setCategories(categories.filter(c => c.id !== categoryId));
     };
 
+    // Department Handlers
+    const handleSaveDepartment = (departmentData: Department) => {
+        if (departmentData.id && departments.some(d => d.id === departmentData.id)) {
+            setDepartments(departments.map(d => d.id === departmentData.id ? departmentData : d));
+        } else {
+            const newDepartment = { ...departmentData, id: `dept-${Date.now()}` };
+            setDepartments([newDepartment, ...departments]);
+        }
+    };
+
+    const handleDeleteDepartment = (departmentId: string) => {
+        setDepartments(departments.filter(d => d.id !== departmentId));
+    };
+
+    // Group Handlers
+    const handleSaveGroup = (groupData: Group) => {
+        if (groupData.id && groups.some(g => g.id === groupData.id)) {
+            setGroups(groups.map(g => g.id === groupData.id ? groupData : g));
+        } else {
+            const newGroup = { ...groupData, id: `g-${Date.now()}` };
+            setGroups([newGroup, ...groups]);
+        }
+    };
+
+    const handleDeleteGroup = (groupId: string) => {
+        setGroups(groups.filter(g => g.id !== groupId));
+        // Also remove this group from any clients that have it
+        setClients(prevClients => prevClients.map(client => client.groupId === groupId ? { ...client, groupId: undefined } : client));
+    };
+
+
     // Payment Plan Handlers
     const handleSavePlan = (planData: PaymentPlan) => {
         if (planData.id && paymentPlans.some(p => p.id === planData.id)) {
@@ -270,6 +319,21 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         console.log('Message stored locally (simulating Google Cloud storage):', newMessage);
     };
 
+    // Portfolio Case Handlers
+    const handleSavePortfolioCase = (caseData: PortfolioCase) => {
+        if (caseData.id && portfolioCases.some(c => c.id === caseData.id)) {
+            setPortfolioCases(portfolioCases.map(c => c.id === caseData.id ? caseData : c));
+        } else {
+            const newCase = { ...caseData, id: `pc-${Date.now()}` };
+            setPortfolioCases([newCase, ...portfolioCases]);
+        }
+    };
+
+    const handleDeletePortfolioCase = (caseId: string) => {
+        setPortfolioCases(portfolioCases.filter(c => c.id !== caseId));
+    };
+
+
     // Auth Handlers
     const login = (role: 'admin' | 'user', userEmail?: string) => {
         setIsLoggedIn(true);
@@ -291,16 +355,23 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         projects,
         clients,
         categories,
+        departments,
+        groups,
         paymentPlans,
         invoices,
         users,
         contactMessages,
+        portfolioCases,
         handleSaveProject,
         handleDeleteProject,
         handleSaveClient,
         handleDeleteClient,
         handleSaveCategory,
         handleDeleteCategory,
+        handleSaveDepartment,
+        handleDeleteDepartment,
+        handleSaveGroup,
+        handleDeleteGroup,
         handleSavePlan,
         handleDeletePlan,
         handleSaveUser,
@@ -308,6 +379,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         handleSaveInvoice,
         handleDeleteInvoice,
         handleSaveContactMessage,
+        handleSavePortfolioCase,
+        handleDeletePortfolioCase,
         isLoggedIn,
         userRole,
         currentUser,

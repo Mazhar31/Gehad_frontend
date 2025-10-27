@@ -51,7 +51,7 @@ const UserHeader: React.FC<UserHeaderProps> = ({ userName, userAvatar, currentPa
                     <div className="flex items-center space-x-8">
                         <div className="flex items-center space-x-3">
                             <ProjectileLogo />
-                            <span className="text-xl font-bold text-white">Projectile</span>
+                            <span className="text-xl font-bold text-white">OneQlek</span>
                         </div>
                         <nav className="hidden md:flex items-center space-x-4">
                             <a 

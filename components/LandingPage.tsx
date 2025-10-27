@@ -3,6 +3,9 @@
 
 
 
+
+
+
 import React, { useState } from 'react';
 import {
     ChartTrendingUpIcon,
@@ -36,7 +39,7 @@ const Logo: React.FC = () => (
             <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
             <path d="M2 7L12 12M12 22V12M22 7L12 12M16 4.5L6 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
         </svg>
-        <span className="font-bold text-xl tracking-tighter">Projex</span>
+        <span className="font-bold text-xl tracking-tighter">OneQlek</span>
     </div>
 );
 
@@ -148,7 +151,7 @@ const testimonials = [
         company: 'Innovate Inc.',
         avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d',
         rating: 5,
-        quote: 'Projectile has completely transformed how we manage our client projects. The dashboard gives us a crystal-clear overview, and our clients love the transparency. Highly recommended!',
+        quote: 'OneQlek has completely transformed how we manage our client projects. The dashboard gives us a crystal-clear overview, and our clients love the transparency. Highly recommended!',
     },
     {
         name: 'Michael B.',
@@ -162,7 +165,7 @@ const testimonials = [
         company: 'Creative Minds',
         avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026706d',
         rating: 5,
-        quote: 'As a design agency, presentation is everything. Projectile not only helps us stay organized internally but also impresses our clients with its professional and sleek interface.',
+        quote: 'As a design agency, presentation is everything. OneQlek not only helps us stay organized internally but also impresses our clients with its professional and sleek interface.',
     },
 ];
 
@@ -196,33 +199,9 @@ const integrations = [
 ];
 
 const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({ onNavigate }) => {
-    const { handleSaveContactMessage } = useData();
+    const { handleSaveContactMessage, portfolioCases } = useData();
     const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
     const [isFormSubmitted, setIsFormSubmitted] = useState(false);
-
-    const portfolioCases = [
-      {
-        category: 'E-commerce',
-        title: 'Innovate Inc. Marketplace',
-        description: 'A complete overhaul of a legacy e-commerce platform, boosting performance by 200% and increasing user engagement through a modern UI/UX design.',
-        imageUrl: 'https://images.unsplash.com/photo-1522199755839-a2bacb67c546?q=80&w=800&auto=format&fit=crop',
-        link: '#'
-      },
-      {
-        category: 'Mobile App',
-        title: 'Solutions Co. Banking App',
-        description: 'Developed a secure and intuitive mobile banking application for iOS and Android, featuring biometric login and real-time transaction tracking.',
-        imageUrl: 'https://images.unsplash.com/photo-1607252650355-f7fd0460ccdb?q=80&w=800&auto=format&fit=crop',
-        link: '#'
-      },
-      {
-        category: 'SaaS Platform',
-        title: 'CloudFlow CRM',
-        description: 'Built a scalable CRM platform from the ground up, enabling businesses to manage customer relationships with advanced analytics and automation tools.',
-        imageUrl: 'https://images.unsplash.com/photo-1556740758-90de374c12ad?q=80&w=800&auto=format&fit=crop',
-        link: '#'
-      }
-    ];
 
     const handleContactChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -257,7 +236,7 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                             The Ultimate Dashboard for Your Projects
                         </h1>
                         <p className="mt-6 text-lg text-secondary-text max-w-2xl mx-auto">
-                            Manage all your projects in one place with Projectile. View plans, track progress, increase productivity and improve communication.
+                            Manage all your projects in one place with OneQlek. View plans, track progress, increase productivity and improve communication.
                         </p>
                         <div className="mt-10 flex justify-center space-x-4">
                             <button onClick={() => onNavigate('login')} className="bg-blue-600 text-white font-semibold px-6 py-3 rounded-full hover:bg-blue-700 transition-colors text-lg">
@@ -269,7 +248,7 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                         <div className="bg-gradient-to-b from-sidebar-bg to-dark-bg p-2 rounded-3xl shadow-2xl shadow-blue-900/20">
                             <img 
                                 src="https://storage.cloud.google.com/ai-studio-bucket-1089004137383-us-west1/IMG_3464.JPG"
-                                alt="Projectile App Dashboard" 
+                                alt="OneQlek App Dashboard" 
                                 className="rounded-2xl border border-border-color" 
                             />
                         </div>
@@ -280,7 +259,7 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                 <section id="features" className="py-20">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="text-center">
-                            <h2 className="text-4xl font-extrabold tracking-tighter text-white">Why Choose Projectile?</h2>
+                            <h2 className="text-4xl font-extrabold tracking-tighter text-white">Why Choose OneQlek?</h2>
                             <p className="mt-4 text-lg text-secondary-text max-w-2xl mx-auto">
                                 Everything you need to streamline your workflow and keep your clients happy.
                             </p>
@@ -303,7 +282,7 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                 <section className="py-20 bg-sidebar-bg/50">
                     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                         <h2 className="text-3xl font-bold text-white mb-4">Integrates with Your Favorite Tools</h2>
-                        <p className="text-secondary-text mb-8">Projectile works seamlessly with the tools you already use, making your workflow smoother.</p>
+                        <p className="text-secondary-text mb-8">OneQlek works seamlessly with the tools you already use, making your workflow smoother.</p>
                         <div className="flex justify-center items-center flex-wrap gap-x-8 gap-y-4">
                             {integrations.map(tool => (
                                 <tool.icon key={tool.name} className="w-8 h-8 text-secondary-text hover:text-white transition-colors" />
@@ -502,7 +481,7 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                                             </div>
                                             <div>
                                                 <h4 className="font-semibold text-white">Email</h4>
-                                                <p className="text-secondary-text">contact@projex.com</p>
+                                                <p className="text-secondary-text">contact@oneqlek.com</p>
                                             </div>
                                         </div>
                                     </div>
@@ -527,7 +506,7 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                         </div>
                     </div>
                     <div className="mt-8 border-t border-border-color pt-8 flex flex-col sm:flex-row justify-between items-center text-sm text-secondary-text">
-                        <p>&copy; {new Date().getFullYear()} Projex Inc. All rights reserved.</p>
+                        <p>&copy; {new Date().getFullYear()} OneQlek Inc. All rights reserved.</p>
                         <div className="flex space-x-4 mt-4 sm:mt-0">
                            <a href="#" className="hover:text-white">Privacy Policy</a>
                            <a href="#" className="hover:text-white">Terms of Service</a>

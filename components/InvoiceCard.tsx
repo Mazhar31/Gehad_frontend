@@ -1,5 +1,7 @@
 
 
+
+
 import React from 'react';
 // FIX: Added file extension to import to resolve module error.
 import { Invoice, Client } from '../types.ts';
@@ -32,7 +34,7 @@ const InvoiceDetail: React.FC<{ invoice: Invoice; client: Client | undefined }> 
                     <p className="text-gray-500">{invoice.invoiceNumber}</p>
                 </div>
                 <div className="text-left sm:text-right mt-4 sm:mt-0">
-                     <h2 className="text-2xl font-semibold text-gray-800">Projex Inc.</h2>
+                     <h2 className="text-2xl font-semibold text-gray-800">OneQlek Inc.</h2>
                     <p className="text-gray-500">123 Dev Lane, Tech City</p>
                 </div>
             </div>
