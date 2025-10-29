@@ -1,16 +1,18 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { Project, Client, Category, PaymentPlan, Invoice, User, ContactMessage, PortfolioCase, Department, Group } from '../types.ts';
+// FIX: Added Category type to resolve type errors.
+import { Project, Client, PaymentPlan, Invoice, User, ContactMessage, PortfolioCase, Department, Group, Category } from '../types.ts';
 import { 
     PROJECTS_DATA, 
     CLIENTS_DATA, 
-    CATEGORIES_DATA, 
     DEPARTMENTS_DATA,
     PAYMENT_PLANS_DATA,
     INVOICES_DATA,
     USERS_DATA,
     CONTACT_MESSAGES_DATA,
     PORTFOLIO_CASES_DATA,
-    GROUPS_DATA
+    GROUPS_DATA,
+    // FIX: Imported mock data for categories.
+    CATEGORIES_DATA,
 } from '../constants.ts';
 
 // Helper to get initial state from localStorage or use default
@@ -29,7 +31,6 @@ const getInitialState = <T,>(key: string, defaultValue: T): T => {
 interface DataContextType {
     projects: Project[];
     clients: Client[];
-    categories: Category[];
     departments: Department[];
     groups: Group[];
     paymentPlans: PaymentPlan[];
@@ -37,12 +38,12 @@ interface DataContextType {
     users: User[];
     contactMessages: ContactMessage[];
     portfolioCases: PortfolioCase[];
+    // FIX: Added categories state and handlers to data context.
+    categories: Category[];
     handleSaveProject: (project: Project) => void;
     handleDeleteProject: (projectId: string) => void;
     handleSaveClient: (client: Client) => void;
     handleDeleteClient: (clientId: string) => void;
-    handleSaveCategory: (category: Category) => void;
-    handleDeleteCategory: (categoryId: string) => void;
     handleSaveDepartment: (department: Department) => void;
     handleDeleteDepartment: (departmentId: string) => void;
     handleSaveGroup: (group: Group) => void;
@@ -56,6 +57,8 @@ interface DataContextType {
     handleSaveContactMessage: (message: Omit<ContactMessage, 'id' | 'createdAt'>) => void;
     handleSavePortfolioCase: (caseItem: PortfolioCase) => void;
     handleDeletePortfolioCase: (caseId: string) => void;
+    handleSaveCategory: (category: Category) => void;
+    handleDeleteCategory: (categoryId: string) => void;
     isLoggedIn: boolean;
     userRole: 'admin' | 'user' | null;
     currentUser: User | null;
@@ -68,7 +71,6 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [projects, setProjects] = useState<Project[]>(() => getInitialState('app_projects', PROJECTS_DATA));
     const [clients, setClients] = useState<Client[]>(() => getInitialState('app_clients', CLIENTS_DATA));
-    const [categories, setCategories] = useState<Category[]>(() => getInitialState('app_categories', CATEGORIES_DATA));
     const [departments, setDepartments] = useState<Department[]>(() => getInitialState('app_departments', DEPARTMENTS_DATA));
     const [groups, setGroups] = useState<Group[]>(() => getInitialState('app_groups', GROUPS_DATA));
     const [paymentPlans, setPaymentPlans] = useState<PaymentPlan[]>(() => getInitialState('app_payment_plans', PAYMENT_PLANS_DATA));
@@ -76,6 +78,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [users, setUsers] = useState<User[]>(() => getInitialState('app_users', USERS_DATA));
     const [contactMessages, setContactMessages] = useState<ContactMessage[]>(() => getInitialState('app_contact_messages', CONTACT_MESSAGES_DATA));
     const [portfolioCases, setPortfolioCases] = useState<PortfolioCase[]>(() => getInitialState('app_portfolio_cases', PORTFOLIO_CASES_DATA));
+    // FIX: Added categories state.
+    const [categories, setCategories] = useState<Category[]>(() => getInitialState('app_categories', CATEGORIES_DATA));
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => getInitialState('app_isLoggedIn', false));
     const [userRole, setUserRole] = useState<'admin' | 'user' | null>(() => getInitialState('app_userRole', null));
     const [currentUser, setCurrentUser] = useState<User | null>(() => getInitialState('app_currentUser', null));
@@ -83,7 +87,6 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     // Effects to save state to localStorage whenever it changes
     useEffect(() => { localStorage.setItem('app_projects', JSON.stringify(projects)); }, [projects]);
     useEffect(() => { localStorage.setItem('app_clients', JSON.stringify(clients)); }, [clients]);
-    useEffect(() => { localStorage.setItem('app_categories', JSON.stringify(categories)); }, [categories]);
     useEffect(() => { localStorage.setItem('app_departments', JSON.stringify(departments)); }, [departments]);
     useEffect(() => { localStorage.setItem('app_groups', JSON.stringify(groups)); }, [groups]);
     useEffect(() => { localStorage.setItem('app_payment_plans', JSON.stringify(paymentPlans)); }, [paymentPlans]);
@@ -91,6 +94,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     useEffect(() => { localStorage.setItem('app_users', JSON.stringify(users)); }, [users]);
     useEffect(() => { localStorage.setItem('app_contact_messages', JSON.stringify(contactMessages)); }, [contactMessages]);
     useEffect(() => { localStorage.setItem('app_portfolio_cases', JSON.stringify(portfolioCases)); }, [portfolioCases]);
+    // FIX: Added useEffect for categories.
+    useEffect(() => { localStorage.setItem('app_categories', JSON.stringify(categories)); }, [categories]);
     useEffect(() => { localStorage.setItem('app_isLoggedIn', JSON.stringify(isLoggedIn)); }, [isLoggedIn]);
     useEffect(() => { localStorage.setItem('app_userRole', JSON.stringify(userRole)); }, [userRole]);
     useEffect(() => { localStorage.setItem('app_currentUser', JSON.stringify(currentUser)); }, [currentUser]);
@@ -205,20 +210,6 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setClients(clients.filter(c => c.id !== clientId));
     };
     
-    // Category Handlers
-    const handleSaveCategory = (categoryData: Category) => {
-        if (categoryData.id && categories.some(c => c.id === categoryData.id)) {
-            setCategories(categories.map(c => c.id === categoryData.id ? categoryData : c));
-        } else {
-            const newCategory = { ...categoryData, id: `cat-${Date.now()}` };
-            setCategories([newCategory, ...categories]);
-        }
-    };
-
-    const handleDeleteCategory = (categoryId: string) => {
-        setCategories(categories.filter(c => c.id !== categoryId));
-    };
-
     // Department Handlers
     const handleSaveDepartment = (departmentData: Department) => {
         if (departmentData.id && departments.some(d => d.id === departmentData.id)) {
@@ -248,7 +239,6 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         // Also remove this group from any clients that have it
         setClients(prevClients => prevClients.map(client => client.groupId === groupId ? { ...client, groupId: undefined } : client));
     };
-
 
     // Payment Plan Handlers
     const handleSavePlan = (planData: PaymentPlan) => {
@@ -333,13 +323,32 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setPortfolioCases(portfolioCases.filter(c => c.id !== caseId));
     };
 
+    // FIX: Added handlers for categories.
+    // Category Handlers
+    const handleSaveCategory = (categoryData: Category) => {
+        if (categoryData.id && categories.some(c => c.id === categoryData.id)) {
+            setCategories(categories.map(c => c.id === categoryData.id ? categoryData : c));
+        } else {
+            const newCategory = { ...categoryData, id: `cat-${Date.now()}` };
+            setCategories([newCategory, ...categories]);
+        }
+    };
+
+    const handleDeleteCategory = (categoryId: string) => {
+        setCategories(categories.filter(c => c.id !== categoryId));
+    };
+
 
     // Auth Handlers
     const login = (role: 'admin' | 'user', userEmail?: string) => {
         setIsLoggedIn(true);
         setUserRole(role);
         if (role === 'user' && userEmail) {
-            const userToLogin = users.find(u => u.email.toLowerCase() === userEmail.toLowerCase());
+            let userToLogin = users.find(u => u.email.toLowerCase() === userEmail.toLowerCase());
+            // For demo purposes, if user does not exist, log in as the first user.
+            if (!userToLogin && users.length > 0) {
+                userToLogin = users[0];
+            }
             setCurrentUser(userToLogin || null);
         }
     };
@@ -354,7 +363,6 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const value = {
         projects,
         clients,
-        categories,
         departments,
         groups,
         paymentPlans,
@@ -362,12 +370,12 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         users,
         contactMessages,
         portfolioCases,
+        // FIX: Added categories to context value.
+        categories,
         handleSaveProject,
         handleDeleteProject,
         handleSaveClient,
         handleDeleteClient,
-        handleSaveCategory,
-        handleDeleteCategory,
         handleSaveDepartment,
         handleDeleteDepartment,
         handleSaveGroup,
@@ -381,6 +389,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         handleSaveContactMessage,
         handleSavePortfolioCase,
         handleDeletePortfolioCase,
+        // FIX: Added category handlers to context value.
+        handleSaveCategory,
+        handleDeleteCategory,
         isLoggedIn,
         userRole,
         currentUser,

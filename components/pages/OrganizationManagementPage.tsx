@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Category, Department, Group } from '../../types.ts';
+import { Department, Group } from '../../types.ts';
 import Modal from '../Modal.tsx';
 import { PlusIcon, PencilSquareIcon, TrashIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
@@ -43,20 +43,19 @@ const ManagementForm: React.FC<{
 
 const OrganizationManagementPage: React.FC = () => {
     const { 
-        categories, handleSaveCategory, handleDeleteCategory,
         departments, handleSaveDepartment, handleDeleteDepartment,
         groups, handleSaveGroup, handleDeleteGroup
     } = useData();
     
-    const [activeTab, setActiveTab] = useState<'categories' | 'departments' | 'groups'>('categories');
+    const [activeTab, setActiveTab] = useState<'departments' | 'groups'>('departments');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingItem, setEditingItem] = useState<{ id?: string; name: string; type: 'category' | 'department' | 'group' } | null>(null);
+    const [editingItem, setEditingItem] = useState<{ id?: string; name: string; type: 'department' | 'group' } | null>(null);
 
-    if (!categories || !handleSaveCategory || !handleDeleteCategory || !departments || !handleSaveDepartment || !handleDeleteDepartment || !groups || !handleSaveGroup || !handleDeleteGroup) {
+    if (!departments || !handleSaveDepartment || !handleDeleteDepartment || !groups || !handleSaveGroup || !handleDeleteGroup) {
         return <div>Loading...</div>
     }
 
-    const handleOpenModal = (item?: { id: string; name: string }, type: 'category' | 'department' | 'group' = 'category') => {
+    const handleOpenModal = (item?: { id: string; name: string }, type: 'department' | 'group' = 'department') => {
         setEditingItem(item ? { ...item, type } : { name: '', type });
         setIsModalOpen(true);
     };
@@ -67,9 +66,7 @@ const OrganizationManagementPage: React.FC = () => {
     };
 
     const onSave = (itemData: { id: string; name: string }) => {
-        if (editingItem?.type === 'category') {
-            handleSaveCategory(itemData as Category);
-        } else if (editingItem?.type === 'department') {
+        if (editingItem?.type === 'department') {
             handleSaveDepartment(itemData as Department);
         } else if (editingItem?.type === 'group') {
             handleSaveGroup(itemData as Group);
@@ -77,11 +74,9 @@ const OrganizationManagementPage: React.FC = () => {
         handleCloseModal();
     };
     
-    const onDelete = (id: string, type: 'category' | 'department' | 'group') => {
+    const onDelete = (id: string, type: 'department' | 'group') => {
         if(window.confirm(`Are you sure you want to delete this ${type}?`)) {
-            if (type === 'category') {
-                handleDeleteCategory(id);
-            } else if (type === 'department') {
+            if (type === 'department') {
                 handleDeleteDepartment(id);
             } else {
                 handleDeleteGroup(id);
@@ -89,9 +84,9 @@ const OrganizationManagementPage: React.FC = () => {
         }
     };
 
-    const renderList = (type: 'categories' | 'departments' | 'groups') => {
-        const data = type === 'categories' ? categories : (type === 'departments' ? departments : groups);
-        const itemType = type.slice(0, -1) as 'category' | 'department' | 'group';
+    const renderList = (type: 'departments' | 'groups') => {
+        const data = type === 'departments' ? departments : groups;
+        const itemType = type.slice(0, -1) as 'department' | 'group';
 
         return (
              <div className="bg-card-bg rounded-2xl p-4">
@@ -122,7 +117,6 @@ const OrganizationManagementPage: React.FC = () => {
     
     const getActiveTabName = () => {
         switch(activeTab) {
-            case 'categories': return 'Category';
             case 'departments': return 'Department';
             case 'groups': return 'Group';
         }
@@ -143,12 +137,6 @@ const OrganizationManagementPage: React.FC = () => {
             
             <div className="flex space-x-2 mb-6 border-b border-border-color">
                 <button 
-                    onClick={() => setActiveTab('categories')}
-                    className={`px-4 py-2 text-sm font-medium ${activeTab === 'categories' ? 'text-accent-blue border-b-2 border-accent-blue' : 'text-secondary-text hover:text-white'}`}
-                >
-                    Categories
-                </button>
-                <button 
                     onClick={() => setActiveTab('departments')}
                     className={`px-4 py-2 text-sm font-medium ${activeTab === 'departments' ? 'text-accent-blue border-b-2 border-accent-blue' : 'text-secondary-text hover:text-white'}`}
                 >
@@ -162,7 +150,6 @@ const OrganizationManagementPage: React.FC = () => {
                 </button>
             </div>
 
-            {activeTab === 'categories' && renderList('categories')}
             {activeTab === 'departments' && renderList('departments')}
             {activeTab === 'groups' && renderList('groups')}
 

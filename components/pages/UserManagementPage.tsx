@@ -174,14 +174,7 @@ const UserForm: React.FC<{
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        if (name === 'dashboardAccess') {
-            const { checked } = e.target as HTMLInputElement;
-            setFormData(prev => ({ ...prev, dashboardAccess: checked ? 'view-and-edit' : 'view-only' }));
-        } else if (name === 'roleSwitch') {
-            const { checked } = e.target as HTMLInputElement;
-            setFormData(prev => ({ ...prev, role: checked ? 'superuser' : 'normal' }));
-        }
-        else if (name === 'clientId') {
+        if (name === 'clientId') {
             setFormData(prev => ({ ...prev, [name]: value, projectIds: [] }));
         } else {
             setFormData(prev => ({ ...prev, [name]: value }));
@@ -264,51 +257,6 @@ const UserForm: React.FC<{
                             )}
                         </div>
                     )}
-                </div>
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-secondary-text mb-2">User Role</label>
-                <div className="flex items-center justify-between bg-dark-bg border border-border-color rounded-md p-3">
-                    <span className={`text-sm font-medium transition-colors ${formData.role === 'normal' ? 'text-white' : 'text-secondary-text'}`}>
-                        Normal User
-                    </span>
-                    <label htmlFor="roleSwitch" className="relative inline-flex items-center cursor-pointer">
-                        <input 
-                            type="checkbox" 
-                            id="roleSwitch" 
-                            name="roleSwitch"
-                            className="sr-only peer"
-                            checked={formData.role === 'superuser'}
-                            onChange={handleChange}
-                        />
-                        <div className="w-11 h-6 bg-gray-600 rounded-full peer peer-focus:ring-2 peer-focus:ring-accent-blue/30 peer-checked:bg-accent-blue after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
-                    </label>
-                    <span className={`text-sm font-medium transition-colors ${formData.role === 'superuser' ? 'text-white' : 'text-secondary-text'}`}>
-                        Superuser
-                    </span>
-                </div>
-                <p className="text-xs text-secondary-text mt-1">Superusers have access to view client invoices.</p>
-            </div>
-             <div>
-                <label className="block text-sm font-medium text-secondary-text mb-2">KPI Dashboard Access</label>
-                <div className="flex items-center justify-between bg-dark-bg border border-border-color rounded-md p-3">
-                    <span className={`text-sm font-medium transition-colors ${formData.dashboardAccess === 'view-only' ? 'text-white' : 'text-secondary-text'}`}>
-                        View-only
-                    </span>
-                    <label htmlFor="dashboardAccessSwitch" className="relative inline-flex items-center cursor-pointer">
-                        <input 
-                            type="checkbox" 
-                            id="dashboardAccessSwitch" 
-                            name="dashboardAccess"
-                            className="sr-only peer"
-                            checked={formData.dashboardAccess === 'view-and-edit'}
-                            onChange={handleChange}
-                        />
-                        <div className="w-11 h-6 bg-gray-600 rounded-full peer peer-focus:ring-2 peer-focus:ring-accent-blue/30 peer-checked:bg-accent-blue after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
-                    </label>
-                    <span className={`text-sm font-medium transition-colors ${formData.dashboardAccess === 'view-and-edit' ? 'text-white' : 'text-secondary-text'}`}>
-                        View & Edit
-                    </span>
                 </div>
             </div>
             <div>

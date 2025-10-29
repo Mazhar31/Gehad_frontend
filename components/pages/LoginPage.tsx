@@ -42,11 +42,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
             return;
         }
         
-        // Check for registered user
-        const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-
-        // Check the user's stored password.
-        if (user && user.password && password === user.password) {
+        // For demo purposes, if it's not the admin login, treat it as a user login.
+        if (email.toLowerCase() !== 'admin@example.com') {
             setPendingRole('user');
             setStep('verification');
             return;

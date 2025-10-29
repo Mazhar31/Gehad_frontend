@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ArrowLeftOnRectangleIcon, FolderIcon, DocumentTextIcon, UserCircleIcon } from '../icons.tsx';
+import { ArrowLeftOnRectangleIcon, FolderIcon, DocumentTextIcon, UserCircleIcon, PuzzlePieceIcon, Bars3Icon, XMarkIcon } from '../icons.tsx';
 import { User } from '../../types.ts';
 
 const ProjectileLogo: React.FC<{ className?: string }> = ({ className }) => (
@@ -20,29 +20,42 @@ interface UserHeaderProps {
     userName: string;
     userAvatar: string;
     currentPage: string;
-    onNavigate: (page: 'projects' | 'invoices' | 'profile') => void;
+    onNavigate: (page: 'dashboards' | 'invoices' | 'profile' | 'addins') => void;
     onLogout: () => void;
     userRole: User['role'];
 }
 
 const UserHeader: React.FC<UserHeaderProps> = ({ userName, userAvatar, currentPage, onNavigate, onLogout, userRole }) => {
-    const [isMenuOpen, setMenuOpen] = useState(false);
-    const menuRef = useRef<HTMLDivElement>(null);
+    const [isProfileMenuOpen, setProfileMenuOpen] = useState(false);
+    const [isMobileNavOpen, setMobileNavOpen] = useState(false);
+    const profileMenuRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-                setMenuOpen(false);
+            if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+                setProfileMenuOpen(false);
             }
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleNav = (page: 'projects' | 'invoices' | 'profile') => {
+    const handleProfileNav = (page: 'profile') => {
         onNavigate(page);
-        setMenuOpen(false);
+        setProfileMenuOpen(false);
     };
+    
+    const handleMobileNav = (page: 'dashboards' | 'invoices' | 'addins') => {
+        onNavigate(page);
+        setMobileNavOpen(false);
+    };
+
+    const navItems = [
+        { page: 'dashboards', label: 'Dashboards', icon: FolderIcon, show: true },
+        { page: 'addins', label: 'Add-ins', icon: PuzzlePieceIcon, show: true },
+        { page: 'invoices', label: 'Invoices', icon: DocumentTextIcon, show: userRole === 'superuser' },
+    ] as const;
+
 
     return (
         <header className="bg-sidebar-bg/50 backdrop-blur-lg border-b border-border-color sticky top-0 z-30">
@@ -54,38 +67,32 @@ const UserHeader: React.FC<UserHeaderProps> = ({ userName, userAvatar, currentPa
                             <span className="text-xl font-bold text-white">OneQlek</span>
                         </div>
                         <nav className="hidden md:flex items-center space-x-4">
-                            <a 
-                                href="#" 
-                                onClick={(e) => { e.preventDefault(); onNavigate('projects'); }}
-                                className={`px-3 py-2 rounded-md text-sm font-medium ${currentPage === 'projects' ? 'text-white bg-white/10' : 'text-secondary-text hover:text-white'}`}
-                            >
-                                Projects
-                            </a>
-                            {userRole === 'superuser' && (
+                            {navItems.map(item => item.show && (
                                 <a 
+                                    key={item.page}
                                     href="#" 
-                                    onClick={(e) => { e.preventDefault(); onNavigate('invoices'); }}
-                                    className={`px-3 py-2 rounded-md text-sm font-medium ${currentPage === 'invoices' ? 'text-white bg-white/10' : 'text-secondary-text hover:text-white'}`}
+                                    onClick={(e) => { e.preventDefault(); onNavigate(item.page); }}
+                                    className={`px-3 py-2 rounded-md text-sm font-medium ${currentPage === item.page ? 'text-white bg-white/10' : 'text-secondary-text hover:text-white'}`}
                                 >
-                                    Invoices
+                                    {item.label}
                                 </a>
-                            )}
+                            ))}
                         </nav>
                     </div>
-                    <div className="flex items-center space-x-4">
-                         <div className="relative" ref={menuRef}>
-                            <button onClick={() => setMenuOpen(!isMenuOpen)} className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2">
+                         <div className="relative" ref={profileMenuRef}>
+                            <button onClick={() => setProfileMenuOpen(!isProfileMenuOpen)} className="flex items-center space-x-2">
                                 <img src={userAvatar} alt={userName} className="w-9 h-9 rounded-full" />
                                 <div className="hidden md:block text-left">
                                     <p className="text-white font-semibold text-sm">{userName}</p>
                                     <p className="text-xs text-secondary-text">Client</p>
                                 </div>
                             </button>
-                            {isMenuOpen && (
+                            {isProfileMenuOpen && (
                                 <div className="absolute right-0 mt-2 w-48 bg-sidebar-bg border border-border-color rounded-md shadow-lg py-1 z-20">
                                     <a
                                         href="#"
-                                        onClick={(e) => { e.preventDefault(); handleNav('profile'); }}
+                                        onClick={(e) => { e.preventDefault(); handleProfileNav('profile'); }}
                                         className="flex items-center w-full px-4 py-2 text-sm text-secondary-text hover:bg-white/10 hover:text-white"
                                     >
                                         <UserCircleIcon className="w-4 h-4 mr-2" />
@@ -102,8 +109,32 @@ const UserHeader: React.FC<UserHeaderProps> = ({ userName, userAvatar, currentPa
                                 </div>
                             )}
                         </div>
+                        <div className="md:hidden">
+                            <button onClick={() => setMobileNavOpen(!isMobileNavOpen)} className="p-2 text-secondary-text hover:text-white" aria-controls="mobile-menu" aria-expanded={isMobileNavOpen}>
+                                <span className="sr-only">Open main menu</span>
+                                {isMobileNavOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
+                            </button>
+                        </div>
                     </div>
                 </div>
+
+                {isMobileNavOpen && (
+                    <div className="md:hidden" id="mobile-menu">
+                        <nav className="px-2 pt-2 pb-4 space-y-1">
+                             {navItems.map(item => item.show && (
+                                <a
+                                    key={item.page}
+                                    href="#"
+                                    onClick={(e) => { e.preventDefault(); handleMobileNav(item.page); }}
+                                    className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${currentPage === item.page ? 'text-white bg-white/10' : 'text-secondary-text hover:text-white hover:bg-white/5'}`}
+                                >
+                                    <item.icon className="w-5 h-5 mr-3" />
+                                    {item.label}
+                                </a>
+                            ))}
+                        </nav>
+                    </div>
+                )}
             </div>
         </header>
     );

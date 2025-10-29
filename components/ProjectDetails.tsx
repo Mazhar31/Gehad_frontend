@@ -1,6 +1,6 @@
 import React from 'react';
-import { Project, Client, Category, PaymentPlan, Department, Group } from '../types.ts';
-import { TagIcon, CreditCardIcon, BanknotesIcon, CalendarDaysIcon, ClockIcon, CheckCircleIcon, ArrowTopRightOnSquareIcon, UsersIcon, UserGroupIcon, FolderIcon } from './icons.tsx';
+import { Project, Client, PaymentPlan, Department, Group } from '../types.ts';
+import { CreditCardIcon, CalendarDaysIcon, ClockIcon, CheckCircleIcon, ArrowTopRightOnSquareIcon, UsersIcon, UserGroupIcon, FolderIcon, CpuChipIcon } from './icons.tsx';
 
 const getStatusInfo = (status: Project['status']) => {
     switch (status) {
@@ -32,26 +32,15 @@ const DetailItem: React.FC<DetailItemProps> = ({ icon: Icon, label, value }) => 
 interface ProjectDetailsProps {
     project: Project;
     client?: Client;
-    category?: Category;
     department?: Department;
     plan?: PaymentPlan;
     groups?: Group[];
 }
 
-const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project, client, category, department, plan, groups }) => {
+const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project, client, department, plan, groups }) => {
     const statusInfo = getStatusInfo(project.status);
     const StatusIcon = statusInfo.icon;
     const group = client?.groupId ? groups?.find(g => g.id === client.groupId) : undefined;
-
-
-    const formattedBudget = project.budget 
-        ? new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: project.currency,
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-          }).format(project.budget)
-        : 'Not set';
 
     const formattedPlanPrice = plan 
         ? `${plan.name} (${new Intl.NumberFormat('en-US', {
@@ -61,6 +50,8 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project, client, catego
             maximumFractionDigits: 0,
           }).format(plan.price)}/yr)`
         : 'N/A';
+        
+    const linkButtonText = project.projectType === 'Add-ins' ? 'Open Add-in Link' : 'View as User (Dashboard)';
 
     return (
         <div className="p-2 text-white">
@@ -88,11 +79,10 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project, client, catego
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <DetailItem icon={UsersIcon} label="Client" value={client?.company} />
-                <DetailItem icon={FolderIcon} label="Client Group" value={group?.name} />
+                <DetailItem icon={UserGroupIcon} label="Client Group" value={group?.name} />
                 <DetailItem icon={CalendarDaysIcon} label="Start Date" value={project.startDate} />
-                <DetailItem icon={BanknotesIcon} label="Budget" value={formattedBudget} />
-                <DetailItem icon={TagIcon} label="Category" value={category?.name} />
-                <DetailItem icon={UserGroupIcon} label="Department" value={department?.name} />
+                <DetailItem icon={FolderIcon} label="Department" value={department?.name} />
+                <DetailItem icon={CpuChipIcon} label="Project Type" value={project.projectType} />
                 <DetailItem 
                     icon={CreditCardIcon} 
                     label="Payment Plan" 
@@ -109,7 +99,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project, client, catego
                         className="inline-flex items-center justify-center space-x-3 bg-gradient-to-r from-pro-bg-start to-pro-bg-end text-white font-bold py-3 px-8 rounded-xl hover:scale-105 transition-transform duration-300 shadow-lg shadow-purple-500/30"
                     >
                         <ArrowTopRightOnSquareIcon className="w-5 h-5" />
-                        <span>View as User (Dashboard)</span>
+                        <span>{linkButtonText}</span>
                     </a>
                 </div>
             )}

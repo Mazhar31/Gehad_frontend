@@ -1,7 +1,6 @@
 import React from 'react';
 import { Project, Client } from '../../../types.ts';
-import { useData } from '../../DataContext.tsx';
-import { TagIcon, CreditCardIcon, BanknotesIcon, CalendarDaysIcon, ClockIcon, CheckCircleIcon, ArrowTopRightOnSquareIcon } from '../../icons.tsx';
+import { CalendarDaysIcon, ClockIcon, CheckCircleIcon, ArrowTopRightOnSquareIcon } from '../../icons.tsx';
 
 const getStatusInfo = (status: Project['status']) => {
     switch (status) {
@@ -30,31 +29,9 @@ const DetailItem: React.FC<DetailItemProps> = ({ icon: Icon, label, value }) => 
     </div>
 );
 
-const UserProjectDetailsPage: React.FC<{ project: Project, client: Client }> = ({ project, client }) => {
-    const { categories, paymentPlans } = useData();
-    const category = categories.find(c => c.id === project.categoryId)?.name || 'N/A';
-    const plan = paymentPlans.find(p => p.id === project.planId);
-    
-    const statusInfo = getStatusInfo(project.status);
+const UserDashboardDetailsPage: React.FC<{ dashboard: Project, client: Client }> = ({ dashboard, client }) => {
+    const statusInfo = getStatusInfo(dashboard.status);
     const StatusIcon = statusInfo.icon;
-
-    const formattedBudget = project.budget 
-        ? new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: project.currency,
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-          }).format(project.budget)
-        : 'Not set';
-
-    const formattedPlanPrice = plan 
-        ? `${plan.name} (${new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: plan.currency,
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-          }).format(plan.price)}/yr)`
-        : 'N/A';
 
     return (
         <div className="p-2 text-white">
@@ -62,39 +39,32 @@ const UserProjectDetailsPage: React.FC<{ project: Project, client: Client }> = (
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center">
                     <div>
                         <p className="text-sm text-secondary-text">{client.company}</p>
-                        <h2 className="text-2xl font-bold text-white">{project.name}</h2>
+                        <h2 className="text-2xl font-bold text-white">{dashboard.name}</h2>
                     </div>
                     <div className="flex items-center space-x-2 mt-4 sm:mt-0">
                         <StatusIcon className={`w-6 h-6 ${statusInfo.class}`} />
-                        <span className={`text-lg font-semibold ${statusInfo.class}`}>{project.status}</span>
+                        <span className={`text-lg font-semibold ${statusInfo.class}`}>{dashboard.status}</span>
                     </div>
                 </div>
                 <div className="mt-6">
                     <div className="flex justify-between text-sm text-secondary-text mb-1">
                         <span>Progress</span>
-                        <span className="text-white font-semibold">{project.progress ?? 0}%</span>
+                        <span className="text-white font-semibold">{dashboard.progress ?? 0}%</span>
                     </div>
                     <div className="w-full bg-dark-bg rounded-full h-2.5">
-                        <div className="bg-accent-blue h-2.5 rounded-full" style={{ width: `${project.progress ?? 0}%` }}></div>
+                        <div className="bg-accent-blue h-2.5 rounded-full" style={{ width: `${dashboard.progress ?? 0}%` }}></div>
                     </div>
                 </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <DetailItem icon={CalendarDaysIcon} label="Start Date" value={project.startDate} />
-                <DetailItem icon={BanknotesIcon} label="Budget" value={formattedBudget} />
-                <DetailItem icon={TagIcon} label="Category" value={category} />
-                <DetailItem 
-                    icon={CreditCardIcon} 
-                    label="Payment Plan" 
-                    value={formattedPlanPrice}
-                />
+                <DetailItem icon={CalendarDaysIcon} label="Start Date" value={dashboard.startDate} />
             </div>
 
-            {project.dashboardUrl && (
+            {dashboard.dashboardUrl && (
                 <div className="mt-8 pt-6 border-t border-border-color text-center">
                     <a
-                        href={project.dashboardUrl}
+                        href={dashboard.dashboardUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center justify-center space-x-3 bg-gradient-to-r from-pro-bg-start to-pro-bg-end text-white font-bold py-3 px-8 rounded-xl hover:scale-105 transition-transform duration-300 shadow-lg shadow-purple-500/30"
@@ -108,4 +78,4 @@ const UserProjectDetailsPage: React.FC<{ project: Project, client: Client }> = (
     );
 };
 
-export default UserProjectDetailsPage;
+export default UserDashboardDetailsPage;

@@ -1,5 +1,14 @@
-// FIX: Created mock data for clients, projects, invoices, categories, and payment plans to resolve import errors and populate the application with data.
-import { Client, Project, Invoice, Category, PaymentPlan, User, ContactMessage, PortfolioCase, Department, Group } from './types.ts';
+// FIX: Created mock data for clients, projects, invoices, and payment plans to resolve import errors and populate the application with data.
+// FIX: Imported Category type and added mock data for categories and projects.
+import { Client, Project, Invoice, PaymentPlan, User, ContactMessage, PortfolioCase, Department, Group, Category } from './types.ts';
+
+// FIX: Added mock data for categories.
+export const CATEGORIES_DATA: Category[] = [
+    { id: 'cat-1', name: 'E-commerce' },
+    { id: 'cat-2', name: 'Mobile App' },
+    { id: 'cat-3', name: 'SaaS Platform' },
+    { id: 'cat-4', name: 'Cloud Services' },
+];
 
 export const GROUPS_DATA: Group[] = [
     { id: 'g-1', name: 'Global Tech' },
@@ -13,13 +22,6 @@ export const CLIENTS_DATA: Client[] = [
   // FIX: Removed duplicate `avatarUrl` property.
   { id: 'c-3', company: 'Tech Giants', email: 'peter.jones@techgiants.com', mobile: '555-0103', address: '789 Enterprise Way, New York, NY', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026706d', groupId: 'g-1' },
   { id: 'c-4', company: 'Web Wizards', email: 'mary.j@webwizards.io', mobile: '555-0104', address: '101 Dev Lane, Austin, TX', avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026707d' },
-];
-
-export const CATEGORIES_DATA: Category[] = [
-    { id: 'cat-1', name: 'Web Development' },
-    { id: 'cat-2', name: 'Mobile App Development' },
-    { id: 'cat-3', name: 'UI/UX Design' },
-    { id: 'cat-4', name: 'Marketing' },
 ];
 
 export const DEPARTMENTS_DATA: Department[] = [
@@ -36,11 +38,12 @@ export const PAYMENT_PLANS_DATA: PaymentPlan[] = [
 ];
 
 export const PROJECTS_DATA: Project[] = [
-  { id: 'p-1', name: 'E-commerce Platform', clientId: 'c-1', planId: 'plan-2', categoryId: 'cat-1', departmentId: 'dept-1', status: 'In Progress', budget: 50000, progress: 75, startDate: '2024-05-01', dashboardUrl: 'https://vercel.com/', currency: 'USD' },
-  { id: 'p-2', name: 'Mobile Banking App', clientId: 'c-2', planId: 'plan-3', categoryId: 'cat-2', departmentId: 'dept-1', status: 'Completed', budget: 120000, progress: 100, startDate: '2023-11-15', dashboardUrl: 'https://example-dashboard.com/p2', currency: 'USD' },
-  { id: 'p-3', name: 'Marketing Campaign', clientId: 'c-3', planId: 'plan-1', categoryId: 'cat-4', departmentId: 'dept-4', status: 'On Hold', budget: 15000, progress: 20, startDate: '2024-06-10', currency: 'USD' },
-  { id: 'p-4', name: 'Design System', clientId: 'c-4', planId: 'plan-2', categoryId: 'cat-3', departmentId: 'dept-3', status: 'In Progress', budget: 80000, progress: 50, startDate: '2023-10-01', dashboardUrl: 'https://example-dashboard.com/p4', currency: 'USD' },
-  { id: 'p-5', name: 'Internal Dashboard', clientId: 'c-1', planId: 'plan-2', categoryId: 'cat-1', departmentId: 'dept-2', status: 'Completed', budget: 35000, progress: 100, startDate: '2024-02-01', currency: 'USD' },
+  { id: 'p-1', name: 'E-commerce Platform', clientId: 'c-1', planId: 'plan-2', departmentId: 'dept-1', status: 'In Progress', budget: 50000, progress: 75, startDate: '2024-05-01', dashboardUrl: 'https://vercel.com/', currency: 'USD', projectType: 'Dashboard' },
+  { id: 'p-2', name: 'Mobile Banking App', clientId: 'c-2', planId: 'plan-3', departmentId: 'dept-1', status: 'Completed', budget: 120000, progress: 100, startDate: '2023-11-15', dashboardUrl: 'https://example-dashboard.com/p2', currency: 'USD', projectType: 'Dashboard' },
+  { id: 'p-3', name: 'Marketing Campaign', clientId: 'c-3', planId: 'plan-1', departmentId: 'dept-4', status: 'On Hold', budget: 15000, progress: 20, startDate: '2024-06-10', currency: 'USD', projectType: 'Dashboard' },
+  { id: 'p-4', name: 'Design System', clientId: 'c-4', planId: 'plan-2', departmentId: 'dept-3', status: 'In Progress', budget: 80000, progress: 50, startDate: '2023-10-01', dashboardUrl: 'https://example-dashboard.com/p4', currency: 'USD', projectType: 'Dashboard' },
+  { id: 'p-5', name: 'Internal Dashboard', clientId: 'c-1', planId: 'plan-2', departmentId: 'dept-2', status: 'Completed', budget: 35000, progress: 100, startDate: '2024-02-01', currency: 'USD', projectType: 'Dashboard' },
+  { id: 'p-6', name: 'Power BI Connector', clientId: 'c-1', planId: 'plan-1', departmentId: 'dept-2', status: 'Completed', progress: 100, startDate: '2024-07-01', dashboardUrl: 'https://powerbi.microsoft.com/', currency: 'USD', projectType: 'Add-ins', imageUrl: 'https://images.unsplash.com/photo-1634017839464-5c33923cb4ae?q=80&w=800&auto=format&fit=crop' },
 ];
 
 export const INVOICES_DATA: Invoice[] = [
@@ -62,7 +65,7 @@ export const INVOICES_DATA: Invoice[] = [
 ];
 
 export const USERS_DATA: User[] = [
-  { id: 'u-1', name: 'Alice Martin', email: 'alice.m@innovate.com', position: 'Project Manager', clientId: 'c-1', avatarUrl: 'https://i.pravatar.cc/150?u=u1', role: 'superuser', password: 'password', dashboardAccess: 'view-and-edit', projectIds: ['p-1', 'p-5'] },
+  { id: 'u-1', name: 'Alice Martin', email: 'alice.m@innovate.com', position: 'Project Manager', clientId: 'c-1', avatarUrl: 'https://i.pravatar.cc/150?u=u1', role: 'superuser', password: 'password', dashboardAccess: 'view-and-edit', projectIds: ['p-1', 'p-5', 'p-6'] },
   { id: 'u-2', name: 'Bob Johnson', email: 'bob.j@solutions.co', position: 'Lead Developer', clientId: 'c-2', avatarUrl: 'https://i.pravatar.cc/150?u=u2', role: 'normal', password: 'password', dashboardAccess: 'view-only', projectIds: ['p-2'] },
   { id: 'u-3', name: 'Charlie Brown', email: 'charlie.b@techgiants.com', position: 'UX Designer', clientId: 'c-3', avatarUrl: 'https://i.pravatar.cc/150?u=u3', role: 'normal', password: 'password', dashboardAccess: 'view-only', projectIds: ['p-3'] },
   { id: 'u-4', name: 'Diana Prince', email: 'diana.p@webwizards.io', position: 'QA Engineer', clientId: 'c-4', avatarUrl: 'https://i.pravatar.cc/150?u=u4', role: 'normal', password: 'password', dashboardAccess: 'view-only', projectIds: ['p-4'] },

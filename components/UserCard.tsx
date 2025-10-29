@@ -42,27 +42,12 @@ const UserCard: React.FC<UserCardProps> = ({ user, clientCompany, projectsCount,
                 )}
             </div>
 
-            <div className="p-5 text-center items-center flex flex-col flex-grow">
-                 {user.role === 'superuser' && (
-                    <span className="absolute top-4 left-4 text-xs font-bold bg-accent-pink/20 text-accent-pink px-2 py-1 rounded-full">Superuser</span>
-                )}
+            <div className="p-5 pt-8 text-center items-center flex flex-col flex-grow">
                 <img src={user.avatarUrl} alt={user.name} className="w-24 h-24 rounded-full mb-4 ring-4 ring-dark-bg object-cover" />
                 <h3 className="font-bold text-white text-lg">{user.name}</h3>
                 <p className="text-sm text-accent-blue font-medium">{user.position}</p>
                 <p className="text-xs text-secondary-text mt-1">{clientCompany} &bull; {projectsCount} {projectsCount === 1 ? 'Project' : 'Projects'}</p>
-                <div className="flex-grow flex items-center justify-center">
-                    <div className="mt-4">
-                        {user.dashboardAccess === 'view-and-edit' ? (
-                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-accent-green/10 text-accent-green">
-                                Dashboard: Edit Access
-                            </span>
-                        ) : (
-                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-accent-blue/10 text-accent-blue">
-                                Dashboard: View Access
-                            </span>
-                        )}
-                    </div>
-                </div>
+                <div className="flex-grow"></div>
             </div>
             
             <div className="w-full border-t border-border-color mt-auto flex">

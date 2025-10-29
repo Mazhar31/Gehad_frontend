@@ -1,4 +1,4 @@
-// FIX: Created type definitions for Client, Project, Invoice, Category, PaymentPlan, and Fund to resolve type errors throughout the application.
+// FIX: Created type definitions for Client, Project, Invoice, PaymentPlan, and Fund to resolve type errors throughout the application.
 
 export interface Group {
   id: string;
@@ -25,7 +25,6 @@ export interface Project {
   name: string;
   clientId: string;
   planId: string;
-  categoryId: string;
   departmentId: string;
   status: 'In Progress' | 'Completed' | 'On Hold';
   budget?: number;
@@ -34,6 +33,7 @@ export interface Project {
   dashboardUrl?: string;
   currency: string;
   imageUrl?: string;
+  projectType: 'Dashboard' | 'Add-ins';
 }
 
 export interface InvoiceItem {
@@ -53,11 +53,6 @@ export interface Invoice {
   status: 'Paid' | 'Pending' | 'Overdue';
   type: 'manual' | 'subscription';
   currency: string;
-}
-
-export interface Category {
-  id:string;
-  name: string;
 }
 
 export interface PaymentPlan {
@@ -106,4 +101,10 @@ export interface PortfolioCase {
   description: string;
   imageUrl: string;
   link?: string;
+}
+
+// FIX: Added Category interface to resolve module not found error.
+export interface Category {
+  id: string;
+  name: string;
 }

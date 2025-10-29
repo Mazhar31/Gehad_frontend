@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import UserHeader from './UserHeader.tsx';
-import UserProjectsPage from './pages/UserProjectsPage.tsx';
+import UserDashboardsPage from './pages/UserProjectsPage.tsx';
 import UserInvoicesPage from './pages/UserInvoicesPage.tsx';
 import UserProfilePage from './pages/UserProfilePage.tsx';
+import UserAddinsPage from './pages/UserAddinsPage.tsx';
 import { useData } from '../DataContext.tsx';
 
 const UserDashboard: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
-    const [currentPage, setCurrentPage] = useState<'projects' | 'invoices' | 'profile'>('projects');
+    const [currentPage, setCurrentPage] = useState<'dashboards' | 'invoices' | 'profile' | 'addins'>('dashboards');
     const { clients, projects, invoices, currentUser, handleSaveInvoice, handleSaveUser } = useData();
 
     if (!currentUser) {
@@ -22,9 +23,9 @@ const UserDashboard: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
     const userClient = clients.find(c => c.id === currentUser.clientId);
 
     useEffect(() => {
-        // If user is normal and trying to access invoices, redirect to projects.
+        // If user is normal and trying to access invoices, redirect to dashboards.
         if (currentUser.role === 'normal' && currentPage === 'invoices') {
-            setCurrentPage('projects');
+            setCurrentPage('dashboards');
         }
     }, [currentPage, currentUser.role]);
 
@@ -35,20 +36,25 @@ const UserDashboard: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
     const userProjects = projects.filter(p => currentUser.projectIds?.includes(p.id));
     const userInvoices = invoices.filter(i => i.clientId === currentUser.clientId);
 
+    const userDashboards = userProjects.filter(p => p.projectType === 'Dashboard' || !p.projectType);
+    const addinProjects = userProjects.filter(p => p.projectType === 'Add-ins');
+
     const renderPage = () => {
         switch(currentPage) {
-            case 'projects':
-                return <UserProjectsPage projects={userProjects} client={userClient} />;
+            case 'dashboards':
+                return <UserDashboardsPage dashboards={userDashboards} client={userClient} />;
+            case 'addins':
+                return <UserAddinsPage addins={addinProjects} />;
             case 'invoices':
                 if (currentUser.role === 'normal') {
                     // This is a fallback, the useEffect should prevent this from being reached.
-                    return <UserProjectsPage projects={userProjects} client={userClient} />;
+                    return <UserDashboardsPage dashboards={userDashboards} client={userClient} />;
                 }
                 return <UserInvoicesPage invoices={userInvoices} client={userClient} onSaveInvoice={handleSaveInvoice} />;
             case 'profile':
                 return <UserProfilePage user={currentUser} onSave={handleSaveUser} />;
             default:
-                return <UserProjectsPage projects={userProjects} client={userClient} />;
+                return <UserDashboardsPage dashboards={userDashboards} client={userClient} />;
         }
     };
 

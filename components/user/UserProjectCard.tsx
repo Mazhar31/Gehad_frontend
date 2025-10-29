@@ -10,33 +10,33 @@ const getStatusClass = (status: Project['status']) => {
     }
 };
 
-interface UserProjectCardProps {
-    project: Project;
+interface UserDashboardCardProps {
+    dashboard: Project;
     onClick: () => void;
 }
 
-const UserProjectCard: React.FC<UserProjectCardProps> = ({ project, onClick }) => {
-    // Use the uploaded project image, or a fallback if none exists.
-    const projectImage = project.imageUrl || 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
+const UserDashboardCard: React.FC<UserDashboardCardProps> = ({ dashboard, onClick }) => {
+    // Use the uploaded dashboard image, or a fallback if none exists.
+    const dashboardImage = dashboard.imageUrl || 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
 
     return (
         <div 
             onClick={onClick}
             className="bg-card-bg p-5 rounded-2xl flex flex-col justify-between space-y-4 cursor-pointer transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-lg hover:shadow-accent-blue/10 border border-border-color hover:border-accent-blue/50"
         >
-            {/* Header: Project Name & Status */}
+            {/* Header: Dashboard Name & Status */}
             <div className="flex justify-between items-start">
-                <h3 className="font-bold text-white text-lg flex-1 pr-4">{project.name}</h3>
-                <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusClass(project.status)}`}>
-                    {project.status}
+                <h3 className="font-bold text-white text-lg flex-1 pr-4">{dashboard.name}</h3>
+                <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusClass(dashboard.status)}`}>
+                    {dashboard.status}
                 </div>
             </div>
             
             {/* Embedded Dashboard Image */}
             <div className="aspect-video bg-dark-bg rounded-lg overflow-hidden my-2 flex-grow">
                 <img 
-                    src={projectImage}
-                    alt={`${project.name} dashboard preview`}
+                    src={dashboardImage}
+                    alt={`${dashboard.name} dashboard preview`}
                     className="w-full h-full object-cover"
                 />
             </div>
@@ -45,11 +45,11 @@ const UserProjectCard: React.FC<UserProjectCardProps> = ({ project, onClick }) =
             <div className="border-t border-border-color pt-4 flex items-center text-sm mt-auto">
                 <div>
                     <p className="text-xs text-secondary-text">Start Date</p>
-                    <p className="font-semibold text-white">{project.startDate}</p>
+                    <p className="font-semibold text-white">{dashboard.startDate}</p>
                 </div>
             </div>
         </div>
     );
 };
 
-export default UserProjectCard;
+export default UserDashboardCard;

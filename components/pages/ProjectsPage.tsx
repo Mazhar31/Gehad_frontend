@@ -12,14 +12,14 @@ import { useData } from '../DataContext.tsx';
 import ProjectDetails from '../ProjectDetails.tsx';
 
 const ProjectsPage: React.FC = () => {
-    const { projects, clients, categories, departments, paymentPlans, groups, handleSaveProject, handleDeleteProject } = useData();
+    const { projects, clients, departments, paymentPlans, groups, handleSaveProject, handleDeleteProject } = useData();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterClientId, setFilterClientId] = useState('All');
 
-    if (!projects || !clients || !categories || !departments || !paymentPlans || !groups || !handleSaveProject || !handleDeleteProject) {
+    if (!projects || !clients || !departments || !paymentPlans || !groups || !handleSaveProject || !handleDeleteProject) {
         return <div>Loading...</div>
     }
 
@@ -120,7 +120,6 @@ const ProjectsPage: React.FC = () => {
                         onSave={onSave} 
                         onCancel={handleCloseModals}
                         clients={clients}
-                        categories={categories}
                         departments={departments}
                         paymentPlans={paymentPlans}
                     />
@@ -132,7 +131,6 @@ const ProjectsPage: React.FC = () => {
                     <ProjectDetails 
                         project={selectedProject}
                         client={clients.find(c => c.id === selectedProject.clientId)}
-                        category={categories.find(c => c.id === selectedProject.categoryId)}
                         department={departments.find(d => d.id === selectedProject.departmentId)}
                         plan={paymentPlans.find(p => p.id === selectedProject.planId)}
                         groups={groups}
@@ -149,20 +147,19 @@ const ProjectForm: React.FC<{
     onSave: (project: Project) => void;
     onCancel: () => void;
     clients: any[];
-    categories: any[];
     departments: any[];
     paymentPlans: any[];
-}> = ({ project, onSave, onCancel, clients, categories, departments, paymentPlans }) => {
+}> = ({ project, onSave, onCancel, clients, departments, paymentPlans }) => {
     const [formData, setFormData] = useState({
         name: project?.name || '',
         clientId: project?.clientId || '',
         planId: project?.planId || '',
-        categoryId: project?.categoryId || '',
         departmentId: project?.departmentId || '',
         status: project?.status || 'In Progress',
         startDate: project?.startDate || new Date().toISOString().slice(0, 10),
         dashboardUrl: project?.dashboardUrl || '',
         imageUrl: project?.imageUrl || '',
+        projectType: project?.projectType || 'Dashboard',
     });
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -195,6 +192,7 @@ const ProjectForm: React.FC<{
             ...formData,
             id: project?.id || '',
             status: formData.status as Project['status'],
+            projectType: formData.projectType as Project['projectType'],
             currency: project?.currency || 'USD', // Placeholder, will be overwritten
         } as Project);
     };
@@ -224,21 +222,21 @@ const ProjectForm: React.FC<{
                 <input type="text" name="name" value={formData.name} onChange={handleChange} className="w-full bg-dark-bg border border-border-color rounded-md p-2" required />
             </div>
             <div>
-                <label className="block text-sm font-medium text-secondary-text mb-1">Dashboard URL (Optional)</label>
-                <input type="url" name="dashboardUrl" value={formData.dashboardUrl} onChange={handleChange} className="w-full bg-dark-bg border border-border-color rounded-md p-2" placeholder="https://example-dashboard.com/project" />
+                <label className="block text-sm font-medium text-secondary-text mb-1">Website / Dashboard URL</label>
+                <input type="url" name="dashboardUrl" value={formData.dashboardUrl} onChange={handleChange} className="w-full bg-dark-bg border border-border-color rounded-md p-2" placeholder="https://example.com" />
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-secondary-text mb-1">Project Type</label>
+                <select name="projectType" value={formData.projectType} onChange={handleChange} className="w-full bg-dark-bg border border-border-color rounded-md p-2" required>
+                    <option value="Dashboard">Dashboard</option>
+                    <option value="Add-ins">Add-ins</option>
+                </select>
             </div>
             <div>
                 <label className="block text-sm font-medium text-secondary-text mb-1">Client</label>
                 <select name="clientId" value={formData.clientId} onChange={handleChange} className="w-full bg-dark-bg border border-border-color rounded-md p-2" required>
                     <option value="">Select a client</option>
                     {clients.map(c => <option key={c.id} value={c.id}>{c.company}</option>)}
-                </select>
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-secondary-text mb-1">Category</label>
-                <select name="categoryId" value={formData.categoryId} onChange={handleChange} className="w-full bg-dark-bg border border-border-color rounded-md p-2" required>
-                    <option value="">Select a category</option>
-                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
             </div>
              <div>

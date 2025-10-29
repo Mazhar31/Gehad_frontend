@@ -1,12 +1,7 @@
 
-
-
-
-
-
 import React from 'react';
 // FIX: Added file extension to import to resolve module error.
-import { HomeIcon, FolderIcon, UsersIcon, DocumentTextIcon, TagIcon, CreditCardIcon, Cog6ToothIcon, XMarkIcon, UserGroupIcon, ArrowLeftOnRectangleIcon, CpuChipIcon, PhotoIcon } from './icons.tsx';
+import { HomeIcon, FolderIcon, UsersIcon, DocumentTextIcon, TagIcon, CreditCardIcon, Cog6ToothIcon, XMarkIcon, UserGroupIcon, ArrowLeftOnRectangleIcon, CpuChipIcon, PhotoIcon, ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from './icons.tsx';
 
 interface SidebarProps {
   currentPage: string;
@@ -19,6 +14,8 @@ interface SidebarProps {
     position: string;
     avatarUrl: string;
   };
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
 }
 
 const NavItem: React.FC<{
@@ -27,7 +24,8 @@ const NavItem: React.FC<{
   page: string;
   isActive: boolean;
   onClick: () => void;
-}> = ({ icon: Icon, label, isActive, onClick }) => (
+  isCollapsed: boolean;
+}> = ({ icon: Icon, label, isActive, onClick, isCollapsed }) => (
   <li>
     <a
       href="#"
@@ -35,21 +33,20 @@ const NavItem: React.FC<{
         e.preventDefault();
         onClick();
       }}
-      className={`flex items-center p-3 rounded-lg transition-colors duration-200 ${
+      className={`flex items-center p-3 rounded-lg transition-colors duration-200 overflow-hidden ${
         isActive
           ? 'bg-accent-blue text-white shadow-lg shadow-accent-blue/20'
           : 'text-secondary-text hover:bg-white/10 hover:text-white'
-      }`}
+      } ${isCollapsed ? 'justify-center' : ''}`}
     >
-      <Icon className="w-6 h-6" />
-      <span className="ml-4 font-semibold">{label}</span>
+      <Icon className="w-6 h-6 flex-shrink-0" />
+      <span className={`font-semibold whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0' : 'ml-4 opacity-100'}`}>{label}</span>
     </a>
   </li>
 );
 
-const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onClose, onLogout, adminProfile }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onClose, onLogout, adminProfile, isCollapsed, onToggleCollapse }) => {
     const navItems = [
-        { icon: HomeIcon, label: 'Dashboard', page: 'dashboard' },
         { icon: FolderIcon, label: 'Projects', page: 'projects' },
         { icon: UsersIcon, label: 'Clients', page: 'clients' },
         { icon: UserGroupIcon, label: 'User Management', page: 'user-management' },
@@ -71,19 +68,26 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onCl
             ></div>
 
             <aside
-                className={`fixed top-0 left-0 h-full bg-sidebar-bg w-64 text-white p-4 flex flex-col z-40 transform transition-transform lg:relative lg:translate-x-0 ${
+                className={`fixed top-0 left-0 h-full bg-sidebar-bg text-white p-4 flex flex-col z-40 lg:relative lg:translate-x-0 transition-all duration-300 ease-in-out ${
                     isOpen ? 'translate-x-0' : '-translate-x-full'
-                }`}
+                } ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}`}
             >
-                <div className="flex justify-between items-center mb-8">
-                    <div className="flex items-center">
-                        <div className="bg-accent-blue p-2 rounded-lg">
-                             <svg className="w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.517l2.74-1.22m0 0l-5.94-2.28a11.95 11.95 0 00-5.814 5.517L9 18.75l-6.75-6.75" />
-                            </svg>
-                        </div>
-                        <span className="text-xl font-bold ml-3">OneQlek</span>
-                    </div>
+                <div className={`flex items-center mb-8 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+                    <a
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onNavigate('dashboard');
+                      }}
+                      className={`flex items-center p-3 rounded-lg transition-colors duration-200 overflow-hidden ${
+                        currentPage === 'dashboard'
+                          ? 'bg-accent-blue text-white shadow-lg shadow-accent-blue/20'
+                          : 'text-primary-text hover:bg-white/10 hover:text-white'
+                      } ${isCollapsed ? 'justify-center' : ''}`}
+                    >
+                      <HomeIcon className="w-6 h-6 flex-shrink-0" />
+                      <span className={`text-xl font-bold whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0' : 'ml-4 opacity-100'}`}>OneQlek</span>
+                    </a>
                     <button onClick={onClose} className="lg:hidden p-1 text-secondary-text hover:text-white">
                         <XMarkIcon className="w-6 h-6" />
                     </button>
@@ -99,6 +103,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onCl
                                 page={item.page}
                                 isActive={currentPage === item.page}
                                 onClick={() => onNavigate(item.page)}
+                                isCollapsed={isCollapsed}
                             />
                         ))}
                     </ul>
@@ -106,29 +111,42 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onCl
 
                 <div className="mt-auto border-t border-border-color pt-4">
                     <div className="flex items-center">
-                        <img src={adminProfile.avatarUrl} alt="Admin" className="w-10 h-10 rounded-full" />
-                        <div className="ml-3 flex-1 overflow-hidden">
+                        <img src={adminProfile.avatarUrl} alt="Admin" className="w-10 h-10 rounded-full flex-shrink-0" />
+                        <div className={`flex-1 overflow-hidden transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 pointer-events-none' : 'ml-3 opacity-100'}`}>
                             <p className="text-sm font-semibold text-white truncate">{adminProfile.name}</p>
                             <p className="text-xs text-secondary-text truncate">{adminProfile.position}</p>
                         </div>
-                        <button
-                            onClick={() => onNavigate('settings')}
-                            className={`p-2 rounded-lg transition-colors ${
-                                currentPage === 'settings'
-                                    ? 'bg-accent-blue text-white'
-                                    : 'text-secondary-text hover:bg-white/10 hover:text-white'
-                            }`}
-                            aria-label="Settings"
-                        >
-                            <Cog6ToothIcon className="w-5 h-5" />
-                        </button>
-                        <button
-                            onClick={onLogout}
-                            className="p-2 ml-1 rounded-lg text-secondary-text hover:bg-white/10 hover:text-white transition-colors"
-                            aria-label="Sign Out"
-                        >
-                            <ArrowLeftOnRectangleIcon className="w-5 h-5" />
-                        </button>
+                    </div>
+                    <div className="flex items-center justify-between mt-2">
+                        <div className="hidden lg:block">
+                            <button
+                                onClick={onToggleCollapse}
+                                className="flex items-center p-2 rounded-lg text-secondary-text hover:bg-white/10 hover:text-white transition-colors"
+                                aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                            >
+                                {isCollapsed ? <ChevronDoubleRightIcon className="w-6 h-6" /> : <ChevronDoubleLeftIcon className="w-6 h-6" />}
+                            </button>
+                        </div>
+                        <div className={`flex items-center overflow-hidden transition-opacity duration-200 ${isCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                            <button
+                                onClick={() => onNavigate('settings')}
+                                className={`p-2 rounded-lg transition-colors ${
+                                    currentPage === 'settings'
+                                        ? 'bg-accent-blue text-white'
+                                        : 'text-secondary-text hover:bg-white/10 hover:text-white'
+                                }`}
+                                aria-label="Settings"
+                            >
+                                <Cog6ToothIcon className="w-5 h-5" />
+                            </button>
+                            <button
+                                onClick={onLogout}
+                                className="p-2 ml-1 rounded-lg text-secondary-text hover:bg-white/10 hover:text-white transition-colors"
+                                aria-label="Sign Out"
+                            >
+                                <ArrowLeftOnRectangleIcon className="w-5 h-5" />
+                            </button>
+                        </div>
                     </div>
                 </div>
             </aside>

@@ -1,9 +1,4 @@
 
-
-
-
-
-
 import React, { useState } from 'react';
 // FIX: Added file extension to import to resolve module error.
 import Sidebar from './components/Sidebar.tsx';
@@ -37,7 +32,8 @@ function App() {
   const { isLoggedIn, userRole, login, logout } = useData();
   const [authPage, setAuthPage] = useState<'login' | null>(null);
   const [currentPage, setCurrentPage] = useState('dashboard');
-  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isSidebarOpen, setSidebarOpen] = useState(false); // For mobile overlay
+  const [isSidebarCollapsed, setSidebarCollapsed] = useState(false); // For desktop collapse
   const [adminProfile, setAdminProfile] = useState({
     name: 'Admin',
     position: 'Super Admin',
@@ -47,7 +43,7 @@ function App() {
 
   const handleNavigate = (page: string) => {
     setCurrentPage(page);
-    setSidebarOpen(false); // Close sidebar on navigation
+    setSidebarOpen(false); // Close mobile sidebar on navigation
   };
   
   const handleLoginSuccess = (role: 'admin' | 'user', userEmail?: string) => {
@@ -66,6 +62,10 @@ function App() {
 
   const handleAdminProfileUpdate = (updatedProfile: typeof adminProfile) => {
     setAdminProfile(updatedProfile);
+  };
+
+  const handleToggleSidebarCollapse = () => {
+    setSidebarCollapsed(!isSidebarCollapsed);
   };
 
 
@@ -113,6 +113,8 @@ function App() {
           onClose={() => setSidebarOpen(false)}
           onLogout={handleLogout}
           adminProfile={adminProfile}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={handleToggleSidebarCollapse}
         />
         <div className="flex-1 flex flex-col overflow-hidden">
           <Header title={currentPage} onMenuClick={() => setSidebarOpen(true)} userProfile={adminProfile} />

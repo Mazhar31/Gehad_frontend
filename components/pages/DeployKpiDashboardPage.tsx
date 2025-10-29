@@ -111,9 +111,9 @@ const DeployKpiDashboardPage: React.FC = () => {
         } else { // Subdomain mode
             if (!subdomain) return;
             
-            console.log(`Simulating deployment of ${file.name} to subdomain: ${subdomain}.projex.app`);
+            console.log(`Simulating deployment of ${file.name} to subdomain: ${subdomain}.oneqlek.com`);
             await new Promise(resolve => setTimeout(resolve, 1500));
-            showNotification(`Dashboard "${file.name}" deployed to ${subdomain}.projex.app successfully!`);
+            showNotification(`Dashboard "${file.name}" deployed to ${subdomain}.oneqlek.com successfully!`);
             
             clearFile();
             setSubdomain('');
@@ -237,7 +237,7 @@ const DeployKpiDashboardPage: React.FC = () => {
                                         placeholder="my-dashboard"
                                         required
                                     />
-                                    <span className="bg-dark-bg border-t border-b border-r border-border-color text-secondary-text px-4 py-3 rounded-r-lg">.projex.app</span>
+                                    <span className="bg-dark-bg border-t border-b border-r border-border-color text-secondary-text px-4 py-3 rounded-r-lg">.oneqlek.com</span>
                                 </div>
                             </div>
                             {/* Step 2: Upload */}

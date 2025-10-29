@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PortfolioCase } from './types.ts';
+import { PortfolioCase } from '../types.ts';
 import { EllipsisVerticalIcon, PencilSquareIcon, TrashIcon, ArrowTopRightOnSquareIcon } from './icons.tsx';
 
 interface PortfolioCardProps {
