@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { EnvelopeIcon, KeyIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
 
@@ -24,10 +23,13 @@ interface LoginPageProps {
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => {
     const { users } = useData();
-    const [step, setStep] = useState<'credentials' | 'forgotPassword' | 'resetSent'>('credentials');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const [step, setStep] = useState<'credentials' | 'verification' | 'forgotPassword' | 'resetSent'>('credentials');
+    const [email, setEmail] = useState('admin@example.com');
+    const [password, setPassword] = useState('password123');
+    const [verificationCode, setVerificationCode] = useState(new Array(6).fill(''));
     const [error, setError] = useState('');
+    const [pendingRole, setPendingRole] = useState<'admin' | 'user' | null>(null);
+    const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
     useEffect(() => {
         const initParticles = () => {
@@ -72,7 +74,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
 
         // Check for admin user
         if (email.toLowerCase() === 'admin@example.com' && password === 'password123') {
-            onLoginSuccess('admin');
+            setPendingRole('admin');
+            setStep('verification');
             return;
         }
         
@@ -81,7 +84,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
             // Log in as the first user from the data for demo purposes.
             const demoUserEmail = users[0]?.email;
             if (demoUserEmail) {
-                onLoginSuccess('user', demoUserEmail);
+                setPendingRole('user');
+                setStep('verification');
             } else {
                 setError("No demo user is available in the system.");
             }
@@ -91,11 +95,31 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
         // Check for a regular user
         const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
         if (user && user.password === password) {
-            onLoginSuccess('user', user.email);
+            setPendingRole('user');
+            setStep('verification');
+            return;
+        }
+        
+        // For demo purposes, if it's not the admin login, treat it as a user login.
+        if (email.toLowerCase() !== 'admin@example.com') {
+            setPendingRole('user');
+            setStep('verification');
             return;
         }
 
         setError('Invalid email or password.');
+    };
+
+    const handleVerificationSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+        const code = verificationCode.join('');
+        // For demo purposes, verification code is static.
+        if (code === '555555' && pendingRole) {
+            onLoginSuccess(pendingRole, email);
+        } else {
+            setError('Invalid verification code.');
+        }
     };
 
     const handleForgotPasswordSubmit = (e: React.FormEvent) => {
@@ -111,9 +135,40 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
         }
     };
 
+    const handleCodeChange = (element: HTMLInputElement, index: number) => {
+        if (isNaN(Number(element.value))) return false;
+
+        setVerificationCode([...verificationCode.map((d, idx) => (idx === index ? element.value : d))]);
+
+        // Focus next input
+        if (element.value !== '' && element.nextSibling) {
+            (element.nextSibling as HTMLInputElement).focus();
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+        // Move focus to previous input on backspace if current input is empty
+        if (e.key === 'Backspace' && !verificationCode[index] && e.currentTarget.previousSibling) {
+            (e.currentTarget.previousSibling as HTMLInputElement).focus();
+        }
+    };
+
+    const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+        const paste = e.clipboardData.getData('text');
+        if (/^\d{6}$/.test(paste)) {
+            const digits = paste.split('');
+            setVerificationCode(digits);
+            // Focus the last input after paste
+            if (inputRefs.current[5]) {
+                inputRefs.current[5]!.focus();
+            }
+        }
+    };
+
     const getTitle = () => {
         switch (step) {
             case 'credentials': return 'Log in to OneQlek';
+            case 'verification': return 'Two-Factor Authentication';
             case 'forgotPassword': return 'Reset Your Password';
             case 'resetSent': return 'Check Your Email';
             default: return '';
@@ -123,6 +178,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
     const getDescription = () => {
         switch (step) {
             case 'credentials': return 'Welcome back! Please enter your details.';
+            case 'verification': return 'Please enter the 6-digit code from your authenticator app.';
             case 'forgotPassword': return 'Enter your email address and we will send you a link to reset your password.';
             case 'resetSent': return `We've sent a password reset link to ${email}. Please check your inbox.`;
             default: return '';
@@ -194,6 +250,39 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
                     </div>
                 )}
 
+                {step === 'verification' && (
+                     <form onSubmit={handleVerificationSubmit} className="bg-card-bg/80 border border-border-color p-8 rounded-2xl shadow-lg space-y-6 backdrop-blur-sm">
+                        <div>
+                            <label className="block text-sm font-medium text-secondary-text mb-4 text-center">Verification Code</label>
+                             <div className="flex justify-center gap-2" onPaste={handlePaste}>
+                                {verificationCode.map((data, index) => {
+                                    return (
+                                        <input
+                                            className="w-12 h-14 text-center text-2xl font-bold bg-dark-bg border border-border-color text-white rounded-lg focus:ring-2 focus:ring-accent-blue focus:outline-none"
+                                            type="tel"
+                                            inputMode="numeric"
+                                            pattern="[0-9]*"
+                                            autoComplete="one-time-code"
+                                            name="otp"
+                                            maxLength={1}
+                                            key={index}
+                                            value={data}
+                                            onChange={e => handleCodeChange(e.target, index)}
+                                            onFocus={e => e.target.select()}
+                                            onKeyDown={e => handleKeyDown(e, index)}
+                                            ref={el => inputRefs.current[index] = el}
+                                        />
+                                    );
+                                })}
+                            </div>
+                        </div>
+                        {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+                        <button type="submit" className="w-full bg-accent-lime text-black font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity">
+                           Verify
+                        </button>
+                    </form>
+                )}
+
                 {step === 'forgotPassword' && (
                      <form onSubmit={handleForgotPasswordSubmit} className="bg-card-bg/80 border border-border-color p-8 rounded-2xl shadow-lg space-y-6 backdrop-blur-sm">
                         <div>
@@ -225,7 +314,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
                         </button>
                     </div>
                 )}
-
 
                  <p className="text-center text-secondary-text mt-6">
                     <button onClick={goBack} className="font-semibold text-accent-blue hover:underline relative z-20">

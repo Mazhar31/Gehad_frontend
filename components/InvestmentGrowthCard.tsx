@@ -12,6 +12,18 @@ const MOCK_CHART_DATA = [
 ];
 
 const InvestmentGrowthCard: React.FC = () => {
+  const { ResponsiveContainer: FallbackResponsiveContainer, AreaChart: FallbackAreaChart, Area: FallbackArea, XAxis: FallbackXAxis, YAxis: FallbackYAxis, Tooltip: FallbackTooltip, CartesianGrid: FallbackCartesianGrid } = (window as any).Recharts || {};
+  
+  // Use imported components first, fallback to window.Recharts if import fails
+  const ChartComponents = {
+    ResponsiveContainer: ResponsiveContainer || FallbackResponsiveContainer,
+    AreaChart: AreaChart || FallbackAreaChart,
+    Area: Area || FallbackArea,
+    XAxis: XAxis || FallbackXAxis,
+    YAxis: YAxis || FallbackYAxis,
+    Tooltip: Tooltip || FallbackTooltip,
+    CartesianGrid: CartesianGrid || FallbackCartesianGrid
+  };
   return (
     <div className="bg-card-bg p-4 sm:p-6 rounded-2xl h-full">
       <div className="flex justify-between items-center mb-4">
@@ -23,21 +35,27 @@ const InvestmentGrowthCard: React.FC = () => {
         </div>
       </div>
       <div className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={MOCK_CHART_DATA} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+        {ChartComponents.ResponsiveContainer && ChartComponents.AreaChart ? (
+          <ChartComponents.ResponsiveContainer width="100%" height="100%">
+            <ChartComponents.AreaChart data={MOCK_CHART_DATA} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
                   <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <XAxis dataKey="name" stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
-              <YAxis stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value/1000}k`} />
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', color: '#f9fafb' }} />
-              <Area type="monotone" dataKey="value" stroke="#3b82f6" fillOpacity={1} fill="url(#colorValue)" />
-            </AreaChart>
-          </ResponsiveContainer>
+              <ChartComponents.XAxis dataKey="name" stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} />
+              <ChartComponents.YAxis stroke="#6b7280" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value/1000}k`} />
+              <ChartComponents.CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <ChartComponents.Tooltip contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', color: '#f9fafb' }} />
+              <ChartComponents.Area type="monotone" dataKey="value" stroke="#3b82f6" fillOpacity={1} fill="url(#colorValue)" />
+            </ChartComponents.AreaChart>
+          </ChartComponents.ResponsiveContainer>
+        ) : (
+            <div className="flex items-center justify-center h-full text-secondary-text">
+                Chart library not available.
+            </div>
+        )}
       </div>
     </div>
   );
