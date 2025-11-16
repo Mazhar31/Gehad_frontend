@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { EnvelopeIcon, KeyIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
+import { authService } from '../../services/auth';
+import SliderVerification from '../SliderVerification.tsx';
 
 const ProjectileLogo: React.FC<{ className?: string }> = ({ className }) => (
     <svg width="32" height="32" viewBox="0 0 32" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
@@ -23,12 +25,14 @@ interface LoginPageProps {
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => {
     const { users } = useData();
-    const [step, setStep] = useState<'credentials' | 'verification' | 'forgotPassword' | 'resetSent'>('credentials');
+    const [step, setStep] = useState<'credentials' | 'slider' | 'verification' | 'forgotPassword' | 'resetSent'>('credentials');
     const [email, setEmail] = useState('admin@example.com');
-    const [password, setPassword] = useState('password123');
+    const [password, setPassword] = useState('admin123');
     const [verificationCode, setVerificationCode] = useState(new Array(6).fill(''));
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const [pendingRole, setPendingRole] = useState<'admin' | 'user' | null>(null);
+    const [isSliderVerified, setIsSliderVerified] = useState(false);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
     useEffect(() => {
@@ -68,57 +72,69 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
         }
     }, []);
 
-    const handleCredentialsSubmit = (e: React.FormEvent) => {
+    const handleCredentialsSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
 
-        // Check for admin user
-        if (email.toLowerCase() === 'admin@example.com' && password === 'password123') {
-            setPendingRole('admin');
-            setStep('verification');
-            return;
-        }
-        
-        // Check for demo user
-        if (email.toLowerCase() === 'user@example.com' && password === 'password123') {
-            // Log in as the first user from the data for demo purposes.
-            const demoUserEmail = users[0]?.email;
-            if (demoUserEmail) {
-                setPendingRole('user');
-                setStep('verification');
-            } else {
-                setError("No demo user is available in the system.");
+        try {
+            // Try admin login first
+            let result = await authService.adminLogin(email, password);
+            let loginType: 'admin' | 'user' = 'admin';
+            
+            // If admin login fails, try user login
+            if (!result.success) {
+                result = await authService.userLogin(email, password);
+                loginType = 'user';
             }
-            return;
-        }
-        
-        // Check for a regular user
-        const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-        if (user && user.password === password) {
-            setPendingRole('user');
-            setStep('verification');
-            return;
-        }
-        
-        // For demo purposes, if it's not the admin login, treat it as a user login.
-        if (email.toLowerCase() !== 'admin@example.com') {
-            setPendingRole('user');
-            setStep('verification');
-            return;
-        }
 
-        setError('Invalid email or password.');
+            if (result.success) {
+                if (result.requires2FA) {
+                    setPendingRole(loginType);
+                    setStep('slider');
+                } else {
+                    setPendingRole(loginType);
+                    setStep('slider');
+                }
+            } else {
+                setError(result.error || 'Invalid email or password');
+            }
+        } catch (err) {
+            console.error('Login error:', err);
+            setError('An unexpected error occurred. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleVerificationSubmit = (e: React.FormEvent) => {
+    const handleVerificationSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
+        
         const code = verificationCode.join('');
-        // For demo purposes, verification code is static.
-        if (code === '555555' && pendingRole) {
-            onLoginSuccess(pendingRole, email);
-        } else {
-            setError('Invalid verification code.');
+        
+        try {
+            if (!pendingRole) {
+                setError('Session expired. Please login again.');
+                setStep('credentials');
+                return;
+            }
+
+            const result = pendingRole === 'admin'
+                ? await authService.adminVerify2FA(code)
+                : await authService.userVerify2FA(code);
+
+            if (result.success) {
+                onLoginSuccess(pendingRole, email);
+            } else {
+                setError(result.error || 'Invalid verification code');
+            }
+        } catch (err) {
+            console.error('2FA verification error:', err);
+            setError('Verification failed. Please try again.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -165,9 +181,26 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
         }
     };
 
+
+    const handleSliderVerified = () => {
+        setIsSliderVerified(true);
+        // Show tick mark for 1.5 seconds before redirecting
+        setTimeout(() => {
+            if (pendingRole) {
+                onLoginSuccess(pendingRole, email);
+            }
+        }, 1500);
+    };
+
+    const handleSliderReset = () => {
+        setIsSliderVerified(false);
+    };
+
+
     const getTitle = () => {
         switch (step) {
             case 'credentials': return 'Log in to OneQlek';
+            case 'slider': return 'Security Verification';
             case 'verification': return 'Two-Factor Authentication';
             case 'forgotPassword': return 'Reset Your Password';
             case 'resetSent': return 'Check Your Email';
@@ -178,6 +211,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
     const getDescription = () => {
         switch (step) {
             case 'credentials': return 'Welcome back! Please enter your details.';
+            case 'slider': return 'Please complete the slider verification to continue.';
             case 'verification': return 'Please enter the 6-digit code from your authenticator app.';
             case 'forgotPassword': return 'Enter your email address and we will send you a link to reset your password.';
             case 'resetSent': return `We've sent a password reset link to ${email}. Please check your inbox.`;
@@ -212,6 +246,30 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
                     </p>
                 </div>
                 
+                {step === 'slider' && (
+                    <div className="bg-card-bg/80 border border-border-color p-8 rounded-2xl shadow-lg space-y-6">
+                        <div className="text-center mb-6">
+                            <div className="w-16 h-16 bg-accent-blue/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg className="w-8 h-8 text-accent-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                            </div>
+                            <p className="text-secondary-text">Complete the verification to proceed</p>
+                        </div>
+                        <SliderVerification 
+                            onVerified={handleSliderVerified}
+                            onReset={handleSliderReset}
+                        />
+                        <button 
+                            type="button" 
+                            onClick={() => setStep('credentials')} 
+                            className="w-full text-secondary-text hover:text-white text-sm mt-4"
+                        >
+                            ← Back to login
+                        </button>
+                    </div>
+                )}
+                
                 {step === 'credentials' && (
                     <div className="bg-card-bg/80 border border-border-color p-8 rounded-2xl shadow-lg backdrop-blur-sm">
                         <form onSubmit={handleCredentialsSubmit} className="space-y-6">
@@ -243,8 +301,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
                                 />
                             </div>
                             {error && <p className="text-red-400 text-sm text-center">{error}</p>}
-                            <button type="submit" className="w-full bg-accent-lime text-black font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity">
-                                Log In
+                            <button 
+                                type="submit" 
+                                disabled={loading}
+                                className="w-full bg-accent-lime text-black font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {loading ? 'Logging in...' : 'Log In'}
                             </button>
                         </form>
                     </div>
@@ -277,8 +339,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
                             </div>
                         </div>
                         {error && <p className="text-red-400 text-sm text-center">{error}</p>}
-                        <button type="submit" className="w-full bg-accent-lime text-black font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity">
-                           Verify
+                        <button 
+                            type="submit" 
+                            disabled={loading}
+                            className="w-full bg-accent-lime text-black font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? 'Verifying...' : 'Verify'}
                         </button>
                     </form>
                 )}
@@ -298,8 +364,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
                             />
                         </div>
                         {error && <p className="text-red-400 text-sm text-center">{error}</p>}
-                        <button type="submit" className="w-full bg-accent-lime text-black font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity">
-                           Send Reset Link
+                        <button 
+                            type="submit" 
+                            disabled={loading}
+                            className="w-full bg-accent-lime text-black font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? 'Sending...' : 'Send Reset Link'}
                         </button>
                     </form>
                 )}

@@ -1,11 +1,8 @@
 import React, { useState, useMemo, useRef } from 'react';
-// FIX: Added file extension to import to resolve module error.
 import { Client, Group } from '../../types.ts';
-// FIX: Added file extension to import to resolve module error.
 import ClientCard from '../ClientCard.tsx';
-// FIX: Added file extension to import to resolve module error.
 import Modal from '../Modal.tsx';
-// FIX: Added file extension to import to resolve module error.
+import ConfirmDialog from '../ConfirmDialog.tsx';
 import { PlusIcon, EnvelopeIcon, PhoneIcon, MapPinIcon, MagnifyingGlassIcon, FolderIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
 
@@ -15,6 +12,7 @@ const ClientsPage: React.FC = () => {
     const [isDetailsModalOpen, setDetailsModalOpen] = useState(false);
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; client: Client | null }>({ isOpen: false, client: null });
 
     if (!clients || !projects || !paymentPlans || !groups || !handleSaveClient || !handleDeleteClient) {
         return <div>Loading...</div>
@@ -41,8 +39,15 @@ const ClientsPage: React.FC = () => {
         handleCloseModals();
     };
 
-    const onDelete = (clientId: string) => {
-        handleDeleteClient(clientId);
+    const onDelete = (client: Client) => {
+        setDeleteConfirm({ isOpen: true, client });
+    };
+
+    const handleConfirmDelete = async () => {
+        if (deleteConfirm.client) {
+            await handleDeleteClient(deleteConfirm.client.id);
+            setDeleteConfirm({ isOpen: false, client: null });
+        }
     };
 
     const filteredClients = useMemo(() => {
@@ -85,7 +90,7 @@ const ClientsPage: React.FC = () => {
                         groupName={getGroupName(client.groupId)}
                         onViewDetails={() => handleOpenDetailsModal(client)}
                         onEdit={() => handleOpenEditModal(client)}
-                        onDelete={() => onDelete(client.id)}
+                        onDelete={() => onDelete(client)}
                     />
                 ))}
             </div>
@@ -111,6 +116,16 @@ const ClientsPage: React.FC = () => {
                     />
                 </Modal>
             )}
+            
+            <ConfirmDialog
+                isOpen={deleteConfirm.isOpen}
+                title="Delete Client"
+                message={`Are you sure you want to delete "${deleteConfirm.client?.company}"? This will also delete all related projects, users, and invoices. This action cannot be undone.`}
+                confirmText="Delete Client"
+                onConfirm={handleConfirmDelete}
+                onCancel={() => setDeleteConfirm({ isOpen: false, client: null })}
+                type="danger"
+            />
         </div>
     );
 };
