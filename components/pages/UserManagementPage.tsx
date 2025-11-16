@@ -26,9 +26,17 @@ const UserManagementPage: React.FC = () => {
         setIsModalOpen(false);
     };
 
-    const onSave = (userData: User) => {
-        handleSaveUser(userData);
-        handleCloseModal();
+    const onSave = async (userData: User & { accountType?: 'admin' | 'user' }) => {
+        try {
+            await handleSaveUser(userData);
+            if (userData.accountType === 'admin' && !userData.id) {
+                // Show success message for admin account creation
+                alert('Admin account created successfully! The admin can now log in using the admin login.');
+            }
+            handleCloseModal();
+        } catch (error) {
+            console.error('Error saving user:', error);
+        }
     };
 
     const onDelete = (userId: string) => {
@@ -153,6 +161,7 @@ const UserForm: React.FC<{
         role: user?.role || 'normal',
         dashboardAccess: user?.dashboardAccess || 'view-only',
         projectIds: user?.projectIds || [] as string[],
+        accountType: 'user' as 'admin' | 'user',
     });
     const [isProjectDropdownOpen, setProjectDropdownOpen] = useState(false);
     const projectDropdownRef = useRef<HTMLDivElement>(null);
@@ -176,6 +185,13 @@ const UserForm: React.FC<{
         const { name, value } = e.target;
         if (name === 'clientId') {
             setFormData(prev => ({ ...prev, [name]: value, projectIds: [] }));
+        } else if (name === 'accountType') {
+            // When switching to admin, clear client-related fields
+            if (value === 'admin') {
+                setFormData(prev => ({ ...prev, [name]: value, clientId: '', projectIds: [], role: 'superuser' }));
+            } else {
+                setFormData(prev => ({ ...prev, [name]: value, role: 'normal' }));
+            }
         } else {
             setFormData(prev => ({ ...prev, [name]: value }));
         }
@@ -194,17 +210,28 @@ const UserForm: React.FC<{
         e.preventDefault();
         // In a real app, passwords would be hashed.
         // This now correctly passes the entire form data, including the password, to the save handler.
-        onSave({ 
+        const userData = { 
             ...user, // Spread existing user data first to preserve fields not in the form (like id, avatarUrl)
             ...formData, // Spread form data to apply updates
             // Ensure types are correct
             role: formData.role as 'superuser' | 'normal',
             dashboardAccess: formData.dashboardAccess as 'view-only' | 'view-and-edit',
-        } as User);
+            accountType: formData.accountType,
+        } as User & { accountType: 'admin' | 'user' };
+        onSave(userData);
     };
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4 text-white">
+            {!user && (
+                <div>
+                    <label className="block text-sm font-medium text-secondary-text mb-1">Account Type</label>
+                    <select name="accountType" value={formData.accountType} onChange={handleChange} className="w-full bg-dark-bg border border-border-color rounded-md p-2" required>
+                        <option value="user">User Account (Client Dashboard)</option>
+                        <option value="admin">Admin Account (Admin Panel)</option>
+                    </select>
+                </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label className="block text-sm font-medium text-secondary-text mb-1">Full Name</label>
@@ -219,46 +246,50 @@ const UserForm: React.FC<{
                 <label className="block text-sm font-medium text-secondary-text mb-1">Email Address</label>
                 <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full bg-dark-bg border border-border-color rounded-md p-2" required />
             </div>
-            <div>
-                <label className="block text-sm font-medium text-secondary-text mb-1">Assign to Client</label>
-                <select name="clientId" value={formData.clientId} onChange={handleChange} className="w-full bg-dark-bg border border-border-color rounded-md p-2" required>
-                    <option value="">Select a client</option>
-                    {clients.map(c => <option key={c.id} value={c.id}>{c.company}</option>)}
-                </select>
-            </div>
-            <div>
-                <label className="block text-sm font-medium text-secondary-text mb-1">Assign Projects</label>
-                 <div className="relative" ref={projectDropdownRef}>
-                    <button 
-                        type="button"
-                        onClick={() => setProjectDropdownOpen(!isProjectDropdownOpen)}
-                        disabled={!formData.clientId}
-                        className="w-full bg-dark-bg border border-border-color rounded-md p-2 text-left flex justify-between items-center disabled:bg-gray-700 disabled:cursor-not-allowed"
-                    >
-                        <span className={formData.projectIds.length === 0 ? 'text-secondary-text' : ''}>
-                            {formData.projectIds.length > 0 ? `${formData.projectIds.length} project(s) selected` : 'Select projects'}
-                        </span>
-                        <svg className={`w-4 h-4 text-secondary-text transition-transform ${isProjectDropdownOpen ? 'transform rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </button>
-                    {isProjectDropdownOpen && (
-                        <div className="absolute z-10 w-full mt-1 bg-sidebar-bg border border-border-color rounded-md shadow-lg max-h-60 overflow-y-auto">
-                            {availableProjects.length > 0 ? availableProjects.map(project => (
-                                <label key={project.id} className="flex items-center px-3 py-2 text-sm hover:bg-white/10 cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={formData.projectIds.includes(project.id)}
-                                        onChange={() => handleProjectSelect(project.id)}
-                                        className="h-4 w-4 rounded border-gray-300 text-accent-blue focus:ring-accent-blue bg-dark-bg"
-                                    />
-                                    <span className="ml-3">{project.name}</span>
-                                </label>
-                            )) : (
-                                <div className="px-3 py-2 text-sm text-secondary-text">No projects for this client.</div>
+            {(formData.accountType === 'user' || user) && (
+                <>
+                    <div>
+                        <label className="block text-sm font-medium text-secondary-text mb-1">Assign to Client</label>
+                        <select name="clientId" value={formData.clientId} onChange={handleChange} className="w-full bg-dark-bg border border-border-color rounded-md p-2" required={formData.accountType === 'user'}>
+                            <option value="">Select a client</option>
+                            {clients.map(c => <option key={c.id} value={c.id}>{c.company}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-secondary-text mb-1">Assign Projects</label>
+                         <div className="relative" ref={projectDropdownRef}>
+                            <button 
+                                type="button"
+                                onClick={() => setProjectDropdownOpen(!isProjectDropdownOpen)}
+                                disabled={!formData.clientId}
+                                className="w-full bg-dark-bg border border-border-color rounded-md p-2 text-left flex justify-between items-center disabled:bg-gray-700 disabled:cursor-not-allowed"
+                            >
+                                <span className={formData.projectIds.length === 0 ? 'text-secondary-text' : ''}>
+                                    {formData.projectIds.length > 0 ? `${formData.projectIds.length} project(s) selected` : 'Select projects'}
+                                </span>
+                                <svg className={`w-4 h-4 text-secondary-text transition-transform ${isProjectDropdownOpen ? 'transform rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+                            {isProjectDropdownOpen && (
+                                <div className="absolute z-10 w-full mt-1 bg-sidebar-bg border border-border-color rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                    {availableProjects.length > 0 ? availableProjects.map(project => (
+                                        <label key={project.id} className="flex items-center px-3 py-2 text-sm hover:bg-white/10 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.projectIds.includes(project.id)}
+                                                onChange={() => handleProjectSelect(project.id)}
+                                                className="h-4 w-4 rounded border-gray-300 text-accent-blue focus:ring-accent-blue bg-dark-bg"
+                                            />
+                                            <span className="ml-3">{project.name}</span>
+                                        </label>
+                                    )) : (
+                                        <div className="px-3 py-2 text-sm text-secondary-text">No projects for this client.</div>
+                                    )}
+                                </div>
                             )}
                         </div>
-                    )}
-                </div>
-            </div>
+                    </div>
+                </>
+            )}
             <div>
                 <label className="block text-sm font-medium text-secondary-text mb-1">{user ? 'Set New Password' : 'Password'}</label>
                 <input type="password" name="password" value={formData.password} onChange={handleChange} className="w-full bg-dark-bg border border-border-color rounded-md p-2" placeholder={user ? 'Leave blank to keep current' : '••••••••'} />

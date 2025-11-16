@@ -1,9 +1,10 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-// FIX: Added file extension to App import to resolve module error.
+import './index.css';
 import App from './App.tsx';
 import { DataProvider } from './components/DataContext.tsx';
+import ErrorBoundary from './components/ErrorBoundary.tsx';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -13,8 +14,10 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <DataProvider>
-      <App />
-    </DataProvider>
+    <ErrorBoundary>
+      <DataProvider>
+        <App />
+      </DataProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );

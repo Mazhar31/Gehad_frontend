@@ -32,6 +32,7 @@ import {
     ArrowTopRightOnSquareIcon
 } from './icons.tsx';
 import { useData } from './DataContext.tsx';
+import { contactAPI, portfolioAPI } from '../services/api';
 
 const Logo: React.FC = () => (
     <div className="flex items-center space-x-2">
@@ -202,24 +203,64 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
     const { handleSaveContactMessage, portfolioCases } = useData();
     const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
     const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitError, setSubmitError] = useState<string | null>(null);
+    const [publicPortfolio, setPublicPortfolio] = useState(portfolioCases);
+
+    // Load public portfolio on component mount
+    React.useEffect(() => {
+        const loadPublicPortfolio = async () => {
+            try {
+                const publicCases = await portfolioAPI.getPublic();
+                setPublicPortfolio(publicCases);
+            } catch (error) {
+                console.error('Failed to load public portfolio:', error);
+                // Keep using local data as fallback
+            }
+        };
+        
+        loadPublicPortfolio();
+    }, [portfolioCases]);
 
     const handleContactChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setContactForm(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleContactSubmit = (e: React.FormEvent) => {
+    const handleContactSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // This now calls the central handler to store the message and simulate the email.
-        handleSaveContactMessage(contactForm);
+        setIsSubmitting(true);
+        setSubmitError(null);
         
-        setIsFormSubmitted(true);
-        setContactForm({ name: '', email: '', message: '' });
+        try {
+            // Try to submit via API first
+            await contactAPI.submit(contactForm);
+            setIsFormSubmitted(true);
+            setContactForm({ name: '', email: '', message: '' });
+        } catch (error) {
+            console.error('Failed to submit contact form via API:', error);
+            setSubmitError('Failed to send message via API, saving locally...');
+            
+            // Fallback to local storage
+            try {
+                await handleSaveContactMessage(contactForm);
+                setIsFormSubmitted(true);
+                setContactForm({ name: '', email: '', message: '' });
+                setSubmitError(null);
+            } catch (localError) {
+                console.error('Failed to save contact form locally:', localError);
+                setSubmitError('Failed to send message. Please try again.');
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
 
         // Hide the success message after a few seconds
-        setTimeout(() => {
-            setIsFormSubmitted(false);
-        }, 5000);
+        if (isFormSubmitted) {
+            setTimeout(() => {
+                setIsFormSubmitted(false);
+            }, 5000);
+        }
     };
 
     return (
@@ -301,7 +342,7 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                             </p>
                         </div>
                         <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {portfolioCases.map((caseItem, index) => (
+                            {publicPortfolio.map((caseItem, index) => (
                                 <div key={index} className="bg-card-bg rounded-2xl overflow-hidden group transition-all duration-300 hover:shadow-xl hover:shadow-blue-900/20 border border-border-color">
                                     <div className="aspect-video overflow-hidden">
                                         <img src={caseItem.imageUrl} alt={caseItem.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -415,7 +456,13 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                                             <p>Thank you! Your message has been sent successfully.</p>
                                         </div>
                                     ) : (
-                                        <form onSubmit={handleContactSubmit} className="space-y-4">
+                                        <>
+                                            {submitError && (
+                                                <div className="bg-yellow-900/20 border border-yellow-500/50 text-yellow-400 px-4 py-3 rounded-lg mb-4">
+                                                    {submitError}
+                                                </div>
+                                            )}
+                                            <form onSubmit={handleContactSubmit} className="space-y-4">
                                             <div>
                                                 <label htmlFor="name" className="block text-sm font-medium text-secondary-text mb-2">Your Name</label>
                                                 <input type="text" id="name" name="name" value={contactForm.name} onChange={handleContactChange} required className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none" />
@@ -428,10 +475,15 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                                                 <label htmlFor="message" className="block text-sm font-medium text-secondary-text mb-2">Message</label>
                                                 <textarea id="message" name="message" rows={4} value={contactForm.message} onChange={handleContactChange} required className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none"></textarea>
                                             </div>
-                                            <button type="submit" className="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">
-                                                Send Message
+                                            <button 
+                                                type="submit" 
+                                                disabled={isSubmitting}
+                                                className="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {isSubmitting ? 'Sending...' : 'Send Message'}
                                             </button>
                                         </form>
+                                        </>
                                     )}
                                 </div>
                                  {/* Map */}

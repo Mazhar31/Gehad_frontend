@@ -1,13 +1,10 @@
 import React from 'react';
-// FIX: Added file extension to import to resolve module error.
 import KpiCard from '../StockCard.tsx';
-// FIX: Added file extension to import to resolve module error.
 import DetailsCard from '../DetailsCard.tsx';
-// FIX: Added file extension to import to resolve module error.
 import RecentProjects from '../RecentProjects.tsx';
 import { useData } from '../DataContext.tsx';
-// FIX: Added file extension to import to resolve module error.
 import { FolderIcon, UsersIcon, DocumentTextIcon, BanknotesIcon } from '../icons.tsx';
+import { useDashboard } from '../../hooks/useDashboard';
 
 interface DashboardPageProps {
     onNavigate: (page: string) => void;
@@ -15,21 +12,41 @@ interface DashboardPageProps {
 
 const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
     const { projects, clients, invoices } = useData();
+    const { stats, recentProjects, loading: dashboardLoading, error: dashboardError } = useDashboard();
 
     if (!projects || !clients || !invoices) {
-        return <div>Loading...</div>;
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-lime"></div>
+            </div>
+        );
     }
 
-    const totalProjects = projects.length;
-    const totalClients = clients.length;
-    const pendingInvoices = invoices.filter(inv => inv.status === 'Pending').length;
-    const totalRevenue = invoices
+    // Use API stats if available, otherwise calculate from local data
+    const totalProjects = stats?.total_projects ?? projects.length;
+    const totalClients = stats?.total_clients ?? clients.length;
+    const activeProjects = stats?.active_projects ?? projects.filter(p => p.status === 'In Progress').length;
+    const totalRevenue = stats?.total_revenue ?? invoices
         .filter(inv => inv.status === 'Paid')
-        // FIX: Calculated total revenue by summing up items from each invoice, as 'amount' property does not exist on Invoice type.
         .reduce((sum, inv) => sum + inv.items.reduce((itemSum, item) => itemSum + item.price * item.quantity, 0), 0);
+    
+    // Use API recent projects if available, otherwise use local data
+    const displayProjects = recentProjects.length > 0 ? recentProjects.slice(0, 5) : projects.slice(0, 5);
 
     return (
         <div className="space-y-6">
+            {/* Error Message */}
+            {dashboardError && (
+                <div className="bg-yellow-900/20 border border-yellow-500/50 text-yellow-400 px-4 py-3 rounded-lg">
+                    <div className="flex justify-between items-center">
+                        <span>Using local data: {dashboardError}</span>
+                        {dashboardLoading && (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-yellow-400"></div>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* KPI Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <KpiCard
@@ -47,11 +64,11 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
                     changeType="positive"
                 />
                 <KpiCard
-                    title="Pending Invoices"
-                    value={pendingInvoices.toString()}
+                    title="Active Projects"
+                    value={activeProjects.toString()}
                     icon={DocumentTextIcon}
                     change="+1 this week"
-                    changeType="negative"
+                    changeType="positive"
                 />
                 <KpiCard
                     title="Total Revenue"
@@ -65,7 +82,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
-                    <RecentProjects projects={projects.slice(0, 5)} clients={clients} onViewAll={() => onNavigate('projects')} />
+                    <RecentProjects projects={displayProjects} clients={clients} onViewAll={() => onNavigate('projects')} />
                 </div>
                 <div className="lg:col-span-1">
                     <DetailsCard clients={clients.slice(0, 4)} onViewAll={() => onNavigate('clients')} />

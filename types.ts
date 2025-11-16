@@ -58,10 +58,14 @@ export interface Invoice {
 export interface PaymentPlan {
   id: string;
   name: string;
-  price: number;
+  price: number | string;
   currency: string;
   features: string[];
-  isPopular: boolean;
+  isPopular?: boolean;
+  is_popular?: boolean;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Fund {
