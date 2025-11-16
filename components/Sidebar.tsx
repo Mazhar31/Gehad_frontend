@@ -33,20 +33,21 @@ const NavItem: React.FC<{
         e.preventDefault();
         onClick();
       }}
-      className={`flex items-center p-3 rounded-lg transition-colors duration-200 overflow-hidden ${
+      className={`flex items-center p-2 rounded-lg transition-colors duration-200 overflow-hidden ${
         isActive
           ? 'bg-accent-blue text-white shadow-lg shadow-accent-blue/20'
           : 'text-secondary-text hover:bg-white/10 hover:text-white'
       } ${isCollapsed ? 'justify-center' : ''}`}
     >
       <Icon className="w-6 h-6 flex-shrink-0" />
-      <span className={`font-semibold whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0' : 'ml-4 opacity-100'}`}>{label}</span>
+      <span className={`text-sm font-medium whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0' : 'ml-4 opacity-100'}`}>{label}</span>
     </a>
   </li>
 );
 
 const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onClose, onLogout, adminProfile, isCollapsed, onToggleCollapse }) => {
     const navItems = [
+        { icon: HomeIcon, label: 'Dashboard', page: 'dashboard' },
         { icon: FolderIcon, label: 'Projects', page: 'projects' },
         { icon: UsersIcon, label: 'Clients', page: 'clients' },
         { icon: UserGroupIcon, label: 'User Management', page: 'user-management' },
@@ -72,21 +73,24 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onCl
                     isOpen ? 'translate-x-0' : '-translate-x-full'
                 } ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}`}
             >
-                <div className={`flex items-center mb-8 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+                <div className={`flex items-center mb-6 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
                     <a
                       href="#"
                       onClick={(e) => {
                         e.preventDefault();
                         onNavigate('dashboard');
                       }}
-                      className={`flex items-center p-3 rounded-lg transition-colors duration-200 overflow-hidden ${
-                        currentPage === 'dashboard'
-                          ? 'bg-accent-blue text-white shadow-lg shadow-accent-blue/20'
-                          : 'text-primary-text hover:bg-white/10 hover:text-white'
-                      } ${isCollapsed ? 'justify-center' : ''}`}
+                      className={`flex items-center p-2 transition-colors duration-200 overflow-hidden text-primary-text hover:text-white ${isCollapsed ? 'justify-center' : ''}`}
                     >
-                      <HomeIcon className="w-6 h-6 flex-shrink-0" />
-                      <span className={`text-xl font-bold whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0' : 'ml-4 opacity-100'}`}>OneQlek</span>
+                      <div className="flex items-center">
+                          <svg className="w-8 h-8 text-white flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                            <path d="M2 7L12 12M12 22V12M22 7L12 12M16 4.5L6 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                          </svg>
+                          <span className={`text-xl font-bold whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0' : 'ml-3 opacity-100'}`}>
+                              OneQlek
+                          </span>
+                      </div>
                     </a>
                     <button onClick={onClose} className="lg:hidden p-1 text-secondary-text hover:text-white">
                         <XMarkIcon className="w-6 h-6" />
@@ -94,7 +98,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onCl
                 </div>
                 
                 <nav className="flex-1">
-                    <ul className="space-y-2">
+                    <ul className="space-y-1">
                         {navItems.map(item => (
                             <NavItem
                                 key={item.page}

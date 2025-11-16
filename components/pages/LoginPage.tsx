@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { EnvelopeIcon, KeyIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
 
@@ -23,13 +23,10 @@ interface LoginPageProps {
 
 const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => {
     const { users } = useData();
-    const [step, setStep] = useState<'credentials' | 'verification' | 'forgotPassword' | 'resetSent'>('credentials');
-    const [email, setEmail] = useState('admin@example.com');
-    const [password, setPassword] = useState('password123');
-    const [verificationCode, setVerificationCode] = useState(new Array(6).fill(''));
+    const [step, setStep] = useState<'credentials' | 'forgotPassword' | 'resetSent'>('credentials');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [pendingRole, setPendingRole] = useState<'admin' | 'user' | null>(null);
-    const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
     const handleCredentialsSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -37,31 +34,30 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
 
         // Check for admin user
         if (email.toLowerCase() === 'admin@example.com' && password === 'password123') {
-            setPendingRole('admin');
-            setStep('verification');
+            onLoginSuccess('admin');
             return;
         }
         
-        // For demo purposes, if it's not the admin login, treat it as a user login.
-        if (email.toLowerCase() !== 'admin@example.com') {
-            setPendingRole('user');
-            setStep('verification');
+        // Check for demo user
+        if (email.toLowerCase() === 'user@example.com' && password === 'password123') {
+            // Log in as the first user from the data for demo purposes.
+            const demoUserEmail = users[0]?.email;
+            if (demoUserEmail) {
+                onLoginSuccess('user', demoUserEmail);
+            } else {
+                setError("No demo user is available in the system.");
+            }
+            return;
+        }
+        
+        // Check for a regular user
+        const user = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+        if (user && user.password === password) {
+            onLoginSuccess('user', user.email);
             return;
         }
 
         setError('Invalid email or password.');
-    };
-
-    const handleVerificationSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setError('');
-        const code = verificationCode.join('');
-        // For demo purposes, verification code is static.
-        if (code === '555555' && pendingRole) {
-            onLoginSuccess(pendingRole, email);
-        } else {
-            setError('Invalid verification code.');
-        }
     };
 
     const handleForgotPasswordSubmit = (e: React.FormEvent) => {
@@ -77,41 +73,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
         }
     };
 
-    const handleCodeChange = (element: HTMLInputElement, index: number) => {
-        if (isNaN(Number(element.value))) return false;
-
-        setVerificationCode([...verificationCode.map((d, idx) => (idx === index ? element.value : d))]);
-
-        // Focus next input
-        if (element.value !== '' && element.nextSibling) {
-            (element.nextSibling as HTMLInputElement).focus();
-        }
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
-        // Move focus to previous input on backspace if current input is empty
-        if (e.key === 'Backspace' && !verificationCode[index] && e.currentTarget.previousSibling) {
-            (e.currentTarget.previousSibling as HTMLInputElement).focus();
-        }
-    };
-
-    const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
-        const paste = e.clipboardData.getData('text');
-        if (/^\d{6}$/.test(paste)) {
-            const digits = paste.split('');
-            setVerificationCode(digits);
-            // Focus the last input after paste
-            if (inputRefs.current[5]) {
-                inputRefs.current[5]!.focus();
-            }
-        }
-    };
-
-
     const getTitle = () => {
         switch (step) {
             case 'credentials': return 'Log in to OneQlek';
-            case 'verification': return 'Two-Factor Authentication';
             case 'forgotPassword': return 'Reset Your Password';
             case 'resetSent': return 'Check Your Email';
             default: return '';
@@ -121,7 +85,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
     const getDescription = () => {
         switch (step) {
             case 'credentials': return 'Welcome back! Please enter your details.';
-            case 'verification': return 'Please enter the 6-digit code from your authenticator app.';
             case 'forgotPassword': return 'Enter your email address and we will send you a link to reset your password.';
             case 'resetSent': return `We've sent a password reset link to ${email}. Please check your inbox.`;
             default: return '';
@@ -153,72 +116,46 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
                 </div>
                 
                 {step === 'credentials' && (
-                    <form onSubmit={handleCredentialsSubmit} className="bg-card-bg/80 border border-border-color p-8 rounded-2xl shadow-lg space-y-6">
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-secondary-text mb-2">Email</label>
-                            <input 
-                                type="email" 
-                                id="email" 
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                                className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none"
-                                placeholder="you@example.com"
-                            />
-                        </div>
-                        <div>
-                            <div className="flex justify-between items-center mb-2">
-                                <label htmlFor="password" className="block text-sm font-medium text-secondary-text">Password</label>
-                                <button type="button" onClick={() => setStep('forgotPassword')} className="text-sm text-accent-blue hover:underline">Forgot password?</button>
+                    <div className="bg-card-bg/80 border border-border-color p-8 rounded-2xl shadow-lg">
+                        <form onSubmit={handleCredentialsSubmit} className="space-y-6">
+                            <div>
+                                <label htmlFor="email" className="block text-sm font-medium text-secondary-text mb-2">Email</label>
+                                <input 
+                                    type="email" 
+                                    id="email" 
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    required
+                                    className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none"
+                                    placeholder="you@example.com"
+                                />
                             </div>
-                            <input 
-                                type="password" 
-                                id="password" 
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none"
-                                placeholder="••••••••"
-                            />
-                        </div>
-                        {error && <p className="text-red-400 text-sm text-center">{error}</p>}
-                        <button type="submit" className="w-full bg-accent-lime text-black font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity">
-                            Log In
-                        </button>
-                    </form>
-                )}
-
-                {step === 'verification' && (
-                     <form onSubmit={handleVerificationSubmit} className="bg-card-bg/80 border border-border-color p-8 rounded-2xl shadow-lg space-y-6">
-                        <div>
-                            <label className="block text-sm font-medium text-secondary-text mb-4 text-center">Verification Code</label>
-                             <div className="flex justify-center gap-2" onPaste={handlePaste}>
-                                {verificationCode.map((data, index) => {
-                                    return (
-                                        <input
-                                            className="w-12 h-14 text-center text-2xl font-bold bg-dark-bg border border-border-color text-white rounded-lg focus:ring-2 focus:ring-accent-blue focus:outline-none"
-                                            type="tel"
-                                            inputMode="numeric"
-                                            pattern="[0-9]*"
-                                            autoComplete="one-time-code"
-                                            name="otp"
-                                            maxLength={1}
-                                            key={index}
-                                            value={data}
-                                            onChange={e => handleCodeChange(e.target, index)}
-                                            onFocus={e => e.target.select()}
-                                            onKeyDown={e => handleKeyDown(e, index)}
-                                            ref={el => inputRefs.current[index] = el}
-                                        />
-                                    );
-                                })}
+                            <div>
+                                <div className="flex justify-between items-center mb-2">
+                                    <label htmlFor="password" className="block text-sm font-medium text-secondary-text">Password</label>
+                                    <button type="button" onClick={() => setStep('forgotPassword')} className="text-sm text-accent-blue hover:underline">Forgot password?</button>
+                                </div>
+                                <input 
+                                    type="password" 
+                                    id="password" 
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    required
+                                    className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none"
+                                    placeholder="••••••••"
+                                />
                             </div>
+                            {error && <p className="text-red-400 text-sm text-center">{error}</p>}
+                            <button type="submit" className="w-full bg-accent-lime text-black font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity">
+                                Log In
+                            </button>
+                        </form>
+                        <div className="text-center text-secondary-text text-sm mt-6 pt-6 border-t border-border-color space-y-2">
+                            <h4 className="font-semibold text-primary-text mb-2">Demo Credentials</h4>
+                            <p><strong>Admin:</strong> <code className="bg-dark-bg text-accent-lime px-1 py-0.5 rounded">admin@example.com</code> / <code className="bg-dark-bg text-accent-lime px-1 py-0.5 rounded">password123</code></p>
+                            <p><strong>User:</strong> <code className="bg-dark-bg text-accent-lime px-1 py-0.5 rounded">user@example.com</code> / <code className="bg-dark-bg text-accent-lime px-1 py-0.5 rounded">password123</code></p>
                         </div>
-                        {error && <p className="text-red-400 text-sm text-center">{error}</p>}
-                        <button type="submit" className="w-full bg-accent-lime text-black font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity">
-                           Verify
-                        </button>
-                    </form>
+                    </div>
                 )}
 
                 {step === 'forgotPassword' && (
