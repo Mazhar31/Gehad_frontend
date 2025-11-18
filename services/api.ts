@@ -386,24 +386,85 @@ export const userAPI = {
 // Invoice APIs
 export const invoiceAPI = {
   getAll: async () => {
-    const response = await apiCall<{ success: boolean; data: Invoice[] }>('/admin/invoices');
-    return response.data || [];
+    const response = await apiCall<{ success: boolean; data: any[] }>('/admin/invoices');
+    // Transform backend snake_case to frontend camelCase
+    const transformedData = (response.data || []).map((invoice: any) => ({
+      id: invoice.id,
+      invoiceNumber: invoice.invoice_number,
+      clientId: invoice.client_id,
+      projectId: invoice.project_id,
+      issueDate: invoice.issue_date,
+      dueDate: invoice.due_date,
+      status: invoice.status,
+      type: invoice.type,
+      currency: invoice.currency,
+      items: invoice.items || []
+    }));
+    return transformedData;
   },
 
   create: async (invoice: Omit<Invoice, 'id'>) => {
-    const response = await apiCall<{ success: boolean; data: Invoice }>('/admin/invoices', {
+    // Transform frontend field names to backend field names
+    const backendInvoice = {
+      client_id: invoice.clientId,
+      project_id: invoice.projectId,
+      issue_date: invoice.issueDate,
+      due_date: invoice.dueDate,
+      status: invoice.status,
+      type: invoice.type,
+      currency: invoice.currency,
+      items: invoice.items
+    };
+    const response = await apiCall<{ success: boolean; data: any }>('/admin/invoices', {
       method: 'POST',
-      body: JSON.stringify(invoice),
+      body: JSON.stringify(backendInvoice),
     });
-    return response.data;
+    // Transform backend response to frontend format
+    const invoiceData = response.data;
+    return {
+      id: invoiceData.id,
+      invoiceNumber: invoiceData.invoice_number,
+      clientId: invoiceData.client_id,
+      projectId: invoiceData.project_id,
+      issueDate: invoiceData.issue_date,
+      dueDate: invoiceData.due_date,
+      status: invoiceData.status,
+      type: invoiceData.type,
+      currency: invoiceData.currency,
+      items: invoiceData.items || []
+    };
   },
 
   update: async (id: string, invoice: Partial<Invoice>) => {
-    const response = await apiCall<{ success: boolean; data: Invoice }>(`/admin/invoices/${id}`, {
+    // Transform frontend field names to backend field names
+    const backendInvoice: any = {};
+    if (invoice.clientId) backendInvoice.client_id = invoice.clientId;
+    if (invoice.projectId) backendInvoice.project_id = invoice.projectId;
+    if (invoice.issueDate) backendInvoice.issue_date = invoice.issueDate;
+    if (invoice.dueDate) backendInvoice.due_date = invoice.dueDate;
+    if (invoice.status) backendInvoice.status = invoice.status;
+    if (invoice.type) backendInvoice.type = invoice.type;
+    if (invoice.currency) backendInvoice.currency = invoice.currency;
+    if (invoice.items) backendInvoice.items = invoice.items;
+    
+    const response = await apiCall<{ success: boolean; data: any }>(`/admin/invoices/${id}`, {
       method: 'PUT',
-      body: JSON.stringify(invoice),
+      body: JSON.stringify(backendInvoice),
     });
-    return response.data;
+    // Transform backend response to frontend format
+    const updatedInvoice = response.data;
+    return {
+      id: updatedInvoice.id,
+      invoiceNumber: updatedInvoice.invoice_number,
+      clientId: updatedInvoice.client_id,
+      projectId: updatedInvoice.project_id,
+      issueDate: updatedInvoice.issue_date,
+      dueDate: updatedInvoice.due_date,
+      status: updatedInvoice.status,
+      type: updatedInvoice.type,
+      currency: updatedInvoice.currency,
+      items: updatedInvoice.items || []
+    };
   },
 
   delete: async (id: string) => {
