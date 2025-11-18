@@ -148,9 +148,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     // Auto-generate and reconcile subscription invoices whenever projects or plans change
     useEffect(() => {
-        setInvoices(prevInvoices => {
-            const manualInvoices = prevInvoices.filter(i => i.type === 'manual');
+        const generateAndSaveSubscriptionInvoices = async () => {
+            const manualInvoices = invoices.filter(i => i.type === 'manual');
+            const existingSubInvoices = invoices.filter(i => i.type === 'subscription');
             const generatedSubInvoices: Invoice[] = [];
+            const newInvoicesToSave: Invoice[] = [];
             const today = new Date();
 
             const activeProjects = projects.filter(p => p.planId && p.startDate);
@@ -164,14 +166,15 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 // Generate invoices for all billing periods that have already started
                 while (cursorDate < today) {
                     const issueDate = new Date(cursorDate);
+                    const invoiceId = `inv-${project.id}-${issueDate.toISOString().slice(0, 10)}`;
 
                     const price = plan.price;
 
                     const dueDate = new Date(issueDate);
                     dueDate.setDate(dueDate.getDate() + 15);
 
-                    // Check if an invoice for this period already exists and preserve its 'Paid' status
-                    const existingInvoice = prevInvoices.find(inv => 
+                    // Check if an invoice for this period already exists
+                    const existingInvoice = existingSubInvoices.find(inv => 
                         inv.projectId === project.id &&
                         inv.type === 'subscription' &&
                         new Date(inv.issueDate).getTime() === issueDate.getTime()
@@ -186,8 +189,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         status = 'Paid';
                     }
 
-                    generatedSubInvoices.push({
-                        id: `inv-${project.id}-${issueDate.toISOString().slice(0, 10)}`,
+                    const invoiceData: Invoice = {
+                        id: invoiceId,
                         invoiceNumber: `SUB-${project.id.toUpperCase()}-${issueDate.getFullYear()}${(issueDate.getMonth() + 1).toString().padStart(2, '0')}`,
                         clientId: project.clientId,
                         projectId: project.id,
@@ -201,24 +204,41 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                         status: status,
                         type: 'subscription',
                         currency: plan.currency,
-                    });
+                    };
+
+                    generatedSubInvoices.push(invoiceData);
+
+                    // If this invoice doesn't exist in database, mark it for saving
+                    if (!existingInvoice) {
+                        newInvoicesToSave.push(invoiceData);
+                    }
 
                     cursorDate.setFullYear(cursorDate.getFullYear() + 1);
                 }
             });
             
-            const finalInvoices = [...manualInvoices, ...generatedSubInvoices];
-
-            // To prevent unnecessary re-renders, only update state if the invoices have actually changed
-            const sortedPrev = [...prevInvoices].sort((a,b) => a.id.localeCompare(b.id));
-            const sortedFinal = [...finalInvoices].sort((a,b) => a.id.localeCompare(b.id));
-
-            if (JSON.stringify(sortedPrev) === JSON.stringify(sortedFinal)) {
-                return prevInvoices;
+            // Save new subscription invoices to database
+            if (newInvoicesToSave.length > 0) {
+                console.log(`Saving ${newInvoicesToSave.length} new subscription invoices to database`);
+                for (const invoice of newInvoicesToSave) {
+                    try {
+                        await invoiceAPI.create(invoice);
+                        console.log(`Saved subscription invoice: ${invoice.invoiceNumber}`);
+                    } catch (error) {
+                        console.error(`Failed to save subscription invoice ${invoice.invoiceNumber}:`, error);
+                    }
+                }
             }
             
-            return finalInvoices;
-        });
+            const finalInvoices = [...manualInvoices, ...generatedSubInvoices];
+
+            // Update state with all invoices
+            setInvoices(finalInvoices);
+        };
+
+        if (projects.length > 0 && paymentPlans.length > 0) {
+            generateAndSaveSubscriptionInvoices();
+        }
     }, [projects, paymentPlans]);
 
 
@@ -252,7 +272,11 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 if (clientsResult.status === 'fulfilled') setClients(Array.isArray(clientsResult.value) ? clientsResult.value : []);
                 if (projectsResult.status === 'fulfilled') setProjects(Array.isArray(projectsResult.value) ? projectsResult.value : []);
                 if (usersResult.status === 'fulfilled') setUsers(Array.isArray(usersResult.value) ? usersResult.value : []);
-                if (invoicesResult.status === 'fulfilled') setInvoices(Array.isArray(invoicesResult.value) ? invoicesResult.value : []);
+                if (invoicesResult.status === 'fulfilled') {
+                    const dbInvoices = Array.isArray(invoicesResult.value) ? invoicesResult.value : [];
+                    console.log('Loaded invoices from database:', dbInvoices.length);
+                    setInvoices(dbInvoices);
+                }
                 if (departmentsResult.status === 'fulfilled') setDepartments(Array.isArray(departmentsResult.value) ? departmentsResult.value : []);
                 if (groupsResult.status === 'fulfilled') setGroups(Array.isArray(groupsResult.value) ? groupsResult.value : []);
                 if (categoriesResult.status === 'fulfilled') setCategories(Array.isArray(categoriesResult.value) ? categoriesResult.value : []);
