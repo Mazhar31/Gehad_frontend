@@ -1,14 +1,9 @@
 import React, { useState, useMemo, useRef } from 'react';
-// FIX: Added file extension to import to resolve module error.
 import { Project, PaymentPlan } from '../../types.ts';
-// FIX: Added file extension to import to resolve module error.
 import ProjectCard from '../ProjectCard.tsx';
-// FIX: Added file extension to import to resolve module error.
 import Modal from '../Modal.tsx';
-// FIX: Added file extension to import to resolve module error.
 import { PlusIcon, MagnifyingGlassIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
-// FIX: Added file extension to import to resolve module error.
 import ProjectDetails from '../ProjectDetails.tsx';
 
 const ProjectsPage: React.FC = () => {
@@ -196,7 +191,7 @@ const ProjectForm: React.FC<{
                 formData.append('entity_id', project?.id || `project-${Date.now()}`);
                 
                 const token = localStorage.getItem('auth_token');
-                const response = await fetch('http://localhost:8000/api/upload/image', {
+                const response = await fetch('https://oneqlek-backend-334489433469.us-central1.run.app/api/upload/image', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,

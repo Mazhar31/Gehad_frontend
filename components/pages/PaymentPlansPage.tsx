@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
-// FIX: Added file extension to import to resolve module error.
 import { PaymentPlan } from '../../types.ts';
-// FIX: Added file extension to import to resolve module error.
 import Modal from '../Modal.tsx';
-// FIX: Added file extension to import to resolve module error.
 import { PlusIcon, PencilSquareIcon, TrashIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
 
