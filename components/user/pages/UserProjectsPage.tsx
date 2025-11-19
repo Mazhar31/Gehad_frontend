@@ -64,6 +64,11 @@ const UserDashboardsPage: React.FC<{ dashboards: Project[], client: Client }> = 
                         <UserDashboardCard key={dashboard.id} dashboard={dashboard} onClick={() => handleDashboardClick(dashboard)} />
                     ))}
                 </div>
+            ) : dashboards.length === 0 ? (
+                <div className="flex items-center justify-center py-16">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-lime"></div>
+                    <p className="text-white ml-4">Loading your dashboards...</p>
+                </div>
             ) : (
                 <div className="text-center py-16 bg-card-bg rounded-2xl">
                     <h3 className="text-xl font-semibold text-white">No Dashboards Found</h3>

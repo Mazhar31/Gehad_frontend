@@ -21,14 +21,26 @@ const UserDashboard: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
 
     // Load user-specific data from local data
     useEffect(() => {
-        if (!currentUser) return;
+        if (!currentUser) {
+            setLoading(true);
+            return;
+        }
         
+        setLoading(true);
         const localProjects = projects.filter(p => currentUser.projectIds?.includes(p.id));
         const localInvoices = invoices.filter(i => i.clientId === currentUser.clientId);
         setUserProjects(localProjects.filter(p => p.projectType === 'Dashboard' || !p.projectType));
         setUserAddins(localProjects.filter(p => p.projectType === 'Add-ins'));
         setUserInvoices(localInvoices);
+        setLoading(false);
     }, [currentUser, projects, invoices]);
+
+    useEffect(() => {
+        // If user is normal and trying to access invoices, redirect to dashboards.
+        if (currentUser && currentUser.role === 'normal' && currentPage === 'invoices') {
+            setCurrentPage('dashboards');
+        }
+    }, [currentPage, currentUser]);
 
     // Handle invoice payment
     const handlePayInvoice = async (invoiceId: string) => {
@@ -83,13 +95,6 @@ const UserDashboard: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
         groupId: undefined
     };
 
-    useEffect(() => {
-        // If user is normal and trying to access invoices, redirect to dashboards.
-        if (currentUser.role === 'normal' && currentPage === 'invoices') {
-            setCurrentPage('dashboards');
-        }
-    }, [currentPage, currentUser.role]);
-    
     const userDashboards = userProjects;
     const addinProjects = userAddins;
     const displayInvoices = userInvoices;

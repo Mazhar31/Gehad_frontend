@@ -136,7 +136,7 @@ function App() {
   
   const handleLoginSuccess = async (role: 'admin' | 'user', userEmail?: string) => {
     console.log('🎉 Login success in App.tsx:', { role, userEmail });
-    login(role, userEmail);
+    await login(role, userEmail);
     setAuthPage(null);
     
     // Load admin profile after login
