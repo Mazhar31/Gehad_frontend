@@ -102,6 +102,18 @@ export const authAPI = {
   getCurrentUser: async () => {
     return apiCall<{ id: string; email: string; role: string; name?: string }>('/auth/me');
   },
+
+  forgotPassword: async (email: string) => {
+    return apiCall<{ message: string }>(`/auth/forgot-password?email=${encodeURIComponent(email)}`, {
+      method: 'POST',
+    });
+  },
+
+  resetPassword: async (token: string, newPassword: string) => {
+    return apiCall<{ message: string }>(`/auth/reset-password?token=${encodeURIComponent(token)}&new_password=${encodeURIComponent(newPassword)}`, {
+      method: 'POST',
+    });
+  },
 };
 
 // Dashboard APIs
@@ -167,7 +179,6 @@ export const projectAPI = {
       imageUrl: project.image_url,
       projectType: project.project_type,
       currency: project.currency,
-      budget: project.budget,
       progress: project.progress
     }));
     return transformedData;
@@ -205,7 +216,6 @@ export const projectAPI = {
       imageUrl: projectData.image_url,
       projectType: projectData.project_type,
       currency: projectData.currency,
-      budget: projectData.budget,
       progress: projectData.progress
     };
   },
@@ -242,7 +252,6 @@ export const projectAPI = {
       imageUrl: updatedProject.image_url,
       projectType: updatedProject.project_type,
       currency: updatedProject.currency,
-      budget: updatedProject.budget,
       progress: updatedProject.progress
     };
   },
@@ -810,6 +819,27 @@ export const adminAPI = {
       method: 'PUT',
       body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
     });
+  },
+
+  updateFirebaseProfile: async (formData: FormData) => {
+    const token = localStorage.getItem('auth_token');
+    const headers: HeadersInit = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/admin/firebase/profile`, {
+      method: 'PUT',
+      headers,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Update failed: ${response.statusText}`);
+    }
+
+    return response.json();
   },
 };
 

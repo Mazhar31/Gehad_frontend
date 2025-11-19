@@ -1,17 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Project, Client, PaymentPlan, Invoice, User, ContactMessage, PortfolioCase, Department, Group, Category } from '../types.ts';
-import { 
-    PROJECTS_DATA, 
-    CLIENTS_DATA, 
-    DEPARTMENTS_DATA,
-    PAYMENT_PLANS_DATA,
-    INVOICES_DATA,
-    USERS_DATA,
-    CONTACT_MESSAGES_DATA,
-    PORTFOLIO_CASES_DATA,
-    GROUPS_DATA,
-    CATEGORIES_DATA,
-} from '../constants.ts';
+
 import {
     authAPI,
     dashboardAPI,
@@ -28,48 +17,9 @@ import {
     adminAPI
 } from '../services/api';
 
-// Helper to get initial state from localStorage or use default
-const getInitialState = <T,>(key: string, defaultValue: T): T => {
-    try {
-        const storedValue = localStorage.getItem(key);
-        if (storedValue) {
-            return JSON.parse(storedValue);
-        }
-    } catch (error) {
-        console.error(`Error reading localStorage key "${key}":`, error);
-    }
-    return defaultValue;
-};
 
-// Helper to safely save to localStorage with quota checking
-const safeSetItem = (key: string, value: any): boolean => {
-    try {
-        const serialized = JSON.stringify(value);
-        // Check if the serialized data is too large (>4MB as safety margin)
-        if (serialized.length > 4 * 1024 * 1024) {
-            console.warn(`Data too large for localStorage: ${key}`);
-            return false;
-        }
-        localStorage.setItem(key, serialized);
-        return true;
-    } catch (error) {
-        if (error instanceof DOMException && error.code === 22) {
-            console.error(`LocalStorage quota exceeded for key: ${key}`);
-            // Try to clear some space by removing oldest data
-            try {
-                localStorage.removeItem('app_contact_messages');
-                localStorage.removeItem('app_portfolio_cases');
-                localStorage.setItem(key, JSON.stringify(value));
-                return true;
-            } catch (retryError) {
-                console.error('Failed to save even after clearing space:', retryError);
-                return false;
-            }
-        }
-        console.error(`Error saving to localStorage: ${key}`, error);
-        return false;
-    }
-};
+
+
 
 interface DataContextType {
     projects: Project[];
@@ -115,35 +65,23 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [projects, setProjects] = useState<Project[]>(() => getInitialState('app_projects', PROJECTS_DATA));
-    const [clients, setClients] = useState<Client[]>(() => getInitialState('app_clients', CLIENTS_DATA));
-    const [departments, setDepartments] = useState<Department[]>(() => getInitialState('app_departments', DEPARTMENTS_DATA));
-    const [groups, setGroups] = useState<Group[]>(() => getInitialState('app_groups', GROUPS_DATA));
-    const [paymentPlans, setPaymentPlans] = useState<PaymentPlan[]>(() => getInitialState('app_payment_plans', PAYMENT_PLANS_DATA));
-    const [invoices, setInvoices] = useState<Invoice[]>(() => getInitialState('app_invoices', INVOICES_DATA));
-    const [users, setUsers] = useState<User[]>(() => getInitialState('app_users', USERS_DATA));
-    const [contactMessages, setContactMessages] = useState<ContactMessage[]>(() => getInitialState('app_contact_messages', CONTACT_MESSAGES_DATA));
-    const [portfolioCases, setPortfolioCases] = useState<PortfolioCase[]>(() => getInitialState('app_portfolio_cases', PORTFOLIO_CASES_DATA));
-    // FIX: Added categories state.
-    const [categories, setCategories] = useState<Category[]>(() => getInitialState('app_categories', CATEGORIES_DATA));
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [clients, setClients] = useState<Client[]>([]);
+    const [departments, setDepartments] = useState<Department[]>([]);
+    const [groups, setGroups] = useState<Group[]>([]);
+    const [paymentPlans, setPaymentPlans] = useState<PaymentPlan[]>([]);
+    const [invoices, setInvoices] = useState<Invoice[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
+    const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
+    const [portfolioCases, setPortfolioCases] = useState<PortfolioCase[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
     const [userRole, setUserRole] = useState<'admin' | 'user' | null>(null);
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
 
-    // Effects to save state to localStorage whenever it changes
-    useEffect(() => { safeSetItem('app_projects', projects); }, [projects]);
-    useEffect(() => { safeSetItem('app_clients', clients); }, [clients]);
-    useEffect(() => { safeSetItem('app_departments', departments); }, [departments]);
-    useEffect(() => { safeSetItem('app_groups', groups); }, [groups]);
-    useEffect(() => { safeSetItem('app_payment_plans', paymentPlans); }, [paymentPlans]);
-    useEffect(() => { safeSetItem('app_invoices', invoices); }, [invoices]);
-    useEffect(() => { safeSetItem('app_users', users); }, [users]);
-    useEffect(() => { safeSetItem('app_contact_messages', contactMessages); }, [contactMessages]);
-    useEffect(() => { safeSetItem('app_portfolio_cases', portfolioCases); }, [portfolioCases]);
-    // FIX: Added useEffect for categories.
-    useEffect(() => { safeSetItem('app_categories', categories); }, [categories]);
+
     // Authentication state is managed by App.tsx, not persisted here
 
     // Auto-generate and reconcile subscription invoices whenever projects or plans change
@@ -242,7 +180,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, [projects, paymentPlans]);
 
 
-    // Load all data from APIs
+    // Load all data from Firebase APIs
     const loadData = async () => {
         if (!isLoggedIn || !localStorage.getItem('auth_token')) {
             return;
@@ -252,9 +190,9 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setError(null);
         
         try {
-            // Only load admin APIs if user is admin
             if (userRole === 'admin') {
-                const results = await Promise.allSettled([
+                // Load all data from Firebase - no fallbacks
+                const [clientsData, projectsData, usersData, invoicesData, departmentsData, groupsData, categoriesData, plansData, portfolioData] = await Promise.all([
                     clientAPI.getAll(),
                     projectAPI.getAll(),
                     userAPI.getAll(),
@@ -266,56 +204,39 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                     portfolioAPI.getAll()
                 ]);
                 
-                const [clientsResult, projectsResult, usersResult, invoicesResult, departmentsResult, groupsResult, categoriesResult, plansResult, portfolioResult] = results;
+                setClients(Array.isArray(clientsData) ? clientsData : []);
+                setProjects(Array.isArray(projectsData) ? projectsData : []);
+                setUsers(Array.isArray(usersData) ? usersData : []);
+                setInvoices(Array.isArray(invoicesData) ? invoicesData : []);
+                setDepartments(Array.isArray(departmentsData) ? departmentsData : []);
+                setGroups(Array.isArray(groupsData) ? groupsData : []);
+                setCategories(Array.isArray(categoriesData) ? categoriesData : []);
+                setPaymentPlans(Array.isArray(plansData) ? plansData : []);
+                setPortfolioCases(Array.isArray(portfolioData) ? portfolioData : []);
                 
-                // Only update state if API calls succeeded, otherwise keep local data
-                if (clientsResult.status === 'fulfilled') setClients(Array.isArray(clientsResult.value) ? clientsResult.value : []);
-                if (projectsResult.status === 'fulfilled') setProjects(Array.isArray(projectsResult.value) ? projectsResult.value : []);
-                if (usersResult.status === 'fulfilled') setUsers(Array.isArray(usersResult.value) ? usersResult.value : []);
-                if (invoicesResult.status === 'fulfilled') {
-                    const dbInvoices = Array.isArray(invoicesResult.value) ? invoicesResult.value : [];
-                    console.log('Loaded invoices from database:', dbInvoices.length);
-                    setInvoices(dbInvoices);
-                }
-                if (departmentsResult.status === 'fulfilled') setDepartments(Array.isArray(departmentsResult.value) ? departmentsResult.value : []);
-                if (groupsResult.status === 'fulfilled') setGroups(Array.isArray(groupsResult.value) ? groupsResult.value : []);
-                if (categoriesResult.status === 'fulfilled') setCategories(Array.isArray(categoriesResult.value) ? categoriesResult.value : []);
-                if (plansResult.status === 'fulfilled') setPaymentPlans(Array.isArray(plansResult.value) ? plansResult.value : []);
-                if (portfolioResult.status === 'fulfilled') setPortfolioCases(Array.isArray(portfolioResult.value) ? portfolioResult.value : []);
-                
-                // Check if any API calls failed due to authentication issues
-                const authFailures = results.filter(result => 
-                    result.status === 'rejected' && 
-                    result.reason?.message?.includes('Not authenticated')
-                );
-                
-                if (authFailures.length > 0) {
-                    // Authentication failed, logout user
-                    console.warn('Authentication failed, logging out user');
-                    logout();
-                    return;
-                }
-                
-                // Check for other failures (network issues, server down, etc.)
-                const otherFailures = results.filter(result => 
-                    result.status === 'rejected' && 
-                    !result.reason?.message?.includes('Not authenticated')
-                );
-                
-                if (otherFailures.length > 0) {
-                    console.warn('Some API calls failed, using local data:', otherFailures.length, 'failures');
-                    // Don't set error for network issues, just log and continue with local data
-                }
-            }
-            // For regular users, don't load admin APIs - they'll use local data or user-specific APIs
-        } catch (err) {
-            console.error('Failed to load data:', err);
-            // Don't set error for network issues in development
-            if (err instanceof Error && err.message.includes('Backend server not available')) {
-                console.warn('Backend not available, using local data');
+                console.log('🔥 Firebase Data Loaded:');
+                console.log('  📊 Projects:', projectsData.length);
+                console.log('  👥 Clients:', clientsData.length);
+                console.log('  💳 Plans:', plansData.length);
+                console.log('  📋 Invoices:', invoicesData.length);
+                console.log('All data loaded from Firebase successfully');
             } else {
-                setError(err instanceof Error ? err.message : 'Failed to load data');
+                // For regular users, load user-specific data
+                const [userProjectsData, userInvoicesData] = await Promise.all([
+                    projectAPI.getUserProjects(),
+                    invoiceAPI.getUserInvoices()
+                ]);
+                
+                setProjects(Array.isArray(userProjectsData) ? userProjectsData : []);
+                setInvoices(Array.isArray(userInvoicesData) ? userInvoicesData : []);
             }
+        } catch (err) {
+            console.error('Failed to load data from Firebase:', err);
+            if (err instanceof Error && err.message.includes('Not authenticated')) {
+                logout();
+                return;
+            }
+            setError(err instanceof Error ? err.message : 'Failed to load data from Firebase');
         } finally {
             setLoading(false);
         }
@@ -338,10 +259,10 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
             if (projectData.id && projects.some(p => p.id === projectData.id)) {
                 const updatedProject = await projectAPI.update(projectData.id, projectWithCurrency);
-                setProjects(projects.map(p => p.id === projectData.id ? updatedProject : p));
+                setProjects(prevProjects => prevProjects.map(p => p.id === projectData.id ? updatedProject : p));
             } else {
                 const newProject = await projectAPI.create(projectWithCurrency);
-                setProjects([newProject, ...projects]);
+                setProjects(prevProjects => [newProject, ...prevProjects]);
             }
         } catch (err) {
             console.error('Failed to save project:', err);
@@ -356,17 +277,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 }
             }
             setError(errorMessage);
-            // Fallback to local storage
-            const plan = paymentPlans.find(p => p.id === projectData.planId);
-            const currency = plan ? plan.currency : 'USD';
-            const projectWithCurrency = { ...projectData, currency };
-            
-            if (projectData.id && projects.some(p => p.id === projectData.id)) {
-                setProjects(projects.map(p => p.id === projectData.id ? projectWithCurrency : p));
-            } else {
-                const newProject = { ...projectWithCurrency, id: `p-${Date.now()}` };
-                setProjects([newProject, ...projects]);
-            }
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -382,8 +293,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (err) {
             console.error('Failed to delete project:', err);
             setError(err instanceof Error ? err.message : 'Failed to delete project');
-            // Fallback to local storage
-            setProjects(projects.filter(p => p.id !== projectId));
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -397,22 +307,15 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         try {
             if (clientData.id && clients.some(c => c.id === clientData.id)) {
                 const updatedClient = await clientAPI.update(clientData.id, clientData);
-                setClients(clients.map(c => c.id === clientData.id ? updatedClient : c));
+                setClients(prevClients => prevClients.map(c => c.id === clientData.id ? updatedClient : c));
             } else {
                 const newClient = await clientAPI.create(clientData);
-                setClients([newClient, ...clients]);
+                setClients(prevClients => [newClient, ...prevClients]);
             }
         } catch (err) {
             console.error('Failed to save client:', err);
             setError(err instanceof Error ? err.message : 'Failed to save client');
-            // Fallback to local storage
-            if (clientData.id && clients.some(c => c.id === clientData.id)) {
-                setClients(clients.map(c => c.id === clientData.id ? clientData : c));
-            } else {
-                const newAvatar = clientData.avatarUrl || `https://i.pravatar.cc/150?u=${Date.now()}`;
-                const newClient = { ...clientData, id: `c-${Date.now()}`, avatarUrl: newAvatar };
-                setClients([newClient, ...clients]);
-            }
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -428,8 +331,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (err) {
             console.error('Failed to delete client:', err);
             setError(err instanceof Error ? err.message : 'Failed to delete client');
-            // Fallback to local storage
-            setClients(clients.filter(c => c.id !== clientId));
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -451,13 +353,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (err) {
             console.error('Failed to save department:', err);
             setError(err instanceof Error ? err.message : 'Failed to save department');
-            // Fallback to local storage
-            if (departmentData.id && departments.some(d => d.id === departmentData.id)) {
-                setDepartments(departments.map(d => d.id === departmentData.id ? departmentData : d));
-            } else {
-                const newDepartment = { ...departmentData, id: `dept-${Date.now()}` };
-                setDepartments([newDepartment, ...departments]);
-            }
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -473,8 +369,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (err) {
             console.error('Failed to delete department:', err);
             setError(err instanceof Error ? err.message : 'Failed to delete department');
-            // Fallback to local storage
-            setDepartments(departments.filter(d => d.id !== departmentId));
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -496,13 +391,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (err) {
             console.error('Failed to save group:', err);
             setError(err instanceof Error ? err.message : 'Failed to save group');
-            // Fallback to local storage
-            if (groupData.id && groups.some(g => g.id === groupData.id)) {
-                setGroups(groups.map(g => g.id === groupData.id ? groupData : g));
-            } else {
-                const newGroup = { ...groupData, id: `g-${Date.now()}` };
-                setGroups([newGroup, ...groups]);
-            }
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -519,9 +408,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (err) {
             console.error('Failed to delete group:', err);
             setError(err instanceof Error ? err.message : 'Failed to delete group');
-            // Fallback to local storage
-            setGroups(groups.filter(g => g.id !== groupId));
-            setClients(prevClients => prevClients.map(client => client.groupId === groupId ? { ...client, groupId: undefined } : client));
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -550,13 +437,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (err) {
             console.error('Failed to save payment plan:', err);
             setError(err instanceof Error ? err.message : 'Failed to save payment plan');
-            // Fallback to local storage
-            if (planData.id && paymentPlans.some(p => p.id === planData.id)) {
-                setPaymentPlans(paymentPlans.map(p => p.id === planData.id ? planData : p));
-            } else {
-                const newPlan = { ...planData, id: `plan-${Date.now()}` };
-                setPaymentPlans([newPlan, ...paymentPlans]);
-            }
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -592,8 +473,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 console.log('Payment plans state updated after deletion');
             } catch (refreshError) {
                 console.error('Failed to refresh payment plans after deletion:', refreshError);
-                // Fallback to local removal only if refresh fails
-                setPaymentPlans(paymentPlans.filter(p => p.id !== planId));
+                throw refreshError;
             }
         } catch (err) {
             console.error('Failed to delete payment plan from API:', err);
@@ -613,7 +493,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             if (userData.id && users.some(u => u.id === userData.id)) {
                 // Update existing user
                 const updatedUser = await userAPI.update(userData.id, userData);
-                setUsers(users.map(u => u.id === userData.id ? updatedUser : u));
+                setUsers(prevUsers => prevUsers.map(u => u.id === userData.id ? updatedUser : u));
             } else {
                 // Create new user or admin
                 if (userData.accountType === 'admin') {
@@ -630,33 +510,13 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 } else {
                     // Create regular user account
                     const newUser = await userAPI.create(userData);
-                    setUsers([newUser, ...users]);
+                    setUsers(prevUsers => [newUser, ...prevUsers]);
                 }
             }
         } catch (err) {
             console.error('Failed to save user:', err);
             setError(err instanceof Error ? err.message : 'Failed to save user');
-            // Fallback to local storage
-            if (userData.id && users.some(u => u.id === userData.id)) {
-                setUsers(users.map(u => {
-                    if (u.id === userData.id) {
-                        const newPassword = (userData.password && userData.password.trim() !== '') ? userData.password : u.password;
-                        return { ...u, ...userData, password: newPassword };
-                    }
-                    return u;
-                }));
-            } else if (userData.accountType !== 'admin') {
-                // Only add to users list if it's not an admin account
-                const newUser = { 
-                    ...userData, 
-                    id: `u-${Date.now()}`, 
-                    avatarUrl: `https://i.pravatar.cc/150?u=${Date.now()}`,
-                    dashboardAccess: userData.dashboardAccess || 'view-only',
-                    projectIds: userData.projectIds || [],
-                    password: userData.password || 'password'
-                };
-                setUsers([newUser, ...users]);
-            }
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -672,8 +532,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (err) {
             console.error('Failed to delete user:', err);
             setError(err instanceof Error ? err.message : 'Failed to delete user');
-            // Fallback to local storage
-            setUsers(users.filter(u => u.id !== userId));
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -695,13 +554,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (err) {
             console.error('Failed to save invoice:', err);
             setError(err instanceof Error ? err.message : 'Failed to save invoice');
-            // Fallback to local storage
-            if (invoiceData.id && invoices.some(i => i.id === invoiceData.id)) {
-                setInvoices(invoices.map(i => i.id === invoiceData.id ? invoiceData : i));
-            } else {
-                const newInvoice = { ...invoiceData, id: `inv-${Date.now()}` };
-                setInvoices([newInvoice, ...invoices]);
-            }
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -717,8 +570,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (err) {
             console.error('Failed to delete invoice:', err);
             setError(err instanceof Error ? err.message : 'Failed to delete invoice');
-            // Fallback to local storage
-            setInvoices(invoices.filter(i => i.id !== invoiceId));
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -740,13 +592,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (err) {
             console.error('Failed to save contact message:', err);
             setError(err instanceof Error ? err.message : 'Failed to save contact message');
-            // Fallback to local storage
-            const newMessage: ContactMessage = {
-                ...messageData,
-                id: `msg-${Date.now()}`,
-                createdAt: new Date().toISOString(),
-            };
-            setContactMessages(prev => [newMessage, ...prev]);
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -760,21 +606,15 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         try {
             if (caseData.id && portfolioCases.some(c => c.id === caseData.id)) {
                 const updatedCase = await portfolioAPI.update(caseData.id, caseData);
-                setPortfolioCases(portfolioCases.map(c => c.id === caseData.id ? updatedCase : c));
+                setPortfolioCases(prevCases => prevCases.map(c => c.id === caseData.id ? updatedCase : c));
             } else {
                 const newCase = await portfolioAPI.create(caseData);
-                setPortfolioCases([newCase, ...portfolioCases]);
+                setPortfolioCases(prevCases => [newCase, ...prevCases]);
             }
         } catch (err) {
             console.error('Failed to save portfolio case:', err);
             setError(err instanceof Error ? err.message : 'Failed to save portfolio case');
-            // Fallback to local storage
-            if (caseData.id && portfolioCases.some(c => c.id === caseData.id)) {
-                setPortfolioCases(portfolioCases.map(c => c.id === caseData.id ? caseData : c));
-            } else {
-                const newCase = { ...caseData, id: `pc-${Date.now()}` };
-                setPortfolioCases([newCase, ...portfolioCases]);
-            }
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -790,8 +630,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (err) {
             console.error('Failed to delete portfolio case:', err);
             setError(err instanceof Error ? err.message : 'Failed to delete portfolio case');
-            // Fallback to local storage
-            setPortfolioCases(portfolioCases.filter(c => c.id !== caseId));
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -813,13 +652,7 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (err) {
             console.error('Failed to save category:', err);
             setError(err instanceof Error ? err.message : 'Failed to save category');
-            // Fallback to local storage
-            if (categoryData.id && categories.some(c => c.id === categoryData.id)) {
-                setCategories(categories.map(c => c.id === categoryData.id ? categoryData : c));
-            } else {
-                const newCategory = { ...categoryData, id: `cat-${Date.now()}` };
-                setCategories([newCategory, ...categories]);
-            }
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -835,21 +668,17 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         } catch (err) {
             console.error('Failed to delete category:', err);
             setError(err instanceof Error ? err.message : 'Failed to delete category');
-            // Fallback to local storage
-            setCategories(categories.filter(c => c.id !== categoryId));
+            throw err;
         } finally {
             setLoading(false);
         }
     };
 
 
-    // Load data when user logs in and has a valid token
+    // Load data immediately when user logs in
     useEffect(() => {
         if (isLoggedIn && localStorage.getItem('auth_token')) {
-            const timer = setTimeout(() => {
-                loadData();
-            }, 1000); // Increased delay to allow app to fully initialize
-            return () => clearTimeout(timer);
+            loadData();
         }
     }, [isLoggedIn, userRole]);
 

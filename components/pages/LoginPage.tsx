@@ -138,16 +138,19 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
         }
     };
 
-    const handleForgotPasswordSubmit = (e: React.FormEvent) => {
+    const handleForgotPasswordSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        // Check if email exists in either admin or users list
-        const userExists = users.some(u => u.email.toLowerCase() === email.toLowerCase());
-        if (email.toLowerCase() === 'admin@example.com' || userExists) {
-            console.log(`Password reset requested for ${email}`);
+        setLoading(true);
+        
+        try {
+            const { authAPI } = await import('../../services/api');
+            await authAPI.forgotPassword(email);
             setStep('resetSent');
-        } else {
-            setError('This email address is not registered.');
+        } catch (error) {
+            setError(error instanceof Error ? error.message : 'Failed to send reset email');
+        } finally {
+            setLoading(false);
         }
     };
 

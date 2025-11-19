@@ -11,13 +11,25 @@ interface DashboardPageProps {
 }
 
 const DashboardPage: React.FC<DashboardPageProps> = ({ onNavigate }) => {
-    const { projects, clients, invoices } = useData();
+    const { projects, clients, invoices, loading, error } = useData();
     const { stats, recentProjects, loading: dashboardLoading, error: dashboardError } = useDashboard();
 
-    if (!projects || !clients || !invoices) {
+    if (loading) {
         return (
-            <div className="flex items-center justify-center h-64">
+            <div className="flex flex-col items-center justify-center h-64 space-y-4">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-lime"></div>
+                <p className="text-gray-400">Loading data from Firebase...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center h-64 space-y-4">
+                <div className="text-red-400 text-center">
+                    <p className="text-lg font-semibold">Failed to load data</p>
+                    <p className="text-sm">{error}</p>
+                </div>
             </div>
         );
     }
