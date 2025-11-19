@@ -16,9 +16,7 @@ const getStatusClass = (status: Invoice['status']) => {
 };
 
 const InvoiceDetail: React.FC<{ invoice: Invoice; client: Client | undefined }> = ({ invoice, client }) => {
-    const subtotal = invoice.items.reduce((acc, item) => acc + item.quantity * item.price, 0);
-    const tax = subtotal * 0.1; // Example 10% tax
-    const total = subtotal + tax;
+    const total = invoice.items.reduce((acc, item) => acc + item.quantity * item.price, 0);
 
     const currencyFormatter = new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -86,17 +84,9 @@ const InvoiceDetail: React.FC<{ invoice: Invoice; client: Client | undefined }> 
             {/* Totals */}
             <div className="flex justify-end">
                 <div className="w-full max-w-xs">
-                    <div className="flex justify-between text-gray-600">
-                        <p>Subtotal</p>
-                        <p>{currencyFormatter.format(subtotal)}</p>
-                    </div>
-                    <div className="flex justify-between text-gray-600">
-                        <p>Tax (10%)</p>
-                        <p>{currencyFormatter.format(tax)}</p>
-                    </div>
                     <div className="border-t my-2"></div>
-                    <div className="flex justify-between font-bold text-gray-900 text-lg">
-                        <p>Total</p>
+                    <div className="flex justify-between font-bold text-gray-900 text-xl">
+                        <p>Total Amount</p>
                         <p>{currencyFormatter.format(total)}</p>
                     </div>
                      <div className="text-center mt-6">

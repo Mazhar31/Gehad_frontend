@@ -136,24 +136,54 @@ export const dashboardAPI = {
 // Client APIs
 export const clientAPI = {
   getAll: async () => {
-    const response = await apiCall<{ success: boolean; data: Client[] }>('/admin/clients');
-    return response.data || [];
+    const response = await apiCall<{ success: boolean; data: any[] }>('/admin/clients/');
+    // Transform backend snake_case to frontend camelCase
+    const transformedData = (response.data || []).map((client: any) => ({
+      id: client.id,
+      company: client.company,
+      email: client.email,
+      mobile: client.mobile,
+      address: client.address,
+      avatarUrl: client.avatar_url,
+      groupId: client.group_id
+    }));
+    return transformedData;
   },
 
   create: async (client: Omit<Client, 'id'>) => {
-    const response = await apiCall<{ success: boolean; data: Client }>('/admin/clients', {
+    const response = await apiCall<{ success: boolean; data: any }>('/admin/clients/', {
       method: 'POST',
       body: JSON.stringify(client),
     });
-    return response.data;
+    // Transform backend response to frontend format
+    const clientData = response.data;
+    return {
+      id: clientData.id,
+      company: clientData.company,
+      email: clientData.email,
+      mobile: clientData.mobile,
+      address: clientData.address,
+      avatarUrl: clientData.avatar_url,
+      groupId: clientData.group_id
+    };
   },
 
   update: async (id: string, client: Partial<Client>) => {
-    const response = await apiCall<{ success: boolean; data: Client }>(`/admin/clients/${id}`, {
+    const response = await apiCall<{ success: boolean; data: any }>(`/admin/clients/${id}`, {
       method: 'PUT',
       body: JSON.stringify(client),
     });
-    return response.data;
+    // Transform backend response to frontend format
+    const updatedClient = response.data;
+    return {
+      id: updatedClient.id,
+      company: updatedClient.company,
+      email: updatedClient.email,
+      mobile: updatedClient.mobile,
+      address: updatedClient.address,
+      avatarUrl: updatedClient.avatar_url,
+      groupId: updatedClient.group_id
+    };
   },
 
   delete: async (id: string) => {
@@ -166,7 +196,7 @@ export const clientAPI = {
 // Project APIs
 export const projectAPI = {
   getAll: async () => {
-    const response = await apiCall<{ success: boolean; data: any[] }>('/admin/projects');
+    const response = await apiCall<{ success: boolean; data: any[] }>('/admin/projects/');
     // Transform backend snake_case to frontend camelCase
     const transformedData = (response.data || []).map((project: any) => ({
       id: project.id,
@@ -199,7 +229,7 @@ export const projectAPI = {
       project_type: project.projectType,
       currency: project.currency
     };
-    const response = await apiCall<{ success: boolean; data: any }>('/admin/projects', {
+    const response = await apiCall<{ success: boolean; data: any }>('/admin/projects/', {
       method: 'POST',
       body: JSON.stringify(backendProject),
     });
@@ -265,7 +295,7 @@ export const projectAPI = {
 
   // User project APIs
   getUserProjects: async () => {
-    const response = await apiCall<{ success: boolean; data: Project[] }>('/user/projects');
+    const response = await apiCall<{ success: boolean; data: Project[] }>('/admin/projects/user/my-projects');
     return response.data || [];
   },
 
@@ -283,7 +313,7 @@ export const projectAPI = {
 // User APIs
 export const userAPI = {
   getAll: async () => {
-    const response = await apiCall<{ success: boolean; data: any[] }>('/admin/users');
+    const response = await apiCall<{ success: boolean; data: any[] }>('/admin/users/');
     // Transform backend snake_case to frontend camelCase
     const transformedData = (response.data || []).map((user: any) => ({
       id: user.id,
@@ -312,7 +342,7 @@ export const userAPI = {
       password: user.password || 'password',
       project_ids: user.projectIds || []
     };
-    const response = await apiCall<{ success: boolean; data: any }>('/admin/users', {
+    const response = await apiCall<{ success: boolean; data: any }>('/admin/users/', {
       method: 'POST',
       body: JSON.stringify(backendUser),
     });
@@ -336,6 +366,7 @@ export const userAPI = {
     // Transform frontend field names to backend field names
     const backendUser: any = {};
     if (user.name) backendUser.name = user.name;
+    if (user.email) backendUser.email = user.email;
     if (user.position) backendUser.position = user.position;
     if (user.clientId) backendUser.client_id = user.clientId;
     if (user.role) backendUser.role = user.role;
@@ -396,7 +427,7 @@ export const userAPI = {
 // Invoice APIs
 export const invoiceAPI = {
   getAll: async () => {
-    const response = await apiCall<{ success: boolean; data: any[] }>('/admin/invoices');
+    const response = await apiCall<{ success: boolean; data: any[] }>('/admin/invoices/');
     // Transform backend snake_case to frontend camelCase
     const transformedData = (response.data || []).map((invoice: any) => ({
       id: invoice.id,
@@ -425,7 +456,7 @@ export const invoiceAPI = {
       currency: invoice.currency,
       items: invoice.items
     };
-    const response = await apiCall<{ success: boolean; data: any }>('/admin/invoices', {
+    const response = await apiCall<{ success: boolean; data: any }>('/admin/invoices/', {
       method: 'POST',
       body: JSON.stringify(backendInvoice),
     });
@@ -491,7 +522,7 @@ export const invoiceAPI = {
 
   // User invoice APIs
   getUserInvoices: async () => {
-    const response = await apiCall<{ success: boolean; data: Invoice[] }>('/user/invoices');
+    const response = await apiCall<{ success: boolean; data: Invoice[] }>('/user/invoices/');
     return response.data || [];
   },
 
@@ -596,7 +627,7 @@ export const categoryAPI = {
 // Payment Plan APIs
 export const paymentPlanAPI = {
   getAll: async () => {
-    const response = await apiCall<{ success: boolean; data: any[] }>('/admin/payment-plans');
+    const response = await apiCall<{ success: boolean; data: any[] }>('/admin/payment-plans/');
     // Transform backend snake_case to frontend camelCase
     const transformedData = (response.data || []).map((plan: any) => ({
       id: plan.id,
@@ -619,7 +650,7 @@ export const paymentPlanAPI = {
       features: plan.features,
       is_popular: plan.isPopular || plan.is_popular || false
     };
-    const response = await apiCall<{ success: boolean; data: any }>('/admin/payment-plans', {
+    const response = await apiCall<{ success: boolean; data: any }>('/admin/payment-plans/', {
       method: 'POST',
       body: JSON.stringify(backendPlan),
     });
@@ -674,24 +705,51 @@ export const paymentPlanAPI = {
 // Portfolio APIs
 export const portfolioAPI = {
   getAll: async () => {
-    const response = await apiCall<{ success: boolean; data: PortfolioCase[] }>('/admin/portfolio');
-    return response.data || [];
+    const response = await apiCall<{ success: boolean; data: any[] }>('/admin/portfolio/');
+    // Transform backend snake_case to frontend camelCase
+    const transformedData = (response.data || []).map((portfolioCase: any) => ({
+      id: portfolioCase.id,
+      category: portfolioCase.category,
+      title: portfolioCase.title,
+      description: portfolioCase.description,
+      imageUrl: portfolioCase.image_url,
+      link: portfolioCase.link
+    }));
+    return transformedData;
   },
 
   create: async (portfolioCase: Omit<PortfolioCase, 'id'>) => {
-    const response = await apiCall<{ success: boolean; data: PortfolioCase }>('/admin/portfolio', {
+    const response = await apiCall<{ success: boolean; data: any }>('/admin/portfolio/', {
       method: 'POST',
       body: JSON.stringify(portfolioCase),
     });
-    return response.data;
+    // Transform backend response to frontend format
+    const caseData = response.data;
+    return {
+      id: caseData.id,
+      category: caseData.category,
+      title: caseData.title,
+      description: caseData.description,
+      imageUrl: caseData.image_url,
+      link: caseData.link
+    };
   },
 
   update: async (id: string, portfolioCase: Partial<PortfolioCase>) => {
-    const response = await apiCall<{ success: boolean; data: PortfolioCase }>(`/admin/portfolio/${id}`, {
+    const response = await apiCall<{ success: boolean; data: any }>(`/admin/portfolio/${id}`, {
       method: 'PUT',
       body: JSON.stringify(portfolioCase),
     });
-    return response.data;
+    // Transform backend response to frontend format
+    const updatedCase = response.data;
+    return {
+      id: updatedCase.id,
+      category: updatedCase.category,
+      title: updatedCase.title,
+      description: updatedCase.description,
+      imageUrl: updatedCase.image_url,
+      link: updatedCase.link
+    };
   },
 
   delete: async (id: string) => {
@@ -701,15 +759,24 @@ export const portfolioAPI = {
   },
 
   getPublic: async () => {
-    const response = await apiCall<{ success: boolean; data: PortfolioCase[] }>('/portfolio/public');
-    return response.data || [];
+    const response = await apiCall<{ success: boolean; data: any[] }>('/admin/portfolio/public');
+    // Transform backend snake_case to frontend camelCase
+    const transformedData = (response.data || []).map((portfolioCase: any) => ({
+      id: portfolioCase.id,
+      category: portfolioCase.category,
+      title: portfolioCase.title,
+      description: portfolioCase.description,
+      imageUrl: portfolioCase.image_url,
+      link: portfolioCase.link
+    }));
+    return transformedData;
   },
 };
 
 // Contact APIs
 export const contactAPI = {
   submit: async (message: Omit<ContactMessage, 'id' | 'createdAt'>) => {
-    return apiCall<{ message: string }>('/contact', {
+    return apiCall<{ message: string }>('/contact/', {
       method: 'POST',
       body: JSON.stringify(message),
     });
