@@ -21,6 +21,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
     const [avatarPreview, setAvatarPreview] = useState<string>(userProfile.avatarUrl);
     const [notification, setNotification] = useState<string | null>(null);
     const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    const [isProfileLoading, setIsProfileLoading] = useState(false);
+    const [isEmailLoading, setIsEmailLoading] = useState(false);
+    const [isPasswordLoading, setIsPasswordLoading] = useState(false);
+    const [isAvatarLoading, setIsAvatarLoading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -39,18 +43,68 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
         setProfile(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleProfileSubmit = (e: React.FormEvent) => {
+    const handleProfileSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const updatedProfile = { ...userProfile, ...profile };
-        onProfileUpdate(updatedProfile);
-        showNotification('Profile information updated successfully!');
+        setIsProfileLoading(true);
+        try {
+            const token = localStorage.getItem('auth_token');
+            const formData = new FormData();
+            formData.append('name', profile.name);
+            
+            const response = await fetch(getAdminProfileUrl(), {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: formData,
+            });
+            
+            if (!response.ok) {
+                const result = await response.json();
+                throw new Error(result.detail || result.message || 'Failed to update profile');
+            }
+            
+            const updatedProfile = { ...userProfile, name: profile.name };
+            await onProfileUpdate(updatedProfile);
+            showNotification('Profile information updated successfully!');
+        } catch (error: any) {
+            console.error('Error updating profile:', error);
+            showNotification(error.message || 'Failed to update profile. Please try again.');
+        } finally {
+            setIsProfileLoading(false);
+        }
     };
     
-    const handleEmailSubmit = (e: React.FormEvent) => {
+    const handleEmailSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const updatedProfile = { ...userProfile, email: email };
-        onProfileUpdate(updatedProfile);
-        showNotification('Email address updated successfully!');
+        setIsEmailLoading(true);
+        try {
+            const token = localStorage.getItem('auth_token');
+            const formData = new FormData();
+            formData.append('email', email);
+            
+            const response = await fetch(getAdminProfileUrl(), {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: formData,
+            });
+            
+            if (!response.ok) {
+                const result = await response.json();
+                throw new Error(result.detail || result.message || 'Failed to update email');
+            }
+            
+            const updatedProfile = { ...userProfile, email: email };
+            await onProfileUpdate(updatedProfile);
+            showNotification('Email address updated successfully!');
+        } catch (error: any) {
+            console.error('Error updating email:', error);
+            showNotification(error.message || 'Failed to update email. Please try again.');
+        } finally {
+            setIsEmailLoading(false);
+        }
     };
 
     const handlePasswordSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -68,6 +122,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
             return;
         }
         
+        setIsPasswordLoading(true);
         try {
             const token = localStorage.getItem('auth_token');
             console.log('DEBUG: Token exists:', !!token);
@@ -98,6 +153,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
         } catch (error: any) {
             console.error('Error changing password:', error);
             showNotification(error.message || 'Failed to change password. Please try again.');
+        } finally {
+            setIsPasswordLoading(false);
         }
     };
     
@@ -109,6 +166,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
+            setIsAvatarLoading(true);
             
             try {
                 // Create preview URL
@@ -145,6 +203,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
                 showNotification('Failed to upload photo. Please try again.');
                 // Reset preview on error
                 setAvatarPreview(userProfile.avatarUrl);
+            } finally {
+                setIsAvatarLoading(false);
             }
         }
     };
@@ -182,14 +242,33 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
                  <form onSubmit={handleProfileSubmit} className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-secondary-text mb-1">Full Name</label>
-                        <input type="text" name="name" value={profile.name} onChange={handleProfileChange} className="w-full bg-dark-bg border border-border-color rounded-md p-2 focus:ring-accent-blue focus:border-accent-blue" />
+                        <input 
+                            type="text" 
+                            name="name" 
+                            value={profile.name} 
+                            onChange={handleProfileChange} 
+                            disabled={isProfileLoading}
+                            className="w-full bg-dark-bg border border-border-color rounded-md p-2 focus:ring-accent-blue focus:border-accent-blue disabled:opacity-50" 
+                        />
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-secondary-text mb-1">Position</label>
-                        <input type="text" name="position" value={profile.position} onChange={handleProfileChange} className="w-full bg-dark-bg border border-border-color rounded-md p-2 focus:ring-accent-blue focus:border-accent-blue" />
+                        <input 
+                            type="text" 
+                            name="position" 
+                            value={profile.position} 
+                            readOnly
+                            className="w-full bg-gray-700 border border-border-color rounded-md p-2 text-gray-400 cursor-not-allowed" 
+                        />
                     </div>
                     <div className="flex justify-end pt-2">
-                        <button type="submit" className="bg-accent-blue px-4 py-2 rounded-lg hover:bg-blue-600 font-semibold">Save Profile</button>
+                        <button 
+                            type="submit" 
+                            disabled={isProfileLoading}
+                            className="bg-accent-blue px-4 py-2 rounded-lg hover:bg-blue-600 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isProfileLoading ? 'Saving...' : 'Save Profile'}
+                        </button>
                     </div>
                 </form>
             </div>
@@ -210,9 +289,10 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
                         />
                          <button 
                             onClick={() => fileInputRef.current?.click()}
-                            className="bg-white/10 px-4 py-2 rounded-lg text-sm hover:bg-white/20 font-semibold"
+                            disabled={isAvatarLoading}
+                            className="bg-white/10 px-4 py-2 rounded-lg text-sm hover:bg-white/20 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Change Photo
+                            {isAvatarLoading ? 'Uploading...' : 'Change Photo'}
                         </button>
                         <p className="text-xs text-secondary-text mt-2">PNG, JPG up to 5MB.</p>
                      </div>
@@ -230,10 +310,23 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
                 <form onSubmit={handleEmailSubmit} className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-secondary-text mb-1">New Email Address</label>
-                        <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-dark-bg border border-border-color rounded-md p-2 focus:ring-accent-blue focus:border-accent-blue" required />
+                        <input 
+                            type="email" 
+                            value={email} 
+                            onChange={e => setEmail(e.target.value)} 
+                            disabled={isEmailLoading}
+                            className="w-full bg-dark-bg border border-border-color rounded-md p-2 focus:ring-accent-blue focus:border-accent-blue disabled:opacity-50" 
+                            required 
+                        />
                     </div>
                     <div className="flex justify-end pt-2">
-                        <button type="submit" className="bg-accent-blue px-4 py-2 rounded-lg hover:bg-blue-600 font-semibold">Update Email</button>
+                        <button 
+                            type="submit" 
+                            disabled={isEmailLoading}
+                            className="bg-accent-blue px-4 py-2 rounded-lg hover:bg-blue-600 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isEmailLoading ? 'Updating...' : 'Update Email'}
+                        </button>
                     </div>
                 </form>
             </div>
@@ -279,7 +372,13 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
                         />
                     </div>
                     <div className="flex justify-end pt-2">
-                        <button type="submit" className="bg-accent-blue px-4 py-2 rounded-lg hover:bg-blue-600 font-semibold">Update Password</button>
+                        <button 
+                            type="submit" 
+                            disabled={isPasswordLoading}
+                            className="bg-accent-blue px-4 py-2 rounded-lg hover:bg-blue-600 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isPasswordLoading ? 'Updating...' : 'Update Password'}
+                        </button>
                     </div>
                 </form>
             </div>

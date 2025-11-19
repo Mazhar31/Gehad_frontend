@@ -39,7 +39,7 @@ import { contactAPI, portfolioAPI } from '../services/api';
 
 const Logo: React.FC = () => (
     <div className="flex items-center space-x-2">
-         <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
             <path d="M2 7L12 12M12 22V12M22 7L12 12M16 4.5L6 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
         </svg>
@@ -176,7 +176,6 @@ const testimonials = [
     },
 ];
 
-
 const FaqItem: React.FC<{ question: string; children: React.ReactNode }> = ({ question, children }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
@@ -203,10 +202,7 @@ const SocialButton: React.FC<{ icon: React.ElementType; href: string; label: str
         aria-label={label}
         className="group relative p-3 flex items-center justify-center transition-all duration-300 ease-in-out"
     >
-        {/* Hover Glow Background */}
         <div className={`absolute inset-0 opacity-0 group-hover:opacity-20 rounded-full transition-opacity duration-300 bg-current ${colorClass} blur-md`}></div>
-        
-        {/* Icon */}
         <Icon className={`w-5 h-5 text-neutral-400 transition-all duration-300 group-hover:scale-110 group-hover:text-white z-10`} />
     </a>
 );
@@ -228,7 +224,6 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [publicPortfolio, setPublicPortfolio] = useState(portfolioCases);
 
-    // Load public portfolio on component mount
     React.useEffect(() => {
         const loadPublicPortfolio = async () => {
             try {
@@ -236,10 +231,8 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                 setPublicPortfolio(publicCases);
             } catch (error) {
                 console.error('Failed to load public portfolio:', error);
-                // Keep using local data as fallback
             }
         };
-        
         loadPublicPortfolio();
     }, [portfolioCases]);
 
@@ -252,9 +245,8 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
         e.preventDefault();
         setIsSubmitting(true);
         setSubmitError(null);
-        
+
         try {
-            // Try to submit via API first
             await contactAPI.submit(contactForm);
             setIsFormSubmitted(true);
             setContactForm({ name: '', email: '', message: '' });
@@ -262,7 +254,6 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
             console.error('Failed to submit contact form via API:', error);
             setSubmitError('Failed to send message via API, saving locally...');
             
-            // Fallback to local storage
             try {
                 await handleSaveContactMessage(contactForm);
                 setIsFormSubmitted(true);
@@ -276,7 +267,6 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
             setIsSubmitting(false);
         }
 
-        // Hide the success message after a few seconds
         if (isFormSubmitted) {
             setTimeout(() => {
                 setIsFormSubmitted(false);
@@ -285,7 +275,6 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
     };
 
     const sectionBackgroundClass = "bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-900 via-black to-black";
-
     return (
         <div className="bg-black text-primary-text scroll-smooth">
             <Header onNavigate={onNavigate} />
@@ -293,8 +282,8 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
             <main>
                 {/* Hero Section */}
                 <section id="home" className="relative pt-32 pb-20 text-center overflow-hidden">
-                     <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-                     <div className="absolute inset-x-0 top-0 h-96 bg-gradient-to-b from-blue-900/20 to-transparent blur-3xl"></div>
+                    <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+                    <div className="absolute inset-x-0 top-0 h-96 bg-gradient-to-b from-blue-900/20 to-transparent blur-3xl"></div>
                     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-400">
                             Turn Your Data Into an AI-Powered Dashboard
@@ -306,10 +295,13 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                         </div>
                     </div>
                     
-                    {/* Updated Interactive Hero Dashboard */}
-                    <div className="mt-16 max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                        <div className="bg-gradient-to-b from-gray-900 to-black p-2 rounded-3xl shadow-2xl shadow-blue-900/20">
-                            <HeroDashboard />
+                    <div className="mt-16 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                        <div className="bg-gradient-to-b from-sidebar-bg to-dark-bg p-2 rounded-3xl shadow-2xl shadow-blue-900/20">
+                            <img 
+                                src="https://firebasestorage.googleapis.com/v0/b/ai-kpi-dashboard.firebasestorage.app/o/hero%2FIMG_3593.jpeg?alt=media&token=5d438439-06dd-406f-bcbd-329e49632109"
+                                alt="OneQlek App Dashboard" 
+                                className="rounded-2xl border border-border-color w-full" 
+                            />
                         </div>
                     </div>
 
@@ -352,7 +344,6 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                         </div>
                     </div>
                 </section>
-                
                 {/* Integrations Section */}
                 <section className="py-20 bg-sidebar-bg/50">
                     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -397,10 +388,8 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                         </div>
                     </div>
                 </section>
-
                 {/* Pricing Section */}
                 <section id="pricing" className={`py-24 ${sectionBackgroundClass} relative overflow-hidden`}>
-                    {/* Background elements */}
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none">
                         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-900/20 rounded-full blur-3xl"></div>
                         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-900/20 rounded-full blur-3xl"></div>
@@ -417,7 +406,6 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-                            {/* One-Time Cost Card */}
                             <div className="lg:col-span-4 bg-card-bg/50 backdrop-blur-sm border border-white/10 rounded-3xl p-8 flex flex-col relative overflow-hidden group hover:border-blue-500/30 transition-colors duration-300">
                                 <div className="absolute inset-0 bg-gradient-to-b from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                                 <div className="relative z-10">
@@ -440,14 +428,12 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                                 </div>
                             </div>
 
-                            {/* Plus Sign (Visual) */}
                             <div className="lg:col-span-1 flex items-center justify-center">
                                 <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50">
                                     <PlusIcon className="w-6 h-6" />
                                 </div>
                             </div>
 
-                            {/* Annual Subscription Container */}
                             <div className="lg:col-span-7 flex flex-col">
                                 <div className="bg-gradient-to-br from-purple-900/20 to-black border border-white/10 rounded-3xl p-8 h-full relative overflow-hidden">
                                     <div className="absolute top-0 right-0 p-8 opacity-10">
@@ -471,9 +457,7 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                                             Your annual fee is calculated based on four key usage factors, ensuring you only pay for the scale and complexity you need.
                                         </p>
 
-                                        {/* Interactive Factors Grid */}
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            {/* Factor 1: Dashboards */}
                                             <div className="bg-white/5 hover:bg-white/10 border border-white/5 hover:border-purple-500/30 rounded-xl p-5 transition-all duration-300 group cursor-default">
                                                 <div className="flex items-center mb-3">
                                                     <Squares2X2Icon className="w-6 h-6 text-purple-400 mr-3 group-hover:scale-110 transition-transform" />
@@ -482,7 +466,6 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                                                 <p className="text-sm text-gray-400">Volume of distinct dashboard views deployed.</p>
                                             </div>
 
-                                            {/* Factor 2: Add-ins */}
                                             <div className="bg-white/5 hover:bg-white/10 border border-white/5 hover:border-pink-500/30 rounded-xl p-5 transition-all duration-300 group cursor-default">
                                                 <div className="flex items-center mb-3">
                                                     <PuzzlePieceIcon className="w-6 h-6 text-pink-400 mr-3 group-hover:scale-110 transition-transform" />
@@ -491,7 +474,6 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                                                 <p className="text-sm text-gray-400">Small creative tools helping in day-to-day tasks.</p>
                                             </div>
 
-                                            {/* Factor 3: Complexity */}
                                             <div className="bg-white/5 hover:bg-white/10 border border-white/5 hover:border-amber-500/30 rounded-xl p-5 transition-all duration-300 group cursor-default">
                                                 <div className="flex items-center mb-3">
                                                     <CpuChipIcon className="w-6 h-6 text-amber-400 mr-3 group-hover:scale-110 transition-transform" />
@@ -500,7 +482,6 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                                                 <p className="text-sm text-gray-400">Depth of calculations and data relationships.</p>
                                             </div>
 
-                                            {/* Factor 4: Users */}
                                             <div className="bg-white/5 hover:bg-white/10 border border-white/5 hover:border-green-500/30 rounded-xl p-5 transition-all duration-300 group cursor-default">
                                                 <div className="flex items-center mb-3">
                                                     <UsersIcon className="w-6 h-6 text-green-400 mr-3 group-hover:scale-110 transition-transform" />
@@ -524,7 +505,6 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                         </div>
                     </div>
                 </section>
-
                 {/* Client Success Stories */}
                 <section id="stories">
                     <ClientSuccessStories />
@@ -576,7 +556,6 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                         </div>
                     </div>
                 </section>
-
                 {/* Contact Section */}
                 <section id="contact" className={`py-20 border-t border-white/5 ${sectionBackgroundClass}`}>
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -586,7 +565,6 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                         </div>
                         <div className="mt-12 max-w-6xl mx-auto">
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-                                {/* Form Card */}
                                 <div className="bg-card-bg border border-border-color rounded-2xl p-8">
                                     <h3 className="text-2xl font-bold text-white mb-6">Send us a message</h3>
                                     {isFormSubmitted ? (
@@ -602,30 +580,29 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                                                 </div>
                                             )}
                                             <form onSubmit={handleContactSubmit} className="space-y-4">
-                                            <div>
-                                                <label htmlFor="name" className="block text-sm font-medium text-secondary-text mb-2">Your Name</label>
-                                                <input type="text" id="name" name="name" value={contactForm.name} onChange={handleContactChange} required className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none" />
-                                            </div>
-                                            <div>
-                                                <label htmlFor="email" className="block text-sm font-medium text-secondary-text mb-2">Your Email</label>
-                                                <input type="email" id="email" name="email" value={contactForm.email} onChange={handleContactChange} required className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none" />
-                                            </div>
-                                            <div>
-                                                <label htmlFor="message" className="block text-sm font-medium text-secondary-text mb-2">Message</label>
-                                                <textarea id="message" name="message" rows={4} value={contactForm.message} onChange={handleContactChange} required className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none"></textarea>
-                                            </div>
-                                            <PremiumButton 
-                                                type="submit" 
-                                                className="w-full" 
-                                                disabled={isSubmitting}
-                                            >
-                                                {isSubmitting ? 'Sending...' : 'Send Message'}
-                                            </PremiumButton>
-                                        </form>
+                                                <div>
+                                                    <label htmlFor="name" className="block text-sm font-medium text-secondary-text mb-2">Your Name</label>
+                                                    <input type="text" id="name" name="name" value={contactForm.name} onChange={handleContactChange} required className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none" />
+                                                </div>
+                                                <div>
+                                                    <label htmlFor="email" className="block text-sm font-medium text-secondary-text mb-2">Your Email</label>
+                                                    <input type="email" id="email" name="email" value={contactForm.email} onChange={handleContactChange} required className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none" />
+                                                </div>
+                                                <div>
+                                                    <label htmlFor="message" className="block text-sm font-medium text-secondary-text mb-2">Message</label>
+                                                    <textarea id="message" name="message" rows={4} value={contactForm.message} onChange={handleContactChange} required className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none"></textarea>
+                                                </div>
+                                                <PremiumButton 
+                                                    type="submit" 
+                                                    className="w-full" 
+                                                    disabled={isSubmitting}
+                                                >
+                                                    {isSubmitting ? 'Sending...' : 'Send Message'}
+                                                </PremiumButton>
+                                            </form>
                                         </>
                                     )}
                                 </div>
-                                 {/* Map */}
                                 <div className="overflow-hidden rounded-2xl border border-border-color h-full min-h-[450px]">
                                     <iframe
                                         src="https://maps.google.com/maps?q=dubai&t=&z=13&ie=UTF8&iwloc=&output=embed"
@@ -640,7 +617,6 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                                 </div>
                             </div>
 
-                            {/* Contact Info Card - Below */}
                             <div className="mt-12">
                                 <div className="bg-card-bg border border-border-color rounded-2xl p-6">
                                     <h3 className="text-xl font-bold text-white mb-6">Contact Information</h3>
@@ -687,8 +663,6 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
             <footer className="relative py-8 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-6xl mx-auto">
                     <div className="bg-neutral-900/50 backdrop-blur-xl border border-white/5 rounded-full px-2 py-2 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_0_40px_-10px_rgba(0,0,0,0.5)]">
-                        
-                        {/* Logo & Copyright */}
                         <div className="flex items-center gap-4 pl-6">
                              <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
@@ -697,7 +671,6 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                             <span className="text-sm text-neutral-400 font-medium">© {new Date().getFullYear()} OneQlek</span>
                         </div>
 
-                        {/* Social Icons Bar */}
                         <div className="flex items-center gap-1 pr-2">
                            <SocialButton href="#" icon={TwitterIcon} label="Twitter" colorClass="text-sky-500" />
                            <SocialButton href="#" icon={FacebookIcon} label="Facebook" colorClass="text-blue-600" />
