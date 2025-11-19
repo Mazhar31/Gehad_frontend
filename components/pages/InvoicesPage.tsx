@@ -1,5 +1,3 @@
-
-
 import React, { useState, useMemo } from 'react';
 import { useData } from '../DataContext.tsx';
 import { Invoice, InvoiceItem, Client } from '../../types.ts';

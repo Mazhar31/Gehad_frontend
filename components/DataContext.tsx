@@ -17,10 +17,6 @@ import {
     adminAPI
 } from '../services/api';
 
-
-
-
-
 interface DataContextType {
     projects: Project[];
     clients: Client[];
@@ -31,7 +27,6 @@ interface DataContextType {
     users: User[];
     contactMessages: ContactMessage[];
     portfolioCases: PortfolioCase[];
-    // FIX: Added categories state and handlers to data context.
     categories: Category[];
     handleSaveProject: (project: Project) => Promise<void>;
     handleDeleteProject: (projectId: string) => Promise<void>;

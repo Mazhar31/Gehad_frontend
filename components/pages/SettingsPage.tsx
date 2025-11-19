@@ -1,5 +1,3 @@
-
-
 import React, { useState, useRef, useEffect } from 'react';
 import { UserCircleIcon, PhotoIcon, EnvelopeIcon, KeyIcon } from '../icons.tsx';
 
@@ -74,7 +72,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
                 formData.append('avatar', file);
                 
                 const token = localStorage.getItem('auth_token');
-                const response = await fetch('http://localhost:8000/api/admin/firebase/profile', {
+                const response = await fetch('https://oneqlek-backend-334489433469.us-central1.run.app/api/admin/firebase/profile', {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`,

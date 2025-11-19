@@ -1,24 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
-// FIX: Added file extension to import to resolve module error.
 import Sidebar from './components/Sidebar.tsx';
-// FIX: Added file extension to import to resolve module error.
 import Header from './components/Header.tsx';
-// FIX: Added file extension to import to resolve module error.
 import DashboardPage from './components/pages/DashboardPage.tsx';
-// FIX: Added file extension to import to resolve module error.
 import ProjectsPage from './components/pages/ProjectsPage.tsx';
-// FIX: Added file extension to import to resolve module error.
 import ClientsPage from './components/pages/ClientsPage.tsx';
-// FIX: Added file extension to import to resolve module error.
 import InvoicesPage from './components/pages/InvoicesPage.tsx';
-// FIX: Added file extension to import to resolve module error.
 import OrganizationManagementPage from './components/pages/OrganizationManagementPage.tsx';
-// FIX: Added file extension to import to resolve module error.
 import PaymentPlansPage from './components/pages/PaymentPlansPage.tsx';
-// FIX: Added file extension to import to resolve module error.
 import SettingsPage from './components/pages/SettingsPage.tsx';
-// FIX: Added file extension to import to resolve module error.
 import UserManagementPage from './components/pages/UserManagementPage.tsx';
 import LandingPage from './components/LandingPage.tsx';
 import LoginPage from './components/pages/LoginPage.tsx';
@@ -53,7 +42,7 @@ function App() {
       const token = localStorage.getItem('auth_token');
       if (!token) return;
       
-      const response = await fetch('http://localhost:8000/api/admin/firebase/profile', {
+      const response = await fetch('https://oneqlek-backend-334489433469.us-central1.run.app/api/admin/firebase/profile', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -86,7 +75,12 @@ function App() {
 
   // Check for existing authentication on app startup
   useEffect(() => {
+    let hasInitialized = false;
+    
     const initializeAuth = async () => {
+      if (hasInitialized) return;
+      hasInitialized = true;
+      
       console.log('🔄 Initializing authentication...');
       const token = localStorage.getItem('auth_token');
       const role = localStorage.getItem('user_role') as 'admin' | 'user' | null;
@@ -98,7 +92,7 @@ function App() {
         try {
           console.log('🔍 Validating token with backend...');
           // Try to validate the token by making a simple API call
-          const response = await fetch('http://localhost:8000/api/auth/me', {
+          const response = await fetch('https://oneqlek-backend-334489433469.us-central1.run.app/api/auth/me', {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
@@ -132,7 +126,7 @@ function App() {
     };
 
     initializeAuth();
-  }, [login]);
+  }, []);
 
   const handleNavigate = (page: string) => {
     setCurrentPage(page);

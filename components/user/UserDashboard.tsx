@@ -75,9 +75,9 @@ const UserDashboard: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
     // Create a temporary client if user doesn't have one
     const effectiveClient = userClient || {
         id: 'temp-client',
-        name: 'Default Client',
+        company: 'Default Client',
         email: currentUser.email,
-        phone: '',
+        mobile: '',
         address: '',
         avatarUrl: currentUser.avatarUrl,
         groupId: undefined
