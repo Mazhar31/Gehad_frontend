@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { UserCircleIcon, PhotoIcon, EnvelopeIcon, KeyIcon } from '../icons.tsx';
+import { getAdminProfileUrl } from '../../config/api';
 
 // Removed toBase64 function as we're now using Firebase Storage
 
@@ -72,7 +73,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
                 formData.append('avatar', file);
                 
                 const token = localStorage.getItem('auth_token');
-                const response = await fetch('https://initial-sonja-akivaemail-c48d22a5.koyeb.app/api/admin/firebase/profile', {
+                const response = await fetch(getAdminProfileUrl(), {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`,

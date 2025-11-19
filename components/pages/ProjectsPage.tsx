@@ -5,6 +5,7 @@ import Modal from '../Modal.tsx';
 import { PlusIcon, MagnifyingGlassIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
 import ProjectDetails from '../ProjectDetails.tsx';
+import { getUploadUrl } from '../../config/api';
 
 const ProjectsPage: React.FC = () => {
     const { projects, clients, departments, paymentPlans, groups, handleSaveProject, handleDeleteProject } = useData();
@@ -191,7 +192,7 @@ const ProjectForm: React.FC<{
                 formData.append('entity_id', project?.id || `project-${Date.now()}`);
                 
                 const token = localStorage.getItem('auth_token');
-                const response = await fetch('https://initial-sonja-akivaemail-c48d22a5.koyeb.app/api/upload/image', {
+                const response = await fetch(getUploadUrl(), {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,

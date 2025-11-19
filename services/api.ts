@@ -10,8 +10,9 @@ import {
   Group, 
   Category 
 } from '../types';
+import { API_CONFIG } from '../config/api';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://initial-sonja-akivaemail-c48d22a5.koyeb.app/api';
+const API_BASE_URL = API_CONFIG.BASE_URL;
 
 // Helper function for API calls with error handling
 async function apiCall<T>(

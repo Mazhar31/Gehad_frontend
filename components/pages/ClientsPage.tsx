@@ -5,6 +5,7 @@ import Modal from '../Modal.tsx';
 import ConfirmDialog from '../ConfirmDialog.tsx';
 import { PlusIcon, EnvelopeIcon, PhoneIcon, MapPinIcon, MagnifyingGlassIcon, FolderIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
+import { getUploadUrl } from '../../config/api';
 
 const ClientsPage: React.FC = () => {
     const { clients, projects, paymentPlans, groups, handleSaveClient, handleDeleteClient } = useData();
@@ -228,7 +229,7 @@ const ClientForm: React.FC<{
                 formData.append('entity_id', client?.id || `client-${Date.now()}`);
                 
                 const token = localStorage.getItem('auth_token');
-                const response = await fetch('https://initial-sonja-akivaemail-c48d22a5.koyeb.app/api/upload/image', {
+                const response = await fetch(getUploadUrl(), {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,

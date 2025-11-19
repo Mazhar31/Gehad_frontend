@@ -4,6 +4,7 @@ import Modal from '../Modal.tsx';
 import PortfolioCard from '../PortfolioCard.tsx';
 import { PlusIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
+import { getUploadUrl } from '../../config/api';
 
 const PortfolioPage: React.FC = () => {
     const { portfolioCases, handleSavePortfolioCase, handleDeletePortfolioCase } = useData();
@@ -116,7 +117,7 @@ const PortfolioForm: React.FC<{
                 formData.append('entity_id', caseItem?.id || `portfolio-${Date.now()}`);
                 
                 const token = localStorage.getItem('auth_token');
-                const response = await fetch('https://initial-sonja-akivaemail-c48d22a5.koyeb.app/api/upload/image', {
+                const response = await fetch(getUploadUrl(), {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,

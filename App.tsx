@@ -17,6 +17,7 @@ import { useData } from './components/DataContext.tsx';
 import DeployKpiDashboardPage from './components/pages/DeployKpiDashboardPage.tsx';
 import PortfolioPage from './components/pages/PortfolioPage.tsx';
 import { authService } from './services/auth';
+import { getAdminProfileUrl, getFullUrl, API_CONFIG } from './config/api';
 
 
 function App() {
@@ -42,7 +43,7 @@ function App() {
       const token = localStorage.getItem('auth_token');
       if (!token) return;
       
-      const response = await fetch('https://initial-sonja-akivaemail-c48d22a5.koyeb.app/api/admin/firebase/profile', {
+      const response = await fetch(getAdminProfileUrl(), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -92,7 +93,7 @@ function App() {
         try {
           console.log('🔍 Validating token with backend...');
           // Try to validate the token by making a simple API call
-          const response = await fetch('https://initial-sonja-akivaemail-c48d22a5.koyeb.app/api/auth/me', {
+          const response = await fetch(getFullUrl(API_CONFIG.ENDPOINTS.GET_CURRENT_USER), {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
