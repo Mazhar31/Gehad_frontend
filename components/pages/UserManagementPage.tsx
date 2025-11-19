@@ -4,6 +4,7 @@ import Modal from '../Modal.tsx';
 import UserCard from '../UserCard.tsx';
 import { PlusIcon, MagnifyingGlassIcon, ArrowDownTrayIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
+import { getUploadUrl } from '../../config/api';
 
 const UserManagementPage: React.FC = () => {
     const { users, clients, projects, handleSaveUser, handleDeleteUser } = useData();
@@ -235,7 +236,7 @@ const UserForm: React.FC<{
                 formData.append('entity_id', user?.id || `user-${Date.now()}`);
                 
                 const token = localStorage.getItem('auth_token');
-                const response = await fetch('https://initial-sonja-akivaemail-c48d22a5.koyeb.app/api/upload/image', {
+                const response = await fetch(getUploadUrl(), {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
