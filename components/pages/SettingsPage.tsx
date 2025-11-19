@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { UserCircleIcon, PhotoIcon, EnvelopeIcon, KeyIcon } from '../icons.tsx';
-import { getAdminProfileUrl } from '../../config/api';
+import { getAdminProfileUrl, getAdminChangePasswordUrl } from '../../config/api';
 
 // Removed toBase64 function as we're now using Firebase Storage
 
@@ -20,6 +20,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
     const [email, setEmail] = useState(userProfile.email);
     const [avatarPreview, setAvatarPreview] = useState<string>(userProfile.avatarUrl);
     const [notification, setNotification] = useState<string | null>(null);
+    const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -52,11 +53,57 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
         showNotification('Email address updated successfully!');
     };
 
-    const handlePasswordSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handlePasswordSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log("Password change requested.");
-        showNotification('Password changed successfully!');
-        e.currentTarget.reset();
+        
+        // Validate passwords match
+        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+            showNotification('New passwords do not match!');
+            return;
+        }
+        
+        // Validate password length
+        if (passwordForm.newPassword.length < 6) {
+            showNotification('New password must be at least 6 characters long!');
+            return;
+        }
+        
+        try {
+            const token = localStorage.getItem('auth_token');
+            console.log('DEBUG: Token exists:', !!token);
+            console.log('DEBUG: API URL:', getAdminChangePasswordUrl());
+            
+            const response = await fetch(getAdminChangePasswordUrl(), {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    current_password: passwordForm.currentPassword,
+                    new_password: passwordForm.newPassword
+                }),
+            });
+            
+            console.log('DEBUG: Response status:', response.status);
+            const result = await response.json();
+            console.log('DEBUG: Response body:', result);
+            
+            if (!response.ok) {
+                throw new Error(result.detail || result.message || 'Failed to change password');
+            }
+            
+            showNotification('Password changed successfully!');
+            setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        } catch (error: any) {
+            console.error('Error changing password:', error);
+            showNotification(error.message || 'Failed to change password. Please try again.');
+        }
+    };
+    
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setPasswordForm(prev => ({ ...prev, [name]: value }));
     };
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -198,15 +245,38 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
                 <form onSubmit={handlePasswordSubmit} className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-secondary-text mb-1">Current Password</label>
-                        <input type="password" name="currentPassword" className="w-full bg-dark-bg border border-border-color rounded-md p-2 focus:ring-accent-blue focus:border-accent-blue" required />
+                        <input 
+                            type="password" 
+                            name="currentPassword" 
+                            value={passwordForm.currentPassword}
+                            onChange={handlePasswordChange}
+                            className="w-full bg-dark-bg border border-border-color rounded-md p-2 focus:ring-accent-blue focus:border-accent-blue" 
+                            required 
+                        />
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-secondary-text mb-1">New Password</label>
-                        <input type="password" name="newPassword" className="w-full bg-dark-bg border border-border-color rounded-md p-2 focus:ring-accent-blue focus:border-accent-blue" required />
+                        <input 
+                            type="password" 
+                            name="newPassword" 
+                            value={passwordForm.newPassword}
+                            onChange={handlePasswordChange}
+                            className="w-full bg-dark-bg border border-border-color rounded-md p-2 focus:ring-accent-blue focus:border-accent-blue" 
+                            required 
+                            minLength={6}
+                        />
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-secondary-text mb-1">Confirm New Password</label>
-                        <input type="password" name="confirmPassword" className="w-full bg-dark-bg border border-border-color rounded-md p-2 focus:ring-accent-blue focus:border-accent-blue" required />
+                        <input 
+                            type="password" 
+                            name="confirmPassword" 
+                            value={passwordForm.confirmPassword}
+                            onChange={handlePasswordChange}
+                            className="w-full bg-dark-bg border border-border-color rounded-md p-2 focus:ring-accent-blue focus:border-accent-blue" 
+                            required 
+                            minLength={6}
+                        />
                     </div>
                     <div className="flex justify-end pt-2">
                         <button type="submit" className="bg-accent-blue px-4 py-2 rounded-lg hover:bg-blue-600 font-semibold">Update Password</button>

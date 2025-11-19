@@ -4,6 +4,7 @@ import { Invoice, InvoiceItem, Client } from '../../types.ts';
 import Modal from '../Modal.tsx';
 import InvoiceDetail from '../InvoiceCard.tsx';
 import { PlusIcon, EyeIcon, PencilSquareIcon, TrashIcon, ArrowDownTrayIcon, EnvelopeIcon } from '../icons.tsx';
+import { getSendInvoiceUrl } from '../../config/api';
 
 const getStatusClass = (status: Invoice['status']) => {
     switch (status) {
@@ -74,15 +75,81 @@ const InvoicesPage: React.FC = () => {
     }, [invoices, filterStatus, filterCompany, filterProject]);
 
     const handlePrint = () => {
+        const printContent = document.querySelector('.printable-content');
+        if (!printContent) return;
+        
+        // Create a hidden div with the invoice content
+        const printDiv = document.createElement('div');
+        printDiv.innerHTML = printContent.outerHTML;
+        printDiv.style.position = 'fixed';
+        printDiv.style.top = '-9999px';
+        printDiv.style.left = '-9999px';
+        printDiv.className = 'print-only-content';
+        document.body.appendChild(printDiv);
+        
+        // Add print styles
+        const printStyles = `
+            @media print {
+                body * { visibility: hidden; }
+                .print-only-content, .print-only-content * { 
+                    visibility: visible;
+                    position: static !important;
+                    background: white !important;
+                    color: black !important;
+                }
+                .print-only-content {
+                    position: absolute !important;
+                    left: 0 !important;
+                    top: 0 !important;
+                    width: 100% !important;
+                }
+                @page { margin: 0.5in; }
+            }
+        `;
+        
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = printStyles;
+        document.head.appendChild(styleSheet);
+        
+        // Print
         window.print();
+        
+        // Cleanup
+        setTimeout(() => {
+            document.body.removeChild(printDiv);
+            document.head.removeChild(styleSheet);
+        }, 1000);
     };
+    
 
-    const handleSendInvoice = (invoice: Invoice, client: Client | undefined) => {
+
+    const handleSendInvoice = async (invoice: Invoice, client: Client | undefined) => {
         if (!client || !client.email) {
             setNotification('Error: Client email not found.');
-        } else {
-            const message = `Invoice ${invoice.invoiceNumber} sent to ${client.email}.`;
-            setNotification(message);
+            setTimeout(() => setNotification(null), 3000);
+            return;
+        }
+        
+        try {
+            const token = localStorage.getItem('auth_token');
+            const response = await fetch(getSendInvoiceUrl(invoice.id), {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const result = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(result.detail || result.message || 'Failed to send invoice');
+            }
+            
+            setNotification(`Invoice ${invoice.invoiceNumber} sent successfully to ${client.email}`);
+        } catch (error: any) {
+            console.error('Error sending invoice:', error);
+            setNotification(`Error: ${error.message || 'Failed to send invoice'}`);
         }
         
         setTimeout(() => {
@@ -256,30 +323,7 @@ const InvoicesPage: React.FC = () => {
                             client={clients.find(c => c.id === viewingInvoice.clientId)}
                         />
                     </div>
-                    <style>{`
-                      @media print {
-                        body * {
-                          visibility: hidden;
-                        }
-                        .printable-content, .printable-content * {
-                          visibility: visible;
-                        }
-                        .printable-content {
-                          position: absolute;
-                          left: 0;
-                          top: 0;
-                          width: 100%;
-                          height: 100%;
-                          overflow: visible;
-                        }
-                        .no-print {
-                          display: none;
-                        }
-                        .fixed {
-                            display: none;
-                        }
-                      }
-                    `}</style>
+
                 </Modal>
             )}
             
