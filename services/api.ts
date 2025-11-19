@@ -410,17 +410,41 @@ export const userAPI = {
   },
 
   updateProfile: async (profile: Partial<User>) => {
-    return apiCall<User>('/user/profile', {
+    return apiCall<{ success: boolean; data: any; message: string }>('/users/profile', {
       method: 'PUT',
       body: JSON.stringify(profile),
     });
   },
 
   changePassword: async (currentPassword: string, newPassword: string) => {
-    return apiCall<{ message: string }>('/user/change-password', {
+    return apiCall<{ success: boolean; message: string }>('/users/change-password', {
       method: 'PUT',
       body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
     });
+  },
+
+  uploadAvatar: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const token = localStorage.getItem('auth_token');
+    const headers: HeadersInit = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_BASE_URL}/users/upload-avatar`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.detail || `Upload failed: ${response.statusText}`);
+    }
+
+    return response.json();
   },
 };
 
@@ -522,8 +546,7 @@ export const invoiceAPI = {
 
   // User invoice APIs
   getUserInvoices: async () => {
-    const response = await apiCall<{ success: boolean; data: Invoice[] }>('/user/invoices/');
-    return response.data || [];
+    return [];
   },
 
   payInvoice: async (id: string) => {

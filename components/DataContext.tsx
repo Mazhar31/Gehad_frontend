@@ -53,7 +53,7 @@ interface DataContextType {
     isLoggedIn: boolean;
     userRole: 'admin' | 'user' | null;
     currentUser: User | null;
-    login: (role: 'admin' | 'user', userEmail?: string) => void;
+    login: (role: 'admin' | 'user', userEmail?: string) => Promise<void>;
     logout: () => void;
 }
 
@@ -678,34 +678,57 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, [isLoggedIn, userRole]);
 
     // Auth Handlers
-    const login = (role: 'admin' | 'user', userEmail?: string) => {
+    const login = async (role: 'admin' | 'user', userEmail?: string) => {
         console.log('🔑 Logging in user:', { role, userEmail });
         setIsLoggedIn(true);
         setUserRole(role);
         setError(null); // Clear any previous errors
         
         if (role === 'user' && userEmail) {
-            let userToLogin = users.find(u => u.email.toLowerCase() === userEmail.toLowerCase());
-            
-            // If user not found in local data, create a temporary user object
-            if (!userToLogin) {
-                console.log('👤 User not found in local data, creating temporary user');
-                userToLogin = {
-                    id: `temp-${Date.now()}`,
-                    name: userEmail.split('@')[0], // Use email prefix as name
-                    email: userEmail,
-                    position: 'User',
-                    clientId: 'temp-client',
-                    role: 'normal',
-                    dashboardAccess: 'view-only',
-                    projectIds: [],
-                    avatarUrl: `https://i.pravatar.cc/150?u=${userEmail}`,
-                    password: ''
-                };
+            // Fetch user data from backend to get project assignments
+            try {
+                const response = await authAPI.getCurrentUser();
+                console.log('🔍 Full API response:', response);
+                
+                if (response && response.data) {
+                    const currentUserData = response.data;
+                    console.log('🔍 User data from API:', currentUserData);
+                    
+                    const userToLogin = {
+                        id: currentUserData.id,
+                        name: currentUserData.name || userEmail.split('@')[0],
+                        email: userEmail,
+                        position: currentUserData.position || 'User',
+                        clientId: currentUserData.client_id || 'temp-client',
+                        role: currentUserData.role || 'normal',
+                        dashboardAccess: currentUserData.dashboard_access || 'view-only',
+                        projectIds: currentUserData.project_ids || [],
+                        avatarUrl: currentUserData.avatar_url || `https://i.pravatar.cc/150?u=${userEmail}`,
+                        password: ''
+                    };
+                    setCurrentUser(userToLogin);
+                    console.log('👤 User loaded from Firestore with projects:', userToLogin.projectIds);
+                    return;
+                }
+            } catch (error) {
+                console.log('⚠️ Failed to load user from Firestore:', error);
             }
             
+            // Fallback - should not happen if Firestore is working
+            console.log('👤 Creating temporary user - Firestore data not available');
+            const userToLogin = {
+                id: `temp-${Date.now()}`,
+                name: userEmail.split('@')[0],
+                email: userEmail,
+                position: 'User',
+                clientId: 'temp-client',
+                role: 'normal',
+                dashboardAccess: 'view-only',
+                projectIds: [],
+                avatarUrl: `https://i.pravatar.cc/150?u=${userEmail}`,
+                password: ''
+            };
             setCurrentUser(userToLogin);
-            console.log('👤 User set:', userToLogin?.name || 'Unknown');
         }
         console.log('✅ Login successful');
     };
