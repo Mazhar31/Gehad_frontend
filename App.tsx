@@ -22,6 +22,7 @@ import SettingsPage from './components/pages/SettingsPage.tsx';
 import UserManagementPage from './components/pages/UserManagementPage.tsx';
 import LandingPage from './components/LandingPage.tsx';
 import LoginPage from './components/pages/LoginPage.tsx';
+import ResetPasswordPage from './components/pages/ResetPasswordPage.tsx';
 import UserDashboard from './components/user/UserDashboard.tsx';
 import { useData } from './components/DataContext.tsx';
 import DeployKpiDashboardPage from './components/pages/DeployKpiDashboardPage.tsx';
@@ -34,7 +35,7 @@ function App() {
   
   // Debug logging for app state
   console.log('📊 App state:', { isLoggedIn, userRole, hasCurrentUser: !!currentUser, error, loading });
-  const [authPage, setAuthPage] = useState<'login' | null>(null);
+  const [authPage, setAuthPage] = useState<'login' | 'reset-password' | null>(null);
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -45,6 +46,43 @@ function App() {
     email: 'admin@example.com',
     avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026702d'
   });
+
+  // Load admin profile from backend
+  const loadAdminProfile = async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) return;
+      
+      const response = await fetch('http://localhost:8000/api/admin/firebase/profile', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        const profile = result.data;
+        setAdminProfile({
+          name: profile.name || 'Admin',
+          position: profile.position || 'Super Admin',
+          email: profile.email || 'admin@example.com',
+          avatarUrl: profile.avatar_url || 'https://i.pravatar.cc/150?u=a042581f4e29026702d'
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load admin profile:', error);
+    }
+  };
+
+  // Check if this is a password reset page
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('token') && window.location.pathname === '/reset-password') {
+      setAuthPage('reset-password');
+      return;
+    }
+  }, []);
 
   // Check for existing authentication on app startup
   useEffect(() => {
@@ -71,6 +109,10 @@ function App() {
             console.log('✅ Token is valid, logging in user');
             // Token is valid, restore login state
             login(role, email || undefined);
+            // Load admin profile if admin
+            if (role === 'admin') {
+              await loadAdminProfile();
+            }
           } else {
             console.log('❌ Token is invalid, clearing auth data');
             // Token is invalid, clear it
@@ -97,10 +139,15 @@ function App() {
     setSidebarOpen(false); // Close mobile sidebar on navigation
   };
   
-  const handleLoginSuccess = (role: 'admin' | 'user', userEmail?: string) => {
+  const handleLoginSuccess = async (role: 'admin' | 'user', userEmail?: string) => {
     console.log('🎉 Login success in App.tsx:', { role, userEmail });
     login(role, userEmail);
     setAuthPage(null);
+    
+    // Load admin profile after login
+    if (role === 'admin') {
+      await loadAdminProfile();
+    }
     
     // For user logins, add a small delay to ensure DataContext is updated
     if (role === 'user') {
@@ -120,12 +167,14 @@ function App() {
     window.location.reload();
   };
 
-  const handleNavigateAuth = (page: 'login' | null) => {
+  const handleNavigateAuth = (page: 'login' | 'reset-password' | null) => {
     setAuthPage(page);
   };
 
   const handleAdminProfileUpdate = (updatedProfile: typeof adminProfile) => {
     setAdminProfile(updatedProfile);
+    // Also reload from backend to ensure sync
+    setTimeout(loadAdminProfile, 500);
   };
 
   const handleToggleSidebarCollapse = () => {
@@ -189,6 +238,9 @@ function App() {
   if (!isLoggedIn) {
     if (authPage === 'login') {
       return <LoginPage onLoginSuccess={handleLoginSuccess} onNavigate={handleNavigateAuth} />;
+    }
+    if (authPage === 'reset-password') {
+      return <ResetPasswordPage onSuccess={() => setAuthPage('login')} />;
     }
     return <LandingPage onNavigate={handleNavigateAuth} />;
   }

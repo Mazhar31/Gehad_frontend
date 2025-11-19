@@ -3,12 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { UserCircleIcon, PhotoIcon, EnvelopeIcon, KeyIcon } from '../icons.tsx';
 
-const toBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = error => reject(error);
-});
+// Removed toBase64 function as we're now using Firebase Storage
 
 interface SettingsPageProps {
     userProfile: {
@@ -46,13 +41,15 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
 
     const handleProfileSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onProfileUpdate({ ...userProfile, ...profile });
+        const updatedProfile = { ...userProfile, ...profile };
+        onProfileUpdate(updatedProfile);
         showNotification('Profile information updated successfully!');
     };
     
     const handleEmailSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onProfileUpdate({ ...userProfile, email: email });
+        const updatedProfile = { ...userProfile, email: email };
+        onProfileUpdate(updatedProfile);
         showNotification('Email address updated successfully!');
     };
 
@@ -66,10 +63,43 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            const base64 = await toBase64(file);
-            setAvatarPreview(base64); // Update local preview first
-            onProfileUpdate({ ...userProfile, avatarUrl: base64 });
-            showNotification('Profile photo updated!');
+            
+            try {
+                // Create preview URL
+                const previewUrl = URL.createObjectURL(file);
+                setAvatarPreview(previewUrl);
+                
+                // Upload to Firebase Storage using the new Firebase admin endpoint
+                const formData = new FormData();
+                formData.append('avatar', file);
+                
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch('http://localhost:8000/api/admin/firebase/profile', {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: formData,
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Upload failed');
+                }
+                
+                const result = await response.json();
+                const newAvatarUrl = result.data.avatar_url;
+                
+                // Update the profile with the new Firebase Storage URL
+                const updatedProfile = { ...userProfile, avatarUrl: newAvatarUrl };
+                onProfileUpdate(updatedProfile);
+                setAvatarPreview(newAvatarUrl);
+                showNotification('Profile photo updated!');
+            } catch (error) {
+                console.error('Error uploading avatar:', error);
+                showNotification('Failed to upload photo. Please try again.');
+                // Reset preview on error
+                setAvatarPreview(userProfile.avatarUrl);
+            }
         }
     };
 

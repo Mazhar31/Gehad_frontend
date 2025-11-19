@@ -34,9 +34,13 @@ const ClientsPage: React.FC = () => {
         setDetailsModalOpen(false);
     };
 
-    const onSave = (clientData: Client) => {
-        handleSaveClient(clientData);
-        handleCloseModals();
+    const onSave = async (clientData: Client) => {
+        try {
+            await handleSaveClient(clientData);
+            handleCloseModals();
+        } catch (error) {
+            console.error('Error saving client:', error);
+        }
     };
 
     const onDelete = (client: Client) => {
@@ -190,20 +194,17 @@ const ClientForm: React.FC<{
         groupId: client?.groupId || '',
     });
     const [avatarPreview, setAvatarPreview] = useState<string>(client?.avatarUrl || 'https://i.pravatar.cc/150');
+    const [avatarFile, setAvatarFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const toBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = error => reject(error);
-    });
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            const base64 = await toBase64(file);
-            setAvatarPreview(base64);
+            setAvatarFile(file);
+            // Create preview URL
+            const previewUrl = URL.createObjectURL(file);
+            setAvatarPreview(previewUrl);
         }
     };
 
@@ -212,9 +213,44 @@ const ClientForm: React.FC<{
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        onSave({ ...formData, id: client?.id || '', avatarUrl: avatarPreview });
+        setIsUploading(true);
+        
+        try {
+            let avatarUrl = avatarPreview;
+            
+            // Upload avatar if a new file was selected
+            if (avatarFile) {
+                const formData = new FormData();
+                formData.append('file', avatarFile);
+                formData.append('type', 'logo');
+                formData.append('entity_id', client?.id || `client-${Date.now()}`);
+                
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch('http://localhost:8000/api/upload/image', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: formData,
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Upload failed');
+                }
+                
+                const uploadResponse = await response.json();
+                avatarUrl = uploadResponse.data.public_url;
+            }
+            
+            onSave({ ...formData, id: client?.id || '', avatarUrl });
+        } catch (error) {
+            console.error('Error uploading avatar:', error);
+            alert('Failed to upload avatar. Please try again.');
+        } finally {
+            setIsUploading(false);
+        }
     };
 
     return (
@@ -232,9 +268,10 @@ const ClientForm: React.FC<{
                     <button 
                         type="button" 
                         onClick={() => fileInputRef.current?.click()}
-                        className="bg-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-700"
+                        disabled={isUploading}
+                        className="bg-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-700 disabled:opacity-50"
                     >
-                        Change Logo
+                        {isUploading ? 'Uploading...' : 'Change Logo'}
                     </button>
                     <p className="text-xs text-secondary-text mt-1">PNG, JPG, GIF up to 10MB</p>
                 </div>
@@ -264,7 +301,9 @@ const ClientForm: React.FC<{
             </div>
             <div className="flex justify-end space-x-3 pt-4">
                 <button type="button" onClick={onCancel} className="bg-gray-600 px-4 py-2 rounded-lg hover:bg-gray-700">Cancel</button>
-                <button type="submit" className="bg-accent-blue px-4 py-2 rounded-lg hover:bg-blue-600">Save</button>
+                <button type="submit" disabled={isUploading} className="bg-accent-blue px-4 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50">
+                    {isUploading ? 'Saving...' : 'Save'}
+                </button>
             </div>
         </form>
     );

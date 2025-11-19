@@ -82,20 +82,17 @@ const PortfolioForm: React.FC<{
         imageUrl: caseItem?.imageUrl || '',
         link: caseItem?.link || ''
     });
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const toBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = error => reject(error);
-    });
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            const base64 = await toBase64(file);
-            setFormData(prev => ({ ...prev, imageUrl: base64 }));
+            setImageFile(file);
+            // Create preview URL
+            const previewUrl = URL.createObjectURL(file);
+            setFormData(prev => ({ ...prev, imageUrl: previewUrl }));
         }
     };
 
@@ -104,13 +101,49 @@ const PortfolioForm: React.FC<{
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        onSave({
-            ...caseItem,
-            ...formData,
-            id: caseItem?.id || '',
-        } as PortfolioCase);
+        setIsUploading(true);
+        
+        try {
+            let imageUrl = formData.imageUrl;
+            
+            // Upload image if a new file was selected
+            if (imageFile) {
+                const formData = new FormData();
+                formData.append('file', imageFile);
+                formData.append('type', 'portfolio');
+                formData.append('entity_id', caseItem?.id || `portfolio-${Date.now()}`);
+                
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch('http://localhost:8000/api/upload/image', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: formData,
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Upload failed');
+                }
+                
+                const uploadResponse = await response.json();
+                imageUrl = uploadResponse.data.public_url;
+            }
+            
+            onSave({
+                ...caseItem,
+                ...formData,
+                imageUrl,
+                id: caseItem?.id || '',
+            } as PortfolioCase);
+        } catch (error) {
+            console.error('Error uploading portfolio image:', error);
+            alert('Failed to upload portfolio image. Please try again.');
+        } finally {
+            setIsUploading(false);
+        }
     };
 
     return (
@@ -127,9 +160,10 @@ const PortfolioForm: React.FC<{
                     <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-white/20"
+                        disabled={isUploading}
+                        className="rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-white/20 disabled:opacity-50"
                     >
-                        Change Image
+                        {isUploading ? 'Uploading...' : 'Change Image'}
                     </button>
                 </div>
             </div>
@@ -151,7 +185,9 @@ const PortfolioForm: React.FC<{
             </div>
             <div className="flex justify-end space-x-3 pt-4">
                 <button type="button" onClick={onCancel} className="bg-gray-600 px-4 py-2 rounded-lg hover:bg-gray-700">Cancel</button>
-                <button type="submit" className="bg-accent-blue px-4 py-2 rounded-lg hover:bg-blue-600">Save Case</button>
+                <button type="submit" disabled={isUploading} className="bg-accent-blue px-4 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50">
+                    {isUploading ? 'Saving...' : 'Save Case'}
+                </button>
             </div>
         </form>
     );

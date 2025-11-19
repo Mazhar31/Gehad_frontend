@@ -163,8 +163,12 @@ const UserForm: React.FC<{
         projectIds: user?.projectIds || [] as string[],
         accountType: 'user' as 'admin' | 'user',
     });
+    const [avatarPreview, setAvatarPreview] = useState<string>(user?.avatarUrl || 'https://i.pravatar.cc/150');
+    const [avatarFile, setAvatarFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
     const [isProjectDropdownOpen, setProjectDropdownOpen] = useState(false);
     const projectDropdownRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     
     const availableProjects = useMemo(() => {
         if (!formData.clientId) return [];
@@ -206,19 +210,64 @@ const UserForm: React.FC<{
         });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            setAvatarFile(file);
+            // Create preview URL
+            const previewUrl = URL.createObjectURL(file);
+            setAvatarPreview(previewUrl);
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // In a real app, passwords would be hashed.
-        // This now correctly passes the entire form data, including the password, to the save handler.
-        const userData = { 
-            ...user, // Spread existing user data first to preserve fields not in the form (like id, avatarUrl)
-            ...formData, // Spread form data to apply updates
-            // Ensure types are correct
-            role: formData.role as 'superuser' | 'normal',
-            dashboardAccess: formData.dashboardAccess as 'view-only' | 'view-and-edit',
-            accountType: formData.accountType,
-        } as User & { accountType: 'admin' | 'user' };
-        onSave(userData);
+        setIsUploading(true);
+        
+        try {
+            let avatarUrl = avatarPreview;
+            
+            // Upload avatar if a new file was selected
+            if (avatarFile) {
+                const formData = new FormData();
+                formData.append('file', avatarFile);
+                formData.append('type', 'avatar');
+                formData.append('entity_id', user?.id || `user-${Date.now()}`);
+                
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch('http://localhost:8000/api/upload/image', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: formData,
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Upload failed');
+                }
+                
+                const uploadResponse = await response.json();
+                avatarUrl = uploadResponse.data.public_url;
+            }
+            
+            const userData = { 
+                ...user, // Spread existing user data first to preserve fields not in the form (like id)
+                ...formData, // Spread form data to apply updates
+                avatarUrl, // Include the avatar URL
+                // Ensure types are correct
+                role: formData.role as 'superuser' | 'normal',
+                dashboardAccess: formData.dashboardAccess as 'view-only' | 'view-and-edit',
+                accountType: formData.accountType,
+            } as User & { accountType: 'admin' | 'user' };
+            
+            onSave(userData);
+        } catch (error) {
+            console.error('Error uploading avatar:', error);
+            alert('Failed to upload avatar. Please try again.');
+        } finally {
+            setIsUploading(false);
+        }
     };
 
     return (
@@ -232,6 +281,27 @@ const UserForm: React.FC<{
                     </select>
                 </div>
             )}
+            <div className="flex items-center space-x-4">
+                <img src={avatarPreview} alt="User Avatar Preview" className="w-20 h-20 rounded-full object-cover" />
+                <div>
+                    <input 
+                        type="file" 
+                        ref={fileInputRef}
+                        onChange={handleFileChange} 
+                        accept="image/*" 
+                        className="hidden" 
+                    />
+                    <button 
+                        type="button" 
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                        className="bg-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-700 disabled:opacity-50"
+                    >
+                        {isUploading ? 'Uploading...' : 'Change Avatar'}
+                    </button>
+                    <p className="text-xs text-secondary-text mt-1">PNG, JPG, GIF up to 10MB</p>
+                </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label className="block text-sm font-medium text-secondary-text mb-1">Full Name</label>
@@ -296,7 +366,9 @@ const UserForm: React.FC<{
             </div>
             <div className="flex justify-end space-x-3 pt-4">
                 <button type="button" onClick={onCancel} className="bg-gray-600 px-4 py-2 rounded-lg hover:bg-gray-700">Cancel</button>
-                <button type="submit" className="bg-accent-blue px-4 py-2 rounded-lg hover:bg-blue-600">Save User</button>
+                <button type="submit" disabled={isUploading} className="bg-accent-blue px-4 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50">
+                    {isUploading ? 'Saving...' : 'Save User'}
+                </button>
             </div>
         </form>
     );
