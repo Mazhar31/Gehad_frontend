@@ -235,7 +235,7 @@ const UserForm: React.FC<{
                 formData.append('entity_id', user?.id || `user-${Date.now()}`);
                 
                 const token = localStorage.getItem('auth_token');
-                const response = await fetch('https://oneqlek-backend-334489433469.us-central1.run.app/api/upload/image', {
+                const response = await fetch('https://initial-sonja-akivaemail-c48d22a5.koyeb.app/api/upload/image', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,

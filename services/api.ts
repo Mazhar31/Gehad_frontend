@@ -11,7 +11,7 @@ import {
   Category 
 } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://oneqlek-backend-334489433469.us-central1.run.app/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://initial-sonja-akivaemail-c48d22a5.koyeb.app/api';
 
 // Helper function for API calls with error handling
 async function apiCall<T>(
