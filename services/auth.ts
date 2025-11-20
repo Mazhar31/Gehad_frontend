@@ -29,8 +29,7 @@ export const authService = {
       }
       
       if (token) {
-        localStorage.setItem('auth_token', token);
-        localStorage.setItem('user_role', 'admin');
+        // Don't store token yet, return it for slider verification
         return { success: true, token };
       }
       
@@ -58,10 +57,8 @@ export const authService = {
       }
       
       if (token) {
-        localStorage.setItem('auth_token', token);
-        localStorage.setItem('user_role', 'user');
-        localStorage.setItem('user_email', email);
-        console.log('💾 User login successful, stored:', { token: token.substring(0, 20) + '...', email });
+        // Don't store token yet, return it for slider verification
+        console.log('💾 User login successful, token ready for slider verification');
         return { success: true, token };
       }
       

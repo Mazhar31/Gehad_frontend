@@ -32,6 +32,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [pendingRole, setPendingRole] = useState<'admin' | 'user' | null>(null);
+    const [pendingToken, setPendingToken] = useState<string | null>(null);
     const [isSliderVerified, setIsSliderVerified] = useState(false);
     const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -89,13 +90,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
             }
 
             if (result.success) {
-                if (result.requires2FA) {
-                    setPendingRole(loginType);
-                    setStep('slider');
-                } else {
-                    setPendingRole(loginType);
-                    setStep('slider');
-                }
+                // Store token temporarily, don't save to localStorage yet
+                setPendingRole(loginType);
+                setPendingToken(result.token || null);
+                setStep('slider');
             } else {
                 setError(result.error || 'Invalid email or password');
             }
@@ -189,7 +187,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
         setIsSliderVerified(true);
         // Show tick mark for 1.5 seconds before redirecting
         setTimeout(() => {
-            if (pendingRole) {
+            if (pendingRole && pendingToken) {
+                // Now save the token to localStorage
+                localStorage.setItem('auth_token', pendingToken);
+                localStorage.setItem('user_role', pendingRole);
+                if (pendingRole === 'user') {
+                    localStorage.setItem('user_email', email);
+                }
                 onLoginSuccess(pendingRole, email);
             }
         }, 1500);
