@@ -30,7 +30,9 @@ const UserDashboardsPage: React.FC<{ dashboards: Project[], client: Client }> = 
         <div>
             <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-white mb-2">Dashboards for {client.company}</h1>
+                    <h1 className="text-3xl font-bold text-white mb-2">
+                        Dashboards for {dashboards.length > 0 && dashboards[0].client ? dashboards[0].client.company : client.company}
+                    </h1>
                     <p className="text-secondary-text">Here are all the dashboards assigned to your company.</p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">

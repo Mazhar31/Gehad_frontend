@@ -13,13 +13,17 @@ const UserDashboard: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
     const { clients, projects, invoices, currentUser, handleSaveInvoice, handleSaveUser } = useData();
     
     console.log('📊 UserDashboard rendered with currentUser:', currentUser);
+    console.log('📊 Available clients:', clients);
+    console.log('📊 Looking for client ID:', currentUser?.clientId);
+    console.log('📊 All invoices from context:', invoices);
+    console.log('📊 User project IDs:', currentUser?.projectIds);
     const [userProjects, setUserProjects] = useState<Project[]>([]);
     const [userInvoices, setUserInvoices] = useState<Invoice[]>([]);
     const [userAddins, setUserAddins] = useState<Project[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // Load user-specific data from local data
+    // Load user-specific data from context data
     useEffect(() => {
         if (!currentUser) {
             setLoading(true);
@@ -28,19 +32,27 @@ const UserDashboard: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
         
         setLoading(true);
         const localProjects = projects.filter(p => currentUser.projectIds?.includes(p.id));
-        const localInvoices = invoices.filter(i => i.clientId === currentUser.clientId);
         setUserProjects(localProjects.filter(p => p.projectType === 'Dashboard' || !p.projectType));
         setUserAddins(localProjects.filter(p => p.projectType === 'Add-ins'));
-        setUserInvoices(localInvoices);
+        
+        // Filter invoices by user's assigned projects (backend should do this, but adding as safety)
+        const userProjectIds = currentUser.projectIds || [];
+        console.log('🔍 Filtering invoices. User projects:', userProjectIds);
+        console.log('🔍 Available invoices:', invoices.map(i => ({ id: i.id, projectId: i.projectId, clientId: i.clientId })));
+        
+        const filteredInvoices = invoices.filter(invoice => {
+            const matchesClient = invoice.clientId === currentUser.clientId;
+            const matchesProject = !invoice.projectId || userProjectIds.includes(invoice.projectId);
+            console.log(`🔍 Invoice ${invoice.id}: client match=${matchesClient}, project match=${matchesProject}`);
+            return matchesClient && matchesProject;
+        });
+        
+        console.log('🔍 Filtered invoices:', filteredInvoices);
+        setUserInvoices(filteredInvoices);
         setLoading(false);
     }, [currentUser, projects, invoices]);
 
-    useEffect(() => {
-        // If user is normal and trying to access invoices, redirect to dashboards.
-        if (currentUser && currentUser.role === 'normal' && currentPage === 'invoices') {
-            setCurrentPage('dashboards');
-        }
-    }, [currentPage, currentUser]);
+    // Removed redirect logic - allow all users to access invoices
 
     // Handle invoice payment
     const handlePayInvoice = async (invoiceId: string) => {
@@ -84,10 +96,10 @@ const UserDashboard: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
     
     const userClient = clients.find(c => c.id === currentUser.clientId);
     
-    // Create a temporary client if user doesn't have one
-    const effectiveClient = userClient || {
-        id: 'temp-client',
-        company: 'Default Client',
+    // Always use real client data when available
+    const effectiveClient = userClient ? userClient : {
+        id: currentUser.clientId || 'temp-client',
+        company: 'No Client Assigned',
         email: currentUser.email,
         mobile: '',
         address: '',
@@ -114,9 +126,6 @@ const UserDashboard: React.FC<{ onLogout: () => void }> = ({ onLogout }) => {
             case 'addins':
                 return <UserAddinsPage addins={addinProjects} />;
             case 'invoices':
-                if (currentUser.role === 'normal') {
-                    return <UserDashboardsPage dashboards={userDashboards} client={effectiveClient} />;
-                }
                 return <UserInvoicesPage invoices={displayInvoices} client={effectiveClient} onSaveInvoice={handlePayInvoice} />;
             case 'profile':
                 return <UserProfilePage user={currentUser} onSave={handleProfileUpdate} />;

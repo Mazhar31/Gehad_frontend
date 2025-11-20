@@ -51,6 +51,11 @@ export interface Invoice {
   status: 'Paid' | 'Pending' | 'Overdue';
   type: 'manual' | 'subscription';
   currency: string;
+  client?: {
+    id: string;
+    company: string;
+    email: string;
+  };
 }
 
 export interface PaymentPlan {

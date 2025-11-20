@@ -16,6 +16,9 @@ import {
     contactAPI,
     adminAPI
 } from '../services/api';
+import { API_CONFIG } from '../config/api';
+
+const API_BASE_URL = API_CONFIG.BASE_URL;
 
 interface DataContextType {
     projects: Project[];
@@ -169,7 +172,8 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setInvoices(finalInvoices);
         };
 
-        if (projects.length > 0 && paymentPlans.length > 0) {
+        // Only generate subscription invoices for admins, not regular users
+        if (projects.length > 0 && paymentPlans.length > 0 && userRole === 'admin') {
             generateAndSaveSubscriptionInvoices();
         }
     }, [projects, paymentPlans]);
@@ -216,14 +220,58 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
                 console.log('  📋 Invoices:', invoicesData.length);
                 console.log('All data loaded from Firebase successfully');
             } else {
-                // For regular users, load user-specific data
+                // For regular users, load user-specific data and their client
                 const [userProjectsData, userInvoicesData] = await Promise.all([
                     projectAPI.getUserProjects(),
                     invoiceAPI.getUserInvoices()
                 ]);
                 
+                // Transform user invoices to match frontend format and preserve client data
+                const transformedInvoices = (userInvoicesData || []).map((invoice: any) => ({
+                    id: invoice.id,
+                    invoiceNumber: invoice.invoice_number || invoice.invoiceNumber,
+                    clientId: invoice.client_id || invoice.clientId,
+                    projectId: invoice.project_id || invoice.projectId,
+                    issueDate: invoice.issue_date || invoice.issueDate,
+                    dueDate: invoice.due_date || invoice.dueDate,
+                    status: invoice.status,
+                    type: invoice.type,
+                    currency: invoice.currency,
+                    items: invoice.items || [],
+                    client: invoice.client // Preserve client data from backend
+                }));
+                
                 setProjects(Array.isArray(userProjectsData) ? userProjectsData : []);
-                setInvoices(Array.isArray(userInvoicesData) ? userInvoicesData : []);
+                setInvoices(transformedInvoices);
+                
+                // Load the user's client data if they have a clientId
+                if (currentUser && currentUser.clientId && currentUser.clientId !== 'temp-client') {
+                    try {
+                        const clientResponse = await fetch(`${API_BASE_URL}/admin/clients/${currentUser.clientId}`, {
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        
+                        if (clientResponse.ok) {
+                            const clientResult = await clientResponse.json();
+                            const clientData = {
+                                id: clientResult.data.id,
+                                company: clientResult.data.company,
+                                email: clientResult.data.email,
+                                mobile: clientResult.data.mobile || '',
+                                address: clientResult.data.address || '',
+                                avatarUrl: clientResult.data.avatar_url || '',
+                                groupId: clientResult.data.group_id
+                            };
+                            setClients([clientData]);
+                            console.log('✅ Client data loaded:', clientData.company);
+                        }
+                    } catch (error) {
+                        console.log('Failed to load user client data:', error);
+                    }
+                }
             }
         } catch (err) {
             console.error('Failed to load data from Firebase:', err);
@@ -676,6 +724,41 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             loadData();
         }
     }, [isLoggedIn, userRole]);
+
+    // Load client data when currentUser changes (for regular users)
+    useEffect(() => {
+        const loadUserClient = async () => {
+            if (userRole === 'user' && currentUser && currentUser.clientId && currentUser.clientId !== 'temp-client' && clients.length === 0) {
+                try {
+                    const clientResponse = await fetch(`${API_BASE_URL}/admin/clients/${currentUser.clientId}`, {
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (clientResponse.ok) {
+                        const clientResult = await clientResponse.json();
+                        const clientData = {
+                            id: clientResult.data.id,
+                            company: clientResult.data.company,
+                            email: clientResult.data.email,
+                            mobile: clientResult.data.mobile || '',
+                            address: clientResult.data.address || '',
+                            avatarUrl: clientResult.data.avatar_url || '',
+                            groupId: clientResult.data.group_id
+                        };
+                        setClients([clientData]);
+                        console.log('✅ Client data loaded for user:', clientData.company);
+                    }
+                } catch (error) {
+                    console.log('Failed to load user client data:', error);
+                }
+            }
+        };
+        
+        loadUserClient();
+    }, [currentUser, userRole, clients.length]);
 
     // Auth Handlers
     const login = async (role: 'admin' | 'user', userEmail?: string) => {

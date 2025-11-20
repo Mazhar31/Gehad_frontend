@@ -32,13 +32,16 @@ const DetailItem: React.FC<DetailItemProps> = ({ icon: Icon, label, value }) => 
 const UserDashboardDetailsPage: React.FC<{ dashboard: Project, client: Client }> = ({ dashboard, client }) => {
     const statusInfo = getStatusInfo(dashboard.status);
     const StatusIcon = statusInfo.icon;
+    
+    // Use client data from project if available, otherwise fallback to passed client
+    const displayClient = dashboard.client || client;
 
     return (
         <div className="p-2 text-white">
             <div className="bg-card-bg rounded-2xl p-6 mb-6">
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center">
                     <div>
-                        <p className="text-sm text-secondary-text">{client.company}</p>
+                        <p className="text-sm text-secondary-text">{displayClient.company}</p>
                         <h2 className="text-2xl font-bold text-white">{dashboard.name}</h2>
                     </div>
                     <div className="flex items-center space-x-2 mt-4 sm:mt-0">
@@ -61,19 +64,17 @@ const UserDashboardDetailsPage: React.FC<{ dashboard: Project, client: Client }>
                 <DetailItem icon={CalendarDaysIcon} label="Start Date" value={dashboard.startDate} />
             </div>
 
-            {dashboard.dashboardUrl && (
-                <div className="mt-8 pt-6 border-t border-border-color text-center">
-                    <a
-                        href={dashboard.dashboardUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center space-x-3 bg-gradient-to-r from-pro-bg-start to-pro-bg-end text-white font-bold py-3 px-8 rounded-xl hover:scale-105 transition-transform duration-300 shadow-lg shadow-purple-500/30"
-                    >
-                        <ArrowTopRightOnSquareIcon className="w-5 h-5" />
-                        <span>Dashboard Access</span>
-                    </a>
-                </div>
-            )}
+            <div className="mt-8 pt-6 border-t border-border-color text-center">
+                <a
+                    href={`${window.location.origin}/${encodeURIComponent(displayClient.company)}/${encodeURIComponent(dashboard.name)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center space-x-3 bg-gradient-to-r from-pro-bg-start to-pro-bg-end text-white font-bold py-3 px-8 rounded-xl hover:scale-105 transition-transform duration-300 shadow-lg shadow-purple-500/30"
+                >
+                    <ArrowTopRightOnSquareIcon className="w-5 h-5" />
+                    <span>Dashboard Access</span>
+                </a>
+            </div>
         </div>
     );
 };
