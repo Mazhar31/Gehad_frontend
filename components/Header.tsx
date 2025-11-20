@@ -8,9 +8,10 @@ interface HeaderProps {
         position: string;
         avatarUrl: string;
     };
+    profileLoaded?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ title, onMenuClick, userProfile }) => {
+const Header: React.FC<HeaderProps> = ({ title, onMenuClick, userProfile, profileLoaded = true }) => {
     return (
         <header className="bg-dark-bg p-4 sm:p-6 flex justify-between items-center sticky top-0 z-20">
             <div className="flex items-center">
@@ -29,7 +30,11 @@ const Header: React.FC<HeaderProps> = ({ title, onMenuClick, userProfile }) => {
                     <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-dark-bg"></span>
                 </button>
                 <div className="flex items-center space-x-2">
-                    <img src={userProfile.avatarUrl} alt="User" className="w-10 h-10 rounded-full" />
+                    {profileLoaded && userProfile.avatarUrl ? (
+                        <img src={userProfile.avatarUrl} alt="User" className="w-10 h-10 rounded-full" />
+                    ) : (
+                        <div className="w-10 h-10 rounded-full bg-gray-600 animate-pulse"></div>
+                    )}
                     <div className="hidden md:block">
                         <p className="text-white font-semibold text-sm">{userProfile.name}</p>
                         <p className="text-xs text-secondary-text">{userProfile.position}</p>
