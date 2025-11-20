@@ -45,7 +45,9 @@ const UserDashboardCard: React.FC<UserDashboardCardProps> = ({ dashboard, onClic
             <div className="border-t border-border-color pt-4 flex items-center text-sm mt-auto">
                 <div>
                     <p className="text-xs text-secondary-text">Start Date</p>
-                    <p className="font-semibold text-white">{dashboard.startDate}</p>
+                    <p className="font-semibold text-white">
+                        {dashboard.startDate ? new Date(dashboard.startDate).toLocaleDateString() : 'Not set'}
+                    </p>
                 </div>
             </div>
         </div>

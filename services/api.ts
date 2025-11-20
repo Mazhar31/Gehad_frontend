@@ -546,7 +546,8 @@ export const invoiceAPI = {
 
   // User invoice APIs
   getUserInvoices: async () => {
-    return [];
+    const response = await apiCall<{ success: boolean; data: Invoice[] }>('/users/invoices');
+    return response.data || [];
   },
 
   payInvoice: async (id: string) => {

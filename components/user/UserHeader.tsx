@@ -53,7 +53,7 @@ const UserHeader: React.FC<UserHeaderProps> = ({ userName, userAvatar, currentPa
     const navItems = [
         { page: 'dashboards', label: 'Dashboards', icon: FolderIcon, show: true },
         { page: 'addins', label: 'Add-ins', icon: PuzzlePieceIcon, show: true },
-        { page: 'invoices', label: 'Invoices', icon: DocumentTextIcon, show: userRole === 'superuser' },
+        { page: 'invoices', label: 'Invoices', icon: DocumentTextIcon, show: true },
     ] as const;
 
 

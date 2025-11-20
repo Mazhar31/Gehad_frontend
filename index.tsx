@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './App.tsx';
+import Router from './components/Router.tsx';
 import { DataProvider } from './components/DataContext.tsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
 
@@ -15,7 +15,7 @@ root.render(
   <React.StrictMode>
     <ErrorBoundary>
       <DataProvider>
-        <App />
+        <Router />
       </DataProvider>
     </ErrorBoundary>
   </React.StrictMode>
