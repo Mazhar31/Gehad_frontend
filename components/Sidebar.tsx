@@ -14,6 +14,7 @@ interface SidebarProps {
     position: string;
     avatarUrl: string;
   };
+  profileLoaded?: boolean;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
 }
@@ -45,7 +46,7 @@ const NavItem: React.FC<{
   </li>
 );
 
-const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onClose, onLogout, adminProfile, isCollapsed, onToggleCollapse }) => {
+const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onClose, onLogout, adminProfile, isCollapsed, onToggleCollapse, profileLoaded = true }) => {
     const navItems = [
         { icon: HomeIcon, label: 'Dashboard', page: 'dashboard' },
         { icon: FolderIcon, label: 'Projects', page: 'projects' },
@@ -119,7 +120,11 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onCl
 
                 <div className="mt-auto border-t border-border-color pt-4">
                     <div className="flex items-center">
-                        <img src={adminProfile.avatarUrl} alt="Admin" className="w-10 h-10 rounded-full flex-shrink-0" />
+                        {profileLoaded && adminProfile.avatarUrl ? (
+                            <img src={adminProfile.avatarUrl} alt="Admin" className="w-10 h-10 rounded-full flex-shrink-0" />
+                        ) : (
+                            <div className="w-10 h-10 rounded-full bg-gray-600 animate-pulse flex-shrink-0"></div>
+                        )}
                         <div className={`flex-1 overflow-hidden transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0 pointer-events-none' : 'ml-3 opacity-100'}`}>
                             <p className="text-sm font-semibold text-white truncate">{adminProfile.name}</p>
                             <p className="text-xs text-secondary-text truncate">{adminProfile.position}</p>

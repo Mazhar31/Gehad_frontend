@@ -34,8 +34,9 @@ function App() {
     name: 'Admin',
     position: 'Super Admin',
     email: 'admin@example.com',
-    avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026702d'
+    avatarUrl: ''
   });
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   // Load admin profile from backend
   const loadAdminProfile = async () => {
@@ -57,8 +58,9 @@ function App() {
           name: profile.name || 'Admin',
           position: profile.position || 'Super Admin',
           email: profile.email || 'admin@example.com',
-          avatarUrl: profile.avatar_url || 'https://i.pravatar.cc/150?u=a042581f4e29026702d'
+          avatarUrl: profile.avatar_url ? `${profile.avatar_url}?t=${Date.now()}` : ''
         });
+        setProfileLoaded(true);
       }
     } catch (error) {
       console.error('Failed to load admin profile:', error);
@@ -264,9 +266,10 @@ function App() {
           adminProfile={adminProfile}
           isCollapsed={isSidebarCollapsed}
           onToggleCollapse={handleToggleSidebarCollapse}
+          profileLoaded={profileLoaded}
         />
         <div className="flex-1 flex flex-col overflow-hidden">
-          <Header title={currentPage} onMenuClick={() => setSidebarOpen(true)} userProfile={adminProfile} />
+          <Header title={currentPage} onMenuClick={() => setSidebarOpen(true)} userProfile={adminProfile} profileLoaded={profileLoaded} />
           <main className="flex-1 overflow-x-hidden overflow-y-auto bg-dark-bg">
             {error && (
               <div className="bg-red-900/20 border border-red-500/50 text-red-400 px-4 py-3 mx-4 mt-4 rounded-lg">
