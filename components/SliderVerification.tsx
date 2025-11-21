@@ -19,11 +19,33 @@ const SliderVerification: React.FC<SliderVerificationProps> = ({ onVerified, onR
     e.preventDefault();
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (isVerified) return;
+    setIsDragging(true);
+    e.preventDefault();
+  };
+
   const handleMouseMove = (e: MouseEvent) => {
     if (!isDragging || !trackRef.current || isVerified) return;
     
     const rect = trackRef.current.getBoundingClientRect();
     const newPosition = Math.max(0, Math.min(e.clientX - rect.left - 20, rect.width - 40));
+    setSliderPosition(newPosition);
+    
+    // Check if slider is at the very end (within 10px)
+    if (newPosition >= rect.width - 50) {
+      setIsVerified(true);
+      setIsDragging(false);
+      onVerified();
+    }
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!isDragging || !trackRef.current || isVerified) return;
+    
+    const rect = trackRef.current.getBoundingClientRect();
+    const touch = e.touches[0];
+    const newPosition = Math.max(0, Math.min(touch.clientX - rect.left - 20, rect.width - 40));
     setSliderPosition(newPosition);
     
     // Check if slider is at the very end (within 10px)
@@ -50,15 +72,35 @@ const SliderVerification: React.FC<SliderVerificationProps> = ({ onVerified, onR
     }
   };
 
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    if (!isVerified && sliderPosition > 5) {
+      setShowError(true);
+      // Reset after showing error for 1 second
+      setTimeout(() => {
+        setSliderPosition(0);
+        setShowError(false);
+        onReset();
+      }, 1000);
+    } else if (!isVerified) {
+      setSliderPosition(0);
+      onReset();
+    }
+  };
+
   React.useEffect(() => {
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('touchmove', handleTouchMove);
+      document.addEventListener('touchend', handleTouchEnd);
     }
     
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
     };
   }, [isDragging, isVerified]);
 
@@ -88,6 +130,7 @@ const SliderVerification: React.FC<SliderVerificationProps> = ({ onVerified, onR
           }`}
           style={{ transform: `translateX(${sliderPosition}px)` }}
           onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
         >
           <div className="flex items-center justify-center h-full text-white">
             {isVerified ? (

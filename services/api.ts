@@ -144,7 +144,7 @@ export const clientAPI = {
       email: client.email,
       mobile: client.mobile,
       address: client.address,
-      avatarUrl: client.avatar_url,
+      avatarUrl: client.avatar_url ? `${client.avatar_url}?t=${Date.now()}` : client.avatar_url,
       groupId: client.group_id
     }));
     return transformedData;
@@ -163,7 +163,7 @@ export const clientAPI = {
       email: clientData.email,
       mobile: clientData.mobile,
       address: clientData.address,
-      avatarUrl: clientData.avatar_url,
+      avatarUrl: clientData.avatar_url ? `${clientData.avatar_url}?t=${Date.now()}` : clientData.avatar_url,
       groupId: clientData.group_id
     };
   },
@@ -181,7 +181,7 @@ export const clientAPI = {
       email: updatedClient.email,
       mobile: updatedClient.mobile,
       address: updatedClient.address,
-      avatarUrl: updatedClient.avatar_url,
+      avatarUrl: updatedClient.avatar_url ? `${updatedClient.avatar_url}?t=${Date.now()}` : updatedClient.avatar_url,
       groupId: updatedClient.group_id
     };
   },
@@ -207,7 +207,7 @@ export const projectAPI = {
       status: project.status,
       startDate: project.start_date,
       dashboardUrl: project.dashboard_url,
-      imageUrl: project.image_url,
+      imageUrl: project.image_url ? `${project.image_url}?t=${Date.now()}` : project.image_url,
       projectType: project.project_type,
       currency: project.currency,
       progress: project.progress
@@ -244,7 +244,7 @@ export const projectAPI = {
       status: projectData.status,
       startDate: projectData.start_date,
       dashboardUrl: projectData.dashboard_url,
-      imageUrl: projectData.image_url,
+      imageUrl: projectData.image_url ? `${projectData.image_url}?t=${Date.now()}` : projectData.image_url,
       projectType: projectData.project_type,
       currency: projectData.currency,
       progress: projectData.progress
@@ -280,7 +280,7 @@ export const projectAPI = {
       status: updatedProject.status,
       startDate: updatedProject.start_date,
       dashboardUrl: updatedProject.dashboard_url,
-      imageUrl: updatedProject.image_url,
+      imageUrl: updatedProject.image_url ? `${updatedProject.image_url}?t=${Date.now()}` : updatedProject.image_url,
       projectType: updatedProject.project_type,
       currency: updatedProject.currency,
       progress: updatedProject.progress
@@ -324,7 +324,7 @@ export const userAPI = {
       role: user.role,
       dashboardAccess: user.dashboard_access,
       projectIds: user.project_ids || [],
-      avatarUrl: user.avatar_url,
+      avatarUrl: user.avatar_url ? `${user.avatar_url}?t=${Date.now()}` : user.avatar_url,
       password: user.password
     }));
     return transformedData;
@@ -357,7 +357,7 @@ export const userAPI = {
       role: userData.role,
       dashboardAccess: userData.dashboard_access,
       projectIds: userData.project_ids || [],
-      avatarUrl: userData.avatar_url,
+      avatarUrl: userData.avatar_url ? `${userData.avatar_url}?t=${Date.now()}` : userData.avatar_url,
       password: userData.password
     };
   },
@@ -390,7 +390,7 @@ export const userAPI = {
       role: updatedUser.role,
       dashboardAccess: updatedUser.dashboard_access,
       projectIds: updatedUser.project_ids || [],
-      avatarUrl: updatedUser.avatar_url,
+      avatarUrl: updatedUser.avatar_url ? `${updatedUser.avatar_url}?t=${Date.now()}` : updatedUser.avatar_url,
       password: updatedUser.password
     };
   },
@@ -736,7 +736,7 @@ export const portfolioAPI = {
       category: portfolioCase.category,
       title: portfolioCase.title,
       description: portfolioCase.description,
-      imageUrl: portfolioCase.image_url,
+      imageUrl: portfolioCase.image_url ? `${portfolioCase.image_url}?t=${Date.now()}` : portfolioCase.image_url,
       link: portfolioCase.link
     }));
     return transformedData;
@@ -754,7 +754,7 @@ export const portfolioAPI = {
       category: caseData.category,
       title: caseData.title,
       description: caseData.description,
-      imageUrl: caseData.image_url,
+      imageUrl: caseData.image_url ? `${caseData.image_url}?t=${Date.now()}` : caseData.image_url,
       link: caseData.link
     };
   },
@@ -771,7 +771,7 @@ export const portfolioAPI = {
       category: updatedCase.category,
       title: updatedCase.title,
       description: updatedCase.description,
-      imageUrl: updatedCase.image_url,
+      imageUrl: updatedCase.image_url ? `${updatedCase.image_url}?t=${Date.now()}` : updatedCase.image_url,
       link: updatedCase.link
     };
   },
@@ -790,7 +790,7 @@ export const portfolioAPI = {
       category: portfolioCase.category,
       title: portfolioCase.title,
       description: portfolioCase.description,
-      imageUrl: portfolioCase.image_url,
+      imageUrl: portfolioCase.image_url ? `${portfolioCase.image_url}?t=${Date.now()}` : portfolioCase.image_url,
       link: portfolioCase.link
     }));
     return transformedData;
