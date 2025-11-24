@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { EnvelopeIcon, KeyIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
 
@@ -27,6 +28,43 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        const initParticles = () => {
+            if ((window as any).particlesJS) {
+                (window as any).particlesJS('particles-js', {
+                    particles: {
+                        number: { value: 80, density: { enable: true, value_area: 800 } },
+                        color: { value: "#ffffff" },
+                        shape: { type: "circle" },
+                        opacity: { value: 0.5, random: false },
+                        size: { value: 3, random: true },
+                        line_linked: { enable: true, distance: 150, color: "#ffffff", opacity: 0.4, width: 1 },
+                        move: { enable: true, speed: 6, direction: "none", random: false, straight: false, out_mode: "out", bounce: false }
+                    },
+                    interactivity: {
+                        detect_on: "canvas",
+                        events: { onhover: { enable: true, mode: "repulse" }, onclick: { enable: true, mode: "push" }, resize: true },
+                        modes: { grab: { distance: 400, line_linked: { opacity: 1 } }, bubble: { distance: 400, size: 40, duration: 2, opacity: 8, speed: 3 }, repulse: { distance: 200, duration: 0.4 }, push: { particles_nb: 4 }, remove: { particles_nb: 2 } }
+                    },
+                    retina_detect: true
+                });
+            }
+        };
+
+        // Ensure script is loaded
+        if ((window as any).particlesJS) {
+            initParticles();
+        } else {
+            const interval = setInterval(() => {
+                if ((window as any).particlesJS) {
+                    initParticles();
+                    clearInterval(interval);
+                }
+            }, 200);
+            return () => clearInterval(interval);
+        }
+    }, []);
 
     const handleCredentialsSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -101,8 +139,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
     };
 
     return (
-        <div className="bg-[#080B13] min-h-screen font-sans flex items-center justify-center p-4">
-            <div className="w-full max-w-md">
+        <div className="bg-[#080B13] min-h-screen font-sans flex items-center justify-center p-4 relative overflow-hidden">
+            {/* Particles Background */}
+            <div id="particles-js" className="absolute inset-0 z-0"></div>
+
+            <div className="w-full max-w-md relative z-10">
                 <div className="text-center mb-8">
                     <button onClick={() => onNavigate(null)} className="inline-block">
                         <ProjectileLogo />
@@ -116,7 +157,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
                 </div>
                 
                 {step === 'credentials' && (
-                    <div className="bg-card-bg/80 border border-border-color p-8 rounded-2xl shadow-lg">
+                    <div className="bg-card-bg/80 border border-border-color p-8 rounded-2xl shadow-lg backdrop-blur-sm">
                         <form onSubmit={handleCredentialsSubmit} className="space-y-6">
                             <div>
                                 <label htmlFor="email" className="block text-sm font-medium text-secondary-text mb-2">Email</label>
@@ -150,16 +191,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
                                 Log In
                             </button>
                         </form>
-                        <div className="text-center text-secondary-text text-sm mt-6 pt-6 border-t border-border-color space-y-2">
-                            <h4 className="font-semibold text-primary-text mb-2">Demo Credentials</h4>
-                            <p><strong>Admin:</strong> <code className="bg-dark-bg text-accent-lime px-1 py-0.5 rounded">admin@example.com</code> / <code className="bg-dark-bg text-accent-lime px-1 py-0.5 rounded">password123</code></p>
-                            <p><strong>User:</strong> <code className="bg-dark-bg text-accent-lime px-1 py-0.5 rounded">user@example.com</code> / <code className="bg-dark-bg text-accent-lime px-1 py-0.5 rounded">password123</code></p>
-                        </div>
                     </div>
                 )}
 
                 {step === 'forgotPassword' && (
-                     <form onSubmit={handleForgotPasswordSubmit} className="bg-card-bg/80 border border-border-color p-8 rounded-2xl shadow-lg space-y-6">
+                     <form onSubmit={handleForgotPasswordSubmit} className="bg-card-bg/80 border border-border-color p-8 rounded-2xl shadow-lg space-y-6 backdrop-blur-sm">
                         <div>
                             <label htmlFor="reset-email" className="block text-sm font-medium text-secondary-text mb-2">Email Address</label>
                             <input 
@@ -180,7 +216,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
                 )}
 
                 {step === 'resetSent' && (
-                     <div className="bg-card-bg/80 border border-border-color p-8 rounded-2xl shadow-lg space-y-6 text-center">
+                     <div className="bg-card-bg/80 border border-border-color p-8 rounded-2xl shadow-lg space-y-6 text-center backdrop-blur-sm">
                          <div className="inline-block bg-dark-bg p-3 rounded-full border border-border-color">
                             <EnvelopeIcon className="w-6 h-6 text-accent-green" />
                         </div>
@@ -192,7 +228,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
 
 
                  <p className="text-center text-secondary-text mt-6">
-                    <button onClick={goBack} className="font-semibold text-accent-blue hover:underline">
+                    <button onClick={goBack} className="font-semibold text-accent-blue hover:underline relative z-20">
                         {step === 'credentials' ? '← Back to Home' : '← Back to Login'}
                     </button>
                 </p>

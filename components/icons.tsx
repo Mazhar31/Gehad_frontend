@@ -59,10 +59,76 @@ export const PuzzlePieceIcon = createIcon(<path strokeLinecap="round" strokeLine
 export const ArrowTopRightOnSquareIcon = createIcon(<path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.75a.75.75 0 01.75-.75h3.75a.75.75 0 01.75.75v3.75m-4.5 0L19.5 6" />);
 export const UserCircleIcon = createIcon(<path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />);
 export const PhotoIcon = createIcon(<path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />);
-export const KeyIcon = createIcon(<path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />);
+export const KeyIcon = createIcon(<path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659 1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />);
 
 export const ChevronDoubleLeftIcon = createIcon(<path strokeLinecap="round" strokeLinejoin="round" d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5" />);
 export const ChevronDoubleRightIcon = createIcon(<path strokeLinecap="round" strokeLinejoin="round" d="M5.25 4.5l7.5 7.5-7.5 7.5m6-15l7.5 7.5-7.5 7.5" />);
+
+// Client Success Stories Icons
+export const CpuIcon = createIcon(<>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 20v2" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 2v2" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20v2" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M17 2v2" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2 12h2" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2 17h2" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2 7h2" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M20 12h2" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M20 17h2" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M20 7h2" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M7 20v2" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M7 2v2" />
+    <rect x="4" y="4" width="16" height="16" rx="2" />
+    <rect x="8" y="8" width="8" height="8" rx="1" />
+</>);
+export const MusicIcon = createIcon(<>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 18V5l12-2v13" />
+    <circle cx="6" cy="18" r="3" />
+    <circle cx="18" cy="16" r="3" />
+</>);
+export const ActivityIcon = createIcon(<path strokeLinecap="round" strokeLinejoin="round" d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2" />);
+export const RocketIcon = createIcon(<>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+</>);
+export const TruckIcon = createIcon(<>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 18H9" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14" />
+    <circle cx="17" cy="18" r="2" />
+    <circle cx="7" cy="18" r="2" />
+</>);
+export const LightbulbIcon = createIcon(<>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 18h6" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M10 22h4" />
+</>);
+export const BoxIcon = createIcon(<>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="m3.3 7 8.7 5 8.7-5" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 22V12" />
+</>);
+export const MonitorIcon = createIcon(<>
+    <rect width="20" height="14" x="2" y="3" rx="2" />
+    <line x1="8" x2="16" y1="21" y2="21" />
+    <line x1="12" x2="12" y1="17" y2="21" />
+</>);
+export const VideoIcon = createIcon(<>
+    <path strokeLinecap="round" strokeLinejoin="round" d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5" />
+    <rect x="2" y="6" width="14" height="12" rx="2" />
+</>);
+export const PlayCircleIcon = createIcon(<>
+    <circle cx="12" cy="12" r="10" />
+    <polygon points="10 8 16 12 10 16 10 8" />
+</>);
+export const ExternalLinkIcon = createIcon(<>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 3h6v6" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M10 14 21 3" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+</>);
+
 
 // Landing page icons
 export const StarIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -79,3 +145,22 @@ export const SlackIcon = createIcon(<><path d="M8.7 14.3a2.6 2.6 0 110-5.2 2.6 2
 export const TrelloIcon = createIcon(<><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zM10 17H7v-7h3v7zm6 0h-3v-4h3v4z" /></>);
 export const GitHubIcon = createIcon(<><path d="M12 2C6.48 2 2 6.48 2 12c0 4.42 2.87 8.17 6.84 9.5.5.09.68-.22.68-.48v-1.69c-2.78.6-3.37-1.34-3.37-1.34-.45-1.15-1.11-1.46-1.11-1.46-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33s1.71.11 2.5.33c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.93.68 1.87v2.75c0 .27.18.58.69.48C19.13 20.17 22 16.42 22 12c0-5.52-4.48-10-10-10z" /></>);
 export const GitLabIcon = createIcon(<path d="M22.6 9.3l-3.3-8.1C18.9.4 18.2 0 17.5 0h-11c-.7 0-1.4.4-1.8 1.2L1.4 9.3c-.5.9-.2 2.1.6 2.7l9.2 6.4c.4.3.9.3 1.3 0l9.2-6.4c.8-.6 1.1-1.8.6-2.7z" />);
+
+// Social Media Icons for Footer
+export const TwitterIcon = createIcon(<path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z" />);
+export const FacebookIcon = createIcon(<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />);
+export const InstagramIcon = createIcon(<>
+  <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+</>);
+export const LinkedInIcon = createIcon(<>
+  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-3.221 2 2 0 0 0-2 3.221V21h-4v-7a6 6 0 0 1 6-6z" />
+  <rect x="2" y="9" width="4" height="12" />
+  <circle cx="4" cy="4" r="2" />
+</>);
+export const TikTokIcon = createIcon(<path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5v4a9 9 0 0 1-9-9v12z" />);
+
+// New Icons for Problems We Solve
+export const RefreshIcon = createIcon(<path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />);
+export const AlertTriangleIcon = createIcon(<path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />);

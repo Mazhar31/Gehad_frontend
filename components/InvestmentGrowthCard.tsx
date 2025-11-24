@@ -1,5 +1,5 @@
-
 import React from 'react';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 const MOCK_CHART_DATA = [
   { name: 'Jan', value: 4000 },
@@ -12,8 +12,6 @@ const MOCK_CHART_DATA = [
 ];
 
 const InvestmentGrowthCard: React.FC = () => {
-  const { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } = (window as any).Recharts || {};
-
   return (
     <div className="bg-card-bg p-4 sm:p-6 rounded-2xl h-full">
       <div className="flex justify-between items-center mb-4">
@@ -25,7 +23,6 @@ const InvestmentGrowthCard: React.FC = () => {
         </div>
       </div>
       <div className="h-72">
-        {ResponsiveContainer && AreaChart ? (
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={MOCK_CHART_DATA} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
               <defs>
@@ -41,11 +38,6 @@ const InvestmentGrowthCard: React.FC = () => {
               <Area type="monotone" dataKey="value" stroke="#3b82f6" fillOpacity={1} fill="url(#colorValue)" />
             </AreaChart>
           </ResponsiveContainer>
-        ) : (
-            <div className="flex items-center justify-center h-full text-secondary-text">
-                Chart library not available.
-            </div>
-        )}
       </div>
     </div>
   );

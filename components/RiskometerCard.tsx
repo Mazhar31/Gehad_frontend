@@ -1,4 +1,5 @@
 import React from 'react';
+import { ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 
 const data = [
   { name: 'Low', value: 1 }, { name: 'Moderate', value: 1 }, { name: 'High', value: 1 },
@@ -9,13 +10,10 @@ const value = 90;
 const needleAngle = (value / 120) * 180; // Assuming max value is 120 for the gauge range
 
 const RiskometerCard: React.FC = () => {
-  const { ResponsiveContainer, PieChart, Pie, Cell } = (window as any).Recharts || {};
-
   return (
     <div className="bg-card-bg p-4 rounded-lg">
       <h3 className="text-lg font-semibold text-white mb-4">Scheme Riskometer</h3>
       <div className="relative w-full h-40">
-        {ResponsiveContainer && PieChart && (
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -37,7 +35,6 @@ const RiskometerCard: React.FC = () => {
               </Pie>
             </PieChart>
           </ResponsiveContainer>
-        )}
         <div 
             className="absolute top-full left-1/2 -translate-x-1/2 -translate-y-[105px] w-0.5 h-20 bg-white origin-bottom"
             style={{ transform: `translateX(-50%) translateY(-105px) rotate(${needleAngle}deg)` }}
