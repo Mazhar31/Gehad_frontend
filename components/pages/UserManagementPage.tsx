@@ -5,6 +5,7 @@ import UserCard from '../UserCard.tsx';
 import { PlusIcon, MagnifyingGlassIcon, ArrowDownTrayIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
 import { getUploadUrl } from '../../config/api';
+import { getSafeImageUrl, refreshCacheBuster } from '../../utils/imageUtils';
 
 const UserManagementPage: React.FC = () => {
     const { users, clients, projects, handleSaveUser, handleDeleteUser } = useData();
@@ -164,7 +165,7 @@ const UserForm: React.FC<{
         projectIds: user?.projectIds || [] as string[],
         accountType: 'user' as 'admin' | 'user',
     });
-    const [avatarPreview, setAvatarPreview] = useState<string>(user?.avatarUrl || 'https://i.pravatar.cc/150');
+    const [avatarPreview, setAvatarPreview] = useState<string>(getSafeImageUrl(user?.avatarUrl, 'avatar'));
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [isProjectDropdownOpen, setProjectDropdownOpen] = useState(false);
@@ -215,8 +216,8 @@ const UserForm: React.FC<{
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             setAvatarFile(file);
-            // Create preview URL
-            const previewUrl = URL.createObjectURL(file);
+            // Create preview URL with cache-busting
+            const previewUrl = refreshCacheBuster(URL.createObjectURL(file));
             setAvatarPreview(previewUrl);
         }
     };
@@ -249,7 +250,7 @@ const UserForm: React.FC<{
                 }
                 
                 const uploadResponse = await response.json();
-                avatarUrl = uploadResponse.data.public_url;
+                avatarUrl = refreshCacheBuster(uploadResponse.data.public_url);
             }
             
             const userData = { 

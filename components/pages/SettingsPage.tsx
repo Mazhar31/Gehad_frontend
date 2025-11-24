@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { UserCircleIcon, PhotoIcon, EnvelopeIcon, KeyIcon } from '../icons.tsx';
 import { getAdminProfileUrl, getAdminChangePasswordUrl } from '../../config/api';
+import { getSafeImageUrl, refreshCacheBuster } from '../../utils/imageUtils';
 
 // Removed toBase64 function as we're now using Firebase Storage
 
@@ -18,7 +19,7 @@ interface SettingsPageProps {
 const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdate }) => {
     const [profile, setProfile] = useState({ name: userProfile.name, position: userProfile.position });
     const [email, setEmail] = useState(userProfile.email);
-    const [avatarPreview, setAvatarPreview] = useState<string>(userProfile.avatarUrl);
+    const [avatarPreview, setAvatarPreview] = useState<string>(getSafeImageUrl(userProfile.avatarUrl, 'avatar'));
     const [notification, setNotification] = useState<string | null>(null);
     const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
     const [isProfileLoading, setIsProfileLoading] = useState(false);
@@ -30,7 +31,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
     useEffect(() => {
         setProfile({ name: userProfile.name, position: userProfile.position });
         setEmail(userProfile.email);
-        setAvatarPreview(userProfile.avatarUrl);
+        setAvatarPreview(getSafeImageUrl(userProfile.avatarUrl, 'avatar'));
     }, [userProfile]);
 
     const showNotification = (message: string) => {
@@ -169,8 +170,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
             setIsAvatarLoading(true);
             
             try {
-                // Create preview URL
-                const previewUrl = URL.createObjectURL(file);
+                // Create preview URL with cache-busting
+                const previewUrl = refreshCacheBuster(URL.createObjectURL(file));
                 setAvatarPreview(previewUrl);
                 
                 // Upload to Firebase Storage using the new Firebase admin endpoint
@@ -191,7 +192,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
                 }
                 
                 const result = await response.json();
-                const newAvatarUrl = result.data.avatar_url;
+                const newAvatarUrl = refreshCacheBuster(result.data.avatar_url);
                 
                 // Update the profile with the new Firebase Storage URL
                 const updatedProfile = { ...userProfile, avatarUrl: newAvatarUrl };
@@ -202,7 +203,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
                 console.error('Error uploading avatar:', error);
                 showNotification('Failed to upload photo. Please try again.');
                 // Reset preview on error
-                setAvatarPreview(userProfile.avatarUrl);
+                setAvatarPreview(getSafeImageUrl(userProfile.avatarUrl, 'avatar'));
             } finally {
                 setIsAvatarLoading(false);
             }
@@ -278,7 +279,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ userProfile, onProfileUpdat
                     <h3 className="text-xl font-bold text-white">Profile Photo</h3>
                 </div>
                 <div className="flex items-center space-x-4">
-                     <img src={avatarPreview} alt="Admin" className="w-20 h-20 rounded-full object-cover" />
+                     <img src={getSafeImageUrl(avatarPreview, 'avatar')} alt="Admin" className="w-20 h-20 rounded-full object-cover" />
                      <div>
                          <input 
                             type="file" 

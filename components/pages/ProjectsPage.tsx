@@ -6,6 +6,7 @@ import { PlusIcon, MagnifyingGlassIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
 import ProjectDetails from '../ProjectDetails.tsx';
 import { getUploadUrl } from '../../config/api';
+import { getSafeImageUrl, refreshCacheBuster } from '../../utils/imageUtils';
 
 const ProjectsPage: React.FC = () => {
     const { projects, clients, departments, paymentPlans, groups, handleSaveProject, handleDeleteProject } = useData();
@@ -154,7 +155,7 @@ const ProjectForm: React.FC<{
         status: project?.status || 'In Progress',
         startDate: project?.startDate || new Date().toISOString().slice(0, 10),
         dashboardUrl: project?.dashboardUrl || '',
-        imageUrl: project?.imageUrl || '',
+        imageUrl: getSafeImageUrl(project?.imageUrl, 'project'),
         projectType: project?.projectType || 'Dashboard',
     });
     const [imageFile, setImageFile] = useState<File | null>(null);
@@ -165,8 +166,8 @@ const ProjectForm: React.FC<{
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             setImageFile(file);
-            // Create preview URL
-            const previewUrl = URL.createObjectURL(file);
+            // Create preview URL with cache-busting
+            const previewUrl = refreshCacheBuster(URL.createObjectURL(file));
             setFormData(prev => ({ ...prev, imageUrl: previewUrl }));
         }
     };
@@ -205,7 +206,7 @@ const ProjectForm: React.FC<{
                 }
                 
                 const uploadResponse = await response.json();
-                imageUrl = uploadResponse.data.public_url;
+                imageUrl = refreshCacheBuster(uploadResponse.data.public_url);
             }
             
             onSave({
@@ -232,7 +233,7 @@ const ProjectForm: React.FC<{
                 <label className="block text-sm font-medium text-secondary-text mb-2">Project Image</label>
                 <div className="flex items-center gap-x-4">
                     <img 
-                        src={formData.imageUrl || 'https://storage.googleapis.com/aistudio-hosting/generative-ai-studio/assets/app-placeholder.png'} 
+                        src={getSafeImageUrl(formData.imageUrl, 'project')} 
                         alt="Project Preview" 
                         className="h-24 w-24 object-cover rounded-lg bg-dark-bg border border-border-color" 
                     />
