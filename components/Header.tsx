@@ -1,4 +1,5 @@
 import React from 'react';
+import { getSafeImageUrl } from '../utils/imageUtils';
 
 interface HeaderProps {
     title: string;
@@ -31,7 +32,7 @@ const Header: React.FC<HeaderProps> = ({ title, onMenuClick, userProfile, profil
                 </button>
                 <div className="flex items-center space-x-2">
                     {profileLoaded && userProfile.avatarUrl ? (
-                        <img src={userProfile.avatarUrl} alt="User" className="w-10 h-10 rounded-full" />
+                        <img src={getSafeImageUrl(userProfile.avatarUrl, 'avatar')} alt="User" className="w-10 h-10 rounded-full" />
                     ) : (
                         <div className="w-10 h-10 rounded-full bg-gray-600 animate-pulse"></div>
                     )}

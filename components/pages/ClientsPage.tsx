@@ -6,6 +6,7 @@ import ConfirmDialog from '../ConfirmDialog.tsx';
 import { PlusIcon, EnvelopeIcon, PhoneIcon, MapPinIcon, MagnifyingGlassIcon, FolderIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
 import { getUploadUrl } from '../../config/api';
+import { getSafeImageUrl, refreshCacheBuster } from '../../utils/imageUtils';
 
 const ClientsPage: React.FC = () => {
     const { clients, projects, paymentPlans, groups, handleSaveClient, handleDeleteClient } = useData();
@@ -194,7 +195,7 @@ const ClientForm: React.FC<{
         address: client?.address || '',
         groupId: client?.groupId || '',
     });
-    const [avatarPreview, setAvatarPreview] = useState<string>(client?.avatarUrl || 'https://i.pravatar.cc/150');
+    const [avatarPreview, setAvatarPreview] = useState<string>(getSafeImageUrl(client?.avatarUrl, 'avatar'));
     const [avatarFile, setAvatarFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -203,8 +204,8 @@ const ClientForm: React.FC<{
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             setAvatarFile(file);
-            // Create preview URL
-            const previewUrl = URL.createObjectURL(file);
+            // Create preview URL with cache-busting
+            const previewUrl = refreshCacheBuster(URL.createObjectURL(file));
             setAvatarPreview(previewUrl);
         }
     };
@@ -242,7 +243,7 @@ const ClientForm: React.FC<{
                 }
                 
                 const uploadResponse = await response.json();
-                avatarUrl = uploadResponse.data.public_url;
+                avatarUrl = refreshCacheBuster(uploadResponse.data.public_url);
             }
             
             onSave({ ...formData, id: client?.id || '', avatarUrl });

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User } from '../types.ts';
 import { EllipsisVerticalIcon, PencilSquareIcon, TrashIcon, EnvelopeIcon, BellIcon } from './icons.tsx';
+import { getSafeImageUrl } from '../utils/imageUtils';
 
 interface UserCardProps {
     user: User;
@@ -43,7 +44,7 @@ const UserCard: React.FC<UserCardProps> = ({ user, clientCompany, projectsCount,
             </div>
 
             <div className="p-5 pt-8 text-center items-center flex flex-col flex-grow">
-                <img src={user.avatarUrl} alt={user.name} className="w-24 h-24 rounded-full mb-4 ring-4 ring-dark-bg object-cover" />
+                <img src={getSafeImageUrl(user.avatarUrl, 'avatar')} alt={user.name} className="w-24 h-24 rounded-full mb-4 ring-4 ring-dark-bg object-cover" />
                 <h3 className="font-bold text-white text-lg">{user.name}</h3>
                 <p className="text-sm text-accent-blue font-medium">{user.position}</p>
                 <p className="text-xs text-secondary-text mt-1">{clientCompany} &bull; {projectsCount} {projectsCount === 1 ? 'Project' : 'Projects'}</p>

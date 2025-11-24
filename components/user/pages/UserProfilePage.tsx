@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { User } from '../../../types.ts';
 import { PhotoIcon, KeyIcon } from '../../icons.tsx';
 import { userAPI } from '../../../services/api';
+import { getSafeImageUrl, refreshCacheBuster } from '../../../utils/imageUtils';
 
 interface UserProfilePageProps {
     user: User;
@@ -9,7 +10,7 @@ interface UserProfilePageProps {
 }
 
 const UserProfilePage: React.FC<UserProfilePageProps> = ({ user, onSave }) => {
-    const [avatarPreview, setAvatarPreview] = useState<string>(user.avatarUrl);
+    const [avatarPreview, setAvatarPreview] = useState<string>(getSafeImageUrl(user.avatarUrl, 'avatar'));
     const [notification, setNotification] = useState<string | null>(null);
     const [isAvatarLoading, setIsAvatarLoading] = useState(false);
     const [isPasswordLoading, setIsPasswordLoading] = useState(false);
@@ -22,7 +23,7 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ user, onSave }) => {
             setIsAvatarLoading(true);
             try {
                 const response = await userAPI.uploadAvatar(file);
-                const newAvatarUrl = response.data.avatar_url;
+                const newAvatarUrl = refreshCacheBuster(response.data.avatar_url);
                 setAvatarPreview(newAvatarUrl);
                 onSave({ ...user, avatarUrl: newAvatarUrl });
                 showNotification('Profile photo updated successfully!');
@@ -95,7 +96,7 @@ const UserProfilePage: React.FC<UserProfilePageProps> = ({ user, onSave }) => {
                 <div className="lg:col-span-1">
                     <div className="bg-card-bg p-6 rounded-2xl border border-border-color text-center">
                         <div className="relative w-32 h-32 mx-auto mb-4 group">
-                            <img src={avatarPreview} alt={user.name} className="w-full h-full rounded-full object-cover ring-4 ring-sidebar-bg" />
+                            <img src={getSafeImageUrl(avatarPreview, 'avatar')} alt={user.name} className="w-full h-full rounded-full object-cover ring-4 ring-sidebar-bg" />
                             <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                                 {isAvatarLoading ? (
                                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>

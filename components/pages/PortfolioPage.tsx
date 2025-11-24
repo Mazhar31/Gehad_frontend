@@ -5,6 +5,7 @@ import PortfolioCard from '../PortfolioCard.tsx';
 import { PlusIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
 import { getUploadUrl } from '../../config/api';
+import { getSafeImageUrl, refreshCacheBuster } from '../../utils/imageUtils';
 
 const PortfolioPage: React.FC = () => {
     const { portfolioCases, handleSavePortfolioCase, handleDeletePortfolioCase } = useData();
@@ -80,7 +81,7 @@ const PortfolioForm: React.FC<{
         title: caseItem?.title || '',
         category: caseItem?.category || '',
         description: caseItem?.description || '',
-        imageUrl: caseItem?.imageUrl || '',
+        imageUrl: getSafeImageUrl(caseItem?.imageUrl, 'portfolio'),
         link: caseItem?.link || ''
     });
     const [imageFile, setImageFile] = useState<File | null>(null);
@@ -91,8 +92,8 @@ const PortfolioForm: React.FC<{
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
             setImageFile(file);
-            // Create preview URL
-            const previewUrl = URL.createObjectURL(file);
+            // Create preview URL with cache-busting
+            const previewUrl = refreshCacheBuster(URL.createObjectURL(file));
             setFormData(prev => ({ ...prev, imageUrl: previewUrl }));
         }
     };
@@ -130,7 +131,7 @@ const PortfolioForm: React.FC<{
                 }
                 
                 const uploadResponse = await response.json();
-                imageUrl = uploadResponse.data.public_url;
+                imageUrl = refreshCacheBuster(uploadResponse.data.public_url);
             }
             
             onSave({
@@ -153,7 +154,7 @@ const PortfolioForm: React.FC<{
                 <label className="block text-sm font-medium text-secondary-text mb-2">Portfolio Image</label>
                 <div className="flex items-center gap-x-4">
                     <img
-                        src={formData.imageUrl || 'https://storage.googleapis.com/aistudio-hosting/generative-ai-studio/assets/app-placeholder.png'}
+                        src={getSafeImageUrl(formData.imageUrl, 'portfolio')}
                         alt="Portfolio Preview"
                         className="h-24 w-24 object-cover rounded-lg bg-dark-bg border border-border-color"
                     />

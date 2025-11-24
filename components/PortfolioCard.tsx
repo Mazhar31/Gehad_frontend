@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PortfolioCase } from '../types.ts';
 import { EllipsisVerticalIcon, PencilSquareIcon, TrashIcon, ArrowTopRightOnSquareIcon } from './icons.tsx';
+import { getSafeImageUrl } from '../utils/imageUtils';
 
 interface PortfolioCardProps {
     caseItem: PortfolioCase;
@@ -32,7 +33,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ caseItem, onEdit, onDelet
                 )}
             </div>
             <div className="aspect-video overflow-hidden">
-                <img src={caseItem.imageUrl} alt={caseItem.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                <img src={getSafeImageUrl(caseItem.imageUrl, 'portfolio')} alt={caseItem.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
             </div>
             <div className="p-6">
                 <p className="text-sm font-medium text-accent-blue mb-2">{caseItem.category}</p>
