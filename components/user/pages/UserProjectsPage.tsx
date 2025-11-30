@@ -63,7 +63,12 @@ const UserDashboardsPage: React.FC<{ dashboards: Project[], client: Client }> = 
             {filteredDashboards.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredDashboards.map(dashboard => (
-                        <UserDashboardCard key={dashboard.id} dashboard={dashboard} onClick={() => handleDashboardClick(dashboard)} />
+                        <UserDashboardCard 
+                            key={dashboard.id} 
+                            dashboard={dashboard} 
+                            onClick={() => handleDashboardClick(dashboard)}
+                            clientName={client.company}
+                        />
                     ))}
                 </div>
             ) : dashboards.length === 0 ? (

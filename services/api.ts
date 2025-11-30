@@ -963,6 +963,16 @@ export const deployAPI = {
     return response.json();
   },
 
+  getDeploymentStatus: async (deploymentId: string) => {
+    return apiCall<{ success: boolean; data: any }>(`/admin/deploy/status/${deploymentId}`);
+  },
+
+  deleteProjectDashboard: async (projectId: string) => {
+    return apiCall<{ success: boolean; message: string }>(`/admin/deploy/project/${projectId}`, {
+      method: 'DELETE',
+    });
+  },
+
   deploySubdomain: async (subdomain: string, dashboardFile: File) => {
     const formData = new FormData();
     formData.append('subdomain', subdomain);

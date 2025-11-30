@@ -14,9 +14,10 @@ const getStatusClass = (status: Project['status']) => {
 interface UserDashboardCardProps {
     dashboard: Project;
     onClick: () => void;
+    clientName?: string;
 }
 
-const UserDashboardCard: React.FC<UserDashboardCardProps> = ({ dashboard, onClick }) => {
+const UserDashboardCard: React.FC<UserDashboardCardProps> = ({ dashboard, onClick, clientName }) => {
     // Use the uploaded dashboard image with cache-busting
     const dashboardImage = getSafeImageUrl(dashboard.imageUrl, 'project');
 
@@ -27,7 +28,12 @@ const UserDashboardCard: React.FC<UserDashboardCardProps> = ({ dashboard, onClic
         >
             {/* Header: Dashboard Name & Status */}
             <div className="flex justify-between items-start">
-                <h3 className="font-bold text-white text-lg flex-1 pr-4">{dashboard.name}</h3>
+                <div className="flex items-center gap-2 flex-1 pr-4">
+                    <h3 className="font-bold text-white text-lg">{dashboard.name}</h3>
+                    {dashboard.dashboardUrl && (
+                        <div className="w-2 h-2 bg-green-400 rounded-full" title="Dashboard deployed"></div>
+                    )}
+                </div>
                 <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusClass(dashboard.status)}`}>
                     {dashboard.status}
                 </div>
@@ -43,7 +49,7 @@ const UserDashboardCard: React.FC<UserDashboardCardProps> = ({ dashboard, onClic
             </div>
 
             {/* Footer: Dates */}
-            <div className="border-t border-border-color pt-4 flex items-center text-sm mt-auto">
+            <div className="border-t border-border-color pt-4 text-sm mt-auto">
                 <div>
                     <p className="text-xs text-secondary-text">Start Date</p>
                     <p className="font-semibold text-white">

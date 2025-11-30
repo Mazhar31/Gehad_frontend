@@ -64,17 +64,33 @@ const UserDashboardDetailsPage: React.FC<{ dashboard: Project, client: Client }>
                 <DetailItem icon={CalendarDaysIcon} label="Start Date" value={dashboard.startDate} />
             </div>
 
-            <div className="mt-8 pt-6 border-t border-border-color text-center">
-                <a
-                    href={`${window.location.origin}/${encodeURIComponent(displayClient.company)}/${encodeURIComponent(dashboard.name)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center space-x-3 bg-gradient-to-r from-pro-bg-start to-pro-bg-end text-white font-bold py-3 px-8 rounded-xl hover:scale-105 transition-transform duration-300 shadow-lg shadow-purple-500/30"
-                >
-                    <ArrowTopRightOnSquareIcon className="w-5 h-5" />
-                    <span>Dashboard Access</span>
-                </a>
-            </div>
+            {dashboard.dashboardUrl && (
+                <div className="mt-8 pt-6 border-t border-border-color text-center">
+                    <button
+                        onClick={() => {
+                            // Helper function to create slug (same as backend)
+                            const createSlug = (name: string) => {
+                                return name.toLowerCase()
+                                    .replace(/[^a-z0-9\s-]/g, '') // Remove special chars except spaces and hyphens
+                                    .replace(/\s+/g, '-') // Replace spaces with hyphens
+                                    .replace(/-+/g, '-') // Replace multiple hyphens with single
+                                    .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+                            };
+                            
+                            // Open dashboard in new tab
+                            const clientSlug = createSlug(displayClient.company);
+                            const projectSlug = createSlug(dashboard.name);
+                            const dashboardUrl = `/dashboard/${clientSlug}/${projectSlug}`;
+                            console.log('🔗 Opening dashboard in new tab:', { clientSlug, projectSlug, dashboardUrl });
+                            window.open(dashboardUrl, '_blank');
+                        }}
+                        className="inline-flex items-center justify-center space-x-3 bg-gradient-to-r from-pro-bg-start to-pro-bg-end text-white font-bold py-3 px-8 rounded-xl hover:scale-105 transition-transform duration-300 shadow-lg shadow-purple-500/30"
+                    >
+                        <ArrowTopRightOnSquareIcon className="w-5 h-5" />
+                        <span>Dashboard Access</span>
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
