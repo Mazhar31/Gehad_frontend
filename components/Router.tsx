@@ -12,6 +12,30 @@ const Router: React.FC = () => {
   
   if (dashboardMatch) {
     const [, clientName, projectName] = dashboardMatch;
+    
+    // Validate session - if no valid session, redirect to home
+    const sessionData = sessionStorage.getItem('dashboard_access_session');
+    if (!sessionData) {
+      console.log('❌ No dashboard session found, redirecting to home');
+      window.location.href = '/';
+      return null;
+    }
+    
+    try {
+      const session = JSON.parse(sessionData);
+      const expectedKey = `${clientName}-${projectName}`;
+      
+      if (session.key !== expectedKey || Date.now() > session.expires || session.token !== localStorage.getItem('auth_token')) {
+        console.log('❌ Invalid dashboard session, redirecting to home');
+        window.location.href = '/';
+        return null;
+      }
+    } catch {
+      console.log('❌ Corrupted dashboard session, redirecting to home');
+      window.location.href = '/';
+      return null;
+    }
+    
     return <DashboardViewer clientName={clientName} projectName={projectName} />;
   }
   
