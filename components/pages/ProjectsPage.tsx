@@ -7,9 +7,10 @@ import { useData } from '../DataContext.tsx';
 import ProjectDetails from '../ProjectDetails.tsx';
 import { getUploadUrl } from '../../config/api';
 import { getSafeImageUrl, refreshCacheBuster } from '../../utils/imageUtils';
+import { deployAPI } from '../../services/api';
 
 const ProjectsPage: React.FC = () => {
-    const { projects, clients, departments, paymentPlans, groups, handleSaveProject, handleDeleteProject } = useData();
+    const { projects, clients, departments, paymentPlans, groups, handleSaveProject, handleDeleteProject, loadData } = useData();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -43,6 +44,17 @@ const ProjectsPage: React.FC = () => {
 
     const onDelete = (projectId: string) => {
         handleDeleteProject(projectId);
+    };
+    
+    const onDeleteDashboard = async (projectId: string) => {
+        try {
+            await deployAPI.deleteProjectDashboard(projectId);
+            // Refresh projects data to update dashboard URLs
+            await loadData();
+        } catch (error) {
+            console.error('Failed to delete dashboard:', error);
+            alert('Failed to delete dashboard deployment');
+        }
     };
 
     const filteredProjects = useMemo(() => {
@@ -105,6 +117,7 @@ const ProjectsPage: React.FC = () => {
                             onEdit={() => handleOpenEditModal(project)}
                             onDelete={() => onDelete(project.id)}
                             onViewDetails={() => handleOpenDetailsModal(project)}
+                            onDeleteDashboard={() => onDeleteDashboard(project.id)}
                         />
                     );
                 })}

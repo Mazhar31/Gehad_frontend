@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useRef, useMemo } from 'react';
-import { ArrowUpTrayIcon, XMarkIcon, CheckCircleIcon } from '../icons.tsx';
+import { ArrowUpTrayIcon, XMarkIcon, CheckCircleIcon, ExclamationTriangleIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
+import { deployAPI } from '../../services/api';
 
 const DeployKpiDashboardPage: React.FC = () => {
-    const { clients, projects } = useData();
+    const { clients, projects, loadData } = useData();
     const [deployMode, setDeployMode] = useState<'project' | 'subdomain'>('project');
     
     // Project mode state
@@ -16,7 +17,9 @@ const DeployKpiDashboardPage: React.FC = () => {
     // Common state
     const [file, setFile] = useState<File | null>(null);
     const [isDragging, setIsDragging] = useState(false);
-    const [notification, setNotification] = useState<string | null>(null);
+    const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+    const [isDeploying, setIsDeploying] = useState(false);
+    const [deploymentProgress, setDeploymentProgress] = useState<string>('');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const availableProjects = useMemo(() => {
@@ -24,9 +27,13 @@ const DeployKpiDashboardPage: React.FC = () => {
         return projects.filter(p => p.clientId === selectedClientId);
     }, [projects, selectedClientId]);
 
-    const showNotification = (message: string) => {
-        setNotification(message);
-        setTimeout(() => setNotification(null), 4000);
+    const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
+        setNotification({ message, type });
+        setTimeout(() => setNotification(null), 5000);
+    };
+
+    const updateProgress = (message: string) => {
+        setDeploymentProgress(message);
     };
 
     const handleFileSelect = (selectedFile: File | null) => {
@@ -89,7 +96,7 @@ const DeployKpiDashboardPage: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!file) return;
+        if (!file || isDeploying) return;
 
         if (deployMode === 'project') {
             if (!selectedClientId || !selectedProjectId) return;
@@ -97,26 +104,73 @@ const DeployKpiDashboardPage: React.FC = () => {
             const selectedProject = projects.find(p => p.id === selectedProjectId);
 
             if (!selectedClient || !selectedProject) {
-                showNotification('Error: Selected client or project not found.');
+                showNotification('Error: Selected client or project not found.', 'error');
                 return;
             }
 
-            console.log(`Simulating deployment for: ${file.name} to ${selectedClient.company}'s project folder: ${selectedProject.name}`);
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            showNotification(`Dashboard "${file.name}" deployed to project "${selectedProject.name}" successfully!`);
-            
-            clearFile();
-            setSelectedClientId('');
-            setSelectedProjectId('');
+            setIsDeploying(true);
+            setDeploymentProgress('Uploading dashboard files...');
+
+            try {
+                // Deploy to project
+                updateProgress('Processing ZIP file...');
+                const result = await deployAPI.deployProject(selectedProjectId, file);
+                
+                updateProgress('Building React application...');
+                // The backend handles the build process
+                
+                updateProgress('Deploying to storage...');
+                // Wait a bit for the backend to complete
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                showNotification(
+                    `Dashboard "${file.name}" deployed to project "${selectedProject.name}" successfully! URL: ${result.data.dashboard_url}`,
+                    'success'
+                );
+                
+                // Refresh projects data to get updated dashboard URLs
+                await loadData();
+                
+                clearFile();
+                setSelectedClientId('');
+                setSelectedProjectId('');
+                
+            } catch (error) {
+                console.error('Deployment failed:', error);
+                showNotification(
+                    `Deployment failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                    'error'
+                );
+            } finally {
+                setIsDeploying(false);
+                setDeploymentProgress('');
+            }
         } else { // Subdomain mode
             if (!subdomain) return;
             
-            console.log(`Simulating deployment of ${file.name} to subdomain: ${subdomain}.oneqlek.com`);
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            showNotification(`Dashboard "${file.name}" deployed to ${subdomain}.oneqlek.com successfully!`);
+            setIsDeploying(true);
+            updateProgress('Deploying to subdomain...');
             
-            clearFile();
-            setSubdomain('');
+            try {
+                const result = await deployAPI.deploySubdomain(subdomain, file);
+                showNotification(
+                    `Dashboard "${file.name}" deployed to ${subdomain}.oneqlek.com successfully!`,
+                    'success'
+                );
+                
+                clearFile();
+                setSubdomain('');
+                
+            } catch (error) {
+                console.error('Subdomain deployment failed:', error);
+                showNotification(
+                    `Deployment failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+                    'error'
+                );
+            } finally {
+                setIsDeploying(false);
+                setDeploymentProgress('');
+            }
         }
     };
     
@@ -137,9 +191,24 @@ const DeployKpiDashboardPage: React.FC = () => {
     return (
         <div className="text-white">
              {notification && (
-                <div className="fixed top-20 right-6 bg-accent-green text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-3">
-                    <CheckCircleIcon className="w-6 h-6" />
-                    <span>{notification}</span>
+                <div className={`fixed top-20 right-6 px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-3 ${
+                    notification.type === 'success' 
+                        ? 'bg-accent-green text-white' 
+                        : 'bg-red-600 text-white'
+                }`}>
+                    {notification.type === 'success' ? (
+                        <CheckCircleIcon className="w-6 h-6" />
+                    ) : (
+                        <ExclamationTriangleIcon className="w-6 h-6" />
+                    )}
+                    <span>{notification.message}</span>
+                </div>
+            )}
+            
+            {isDeploying && (
+                <div className="fixed top-32 right-6 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-3">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <span>{deploymentProgress}</span>
                 </div>
             )}
             <div>
@@ -302,11 +371,14 @@ const DeployKpiDashboardPage: React.FC = () => {
                     <div className="mt-8 flex justify-end">
                         <button 
                             type="submit"
-                            disabled={!file || !canUpload}
+                            disabled={!file || !canUpload || isDeploying}
                             className="bg-accent-blue text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300
-                                       disabled:bg-gray-600 disabled:cursor-not-allowed hover:bg-blue-600"
+                                       disabled:bg-gray-600 disabled:cursor-not-allowed hover:bg-blue-600 flex items-center space-x-2"
                         >
-                            Deploy Dashboard
+                            {isDeploying && (
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            )}
+                            <span>{isDeploying ? 'Deploying...' : 'Deploy Dashboard'}</span>
                         </button>
                     </div>
                 </form>
