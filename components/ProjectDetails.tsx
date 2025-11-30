@@ -92,15 +92,38 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project, client, depart
 
             {project.dashboardUrl && (
                 <div className="mt-8 pt-6 border-t border-border-color text-center">
-                    <a
-                        href={project.dashboardUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <button
+                        onClick={() => {
+                            if (project.projectType === 'Add-ins') {
+                                // For Add-ins, open external URL directly
+                                window.open(project.dashboardUrl, '_blank');
+                            } else {
+                                // For Dashboard projects, use secure session
+                                const urlParts = project.dashboardUrl.split('/');
+                                const clientSlug = urlParts[2];
+                                const projectSlug = urlParts[3];
+                                
+                                // Create session data
+                                const sessionData = {
+                                    key: `${clientSlug}-${projectSlug}`,
+                                    timestamp: Date.now(),
+                                    expires: Date.now() + (5 * 60 * 1000), // 5 minutes
+                                    token: localStorage.getItem('auth_token')
+                                };
+                                
+                                // Store session
+                                sessionStorage.setItem('dashboard_access_session', JSON.stringify(sessionData));
+                                
+                                // Open dashboard in new tab
+                                const dashboardUrl = `/dashboard/${clientSlug}/${projectSlug}`;
+                                window.open(dashboardUrl, '_blank');
+                            }
+                        }}
                         className="inline-flex items-center justify-center space-x-3 bg-gradient-to-r from-pro-bg-start to-pro-bg-end text-white font-bold py-3 px-8 rounded-xl hover:scale-105 transition-transform duration-300 shadow-lg shadow-purple-500/30"
                     >
                         <ArrowTopRightOnSquareIcon className="w-5 h-5" />
                         <span>{linkButtonText}</span>
-                    </a>
+                    </button>
                 </div>
             )}
         </div>

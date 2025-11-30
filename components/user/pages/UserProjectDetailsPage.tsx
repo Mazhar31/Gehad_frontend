@@ -68,20 +68,23 @@ const UserDashboardDetailsPage: React.FC<{ dashboard: Project, client: Client }>
                 <div className="mt-8 pt-6 border-t border-border-color text-center">
                     <button
                         onClick={() => {
-                            // Helper function to create slug (same as backend)
-                            const createSlug = (name: string) => {
-                                return name.toLowerCase()
-                                    .replace(/[^a-z0-9\s-]/g, '') // Remove special chars except spaces and hyphens
-                                    .replace(/\s+/g, '-') // Replace spaces with hyphens
-                                    .replace(/-+/g, '-') // Replace multiple hyphens with single
-                                    .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
+                            const urlParts = dashboard.dashboardUrl.split('/');
+                            const clientSlug = urlParts[2];
+                            const projectSlug = urlParts[3];
+                            
+                            // Create session data
+                            const sessionData = {
+                                key: `${clientSlug}-${projectSlug}`,
+                                timestamp: Date.now(),
+                                expires: Date.now() + (5 * 60 * 1000), // 5 minutes
+                                token: localStorage.getItem('auth_token')
                             };
                             
+                            // Store session
+                            sessionStorage.setItem('dashboard_access_session', JSON.stringify(sessionData));
+                            
                             // Open dashboard in new tab
-                            const clientSlug = createSlug(displayClient.company);
-                            const projectSlug = createSlug(dashboard.name);
                             const dashboardUrl = `/dashboard/${clientSlug}/${projectSlug}`;
-                            console.log('🔗 Opening dashboard in new tab:', { clientSlug, projectSlug, dashboardUrl });
                             window.open(dashboardUrl, '_blank');
                         }}
                         className="inline-flex items-center justify-center space-x-3 bg-gradient-to-r from-pro-bg-start to-pro-bg-end text-white font-bold py-3 px-8 rounded-xl hover:scale-105 transition-transform duration-300 shadow-lg shadow-purple-500/30"

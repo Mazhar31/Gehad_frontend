@@ -108,6 +108,9 @@ const DashboardViewer: React.FC<DashboardViewerProps> = ({ clientName, projectNa
         const loadDataAndValidate = async () => {
             if (dataLoaded) return; // Prevent multiple loads
             
+            // Session validation is now handled in Router.tsx
+            // This component only loads if session is valid
+            
             // Check if user is logged in by checking for auth token
             const authToken = localStorage.getItem('auth_token');
             if (!authToken) {
