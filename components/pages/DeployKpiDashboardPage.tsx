@@ -40,6 +40,7 @@ const DeployKpiDashboardPage: React.FC = () => {
     const handleFileSelect = (selectedFile: File | null) => {
         if (selectedFile && selectedFile.name.toLowerCase().endsWith('.zip')) {
             setFile(selectedFile);
+            setLastDeployedDashboard(null); // Clear previous deployment when new file selected
         } else if (selectedFile) {
             alert('Invalid file type. Please upload a .zip file.');
             if (fileInputRef.current) {
@@ -90,7 +91,7 @@ const DeployKpiDashboardPage: React.FC = () => {
 
     const clearFile = () => {
         setFile(null);
-        setLastDeployedDashboard(null); // Clear deployed dashboard info when clearing file
+        // Don't clear lastDeployedDashboard here - let it persist until new upload or page navigation
         if(fileInputRef.current) {
             fileInputRef.current.value = '';
         }
@@ -144,6 +145,7 @@ const DeployKpiDashboardPage: React.FC = () => {
                 clearFile();
                 setSelectedClientId('');
                 setSelectedProjectId('');
+                // Keep lastDeployedDashboard to show the button
                 
             } catch (error) {
                 console.error('Deployment failed:', error);
