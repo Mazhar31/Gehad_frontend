@@ -218,10 +218,10 @@ const DashboardViewer: React.FC<DashboardViewerProps> = ({ clientName, projectNa
                     <h2 className="text-xl font-bold text-white mb-2">Dashboard Access Error</h2>
                     <p className="text-secondary-text mb-4">{error}</p>
                     <button 
-                        onClick={() => window.history.back()}
+                        onClick={() => window.close()}
                         className="bg-accent-blue text-white px-4 py-2 rounded-lg hover:bg-blue-600"
                     >
-                        Go Back
+                        Close
                     </button>
                 </div>
             </div>
@@ -250,19 +250,12 @@ const DashboardViewer: React.FC<DashboardViewerProps> = ({ clientName, projectNa
                     </div>
                     <button 
                         onClick={() => {
-                            // Check if user is admin or regular user
-                            const userRole = localStorage.getItem('user_role');
-                            if (userRole === 'user') {
-                                // Close the tab for users
-                                window.close();
-                            } else {
-                                // Navigate back for admin
-                                window.history.back();
-                            }
+                            // Always close the tab since dashboard opens in new tab
+                            window.close();
                         }}
                         className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
                     >
-                        {localStorage.getItem('user_role') === 'user' ? 'Back to User Dashboard' : 'Back to Projects'}
+                        Close Dashboard
                     </button>
                 </div>
             </div>
