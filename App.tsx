@@ -67,11 +67,15 @@ function App() {
     }
   };
 
-  // Check if this is a password reset page
+  // Check URL parameters for auth pages
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('token') && window.location.pathname === '/reset-password') {
       setAuthPage('reset-password');
+      return;
+    }
+    if (urlParams.get('page') === 'login') {
+      setAuthPage('login');
       return;
     }
   }, []);

@@ -15,6 +15,17 @@ const DashboardViewer: React.FC<DashboardViewerProps> = ({ clientName, projectNa
     const [dashboardUrl, setDashboardUrl] = useState<string | null>(null);
     const [dataLoaded, setDataLoaded] = useState(false);
 
+    // Remove body scrollbar when component mounts
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+        
+        return () => {
+            document.body.style.overflow = 'auto';
+            document.documentElement.style.overflow = 'auto';
+        };
+    }, []);
+
     const validateAccess = useCallback(async (clientsToUse: any[], projectsToUse: any[], userToUse: any) => {
         console.log('🔍 Validating access for:', { clientName, projectName });
         console.log('📊 Available clients:', clientsToUse.map(c => ({ id: c.id, company: c.company })));
@@ -240,38 +251,15 @@ const DashboardViewer: React.FC<DashboardViewerProps> = ({ clientName, projectNa
     console.log('🎯 Loading dashboard from:', dashboardSrc);
     
     return (
-        <div className="min-h-screen bg-dark-bg">
-            <div className="bg-card-bg border-b border-border-color p-4">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-xl font-bold text-white">
-                            {projectName.replace(/-/g, ' ')} Dashboard
-                        </h1>
-                        <p className="text-secondary-text">
-                            Client: {clientName.replace(/-/g, ' ')}
-                        </p>
-                    </div>
-                    <button 
-                        onClick={() => {
-                            // Always close the tab since dashboard opens in new tab
-                            window.close();
-                        }}
-                        className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
-                    >
-                        Close Dashboard
-                    </button>
-                </div>
-            </div>
-            
-            <div className="h-full">
-                <iframe
-                    src={dashboardSrc}
-                    className="w-full h-screen border-0"
-                    title={`${projectName} Dashboard`}
-                    sandbox="allow-scripts allow-same-origin allow-forms"
-                    onError={() => setError('Failed to load dashboard')}
-                />
-            </div>
+        <div style={{ width: '100vw', height: '100vh', margin: 0, padding: 0, overflow: 'hidden' }}>
+            <iframe
+                src={dashboardSrc}
+                className="w-full h-full border-0 block"
+                title={`${projectName} Dashboard`}
+                sandbox="allow-scripts allow-same-origin allow-forms"
+                onError={() => setError('Failed to load dashboard')}
+                style={{ margin: 0, padding: 0, border: 'none' }}
+            />
         </div>
     );
 };
