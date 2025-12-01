@@ -6,11 +6,38 @@ const UserAddinCard: React.FC<{ addin: Project }> = ({ addin }) => {
     const addinImage = addin.imageUrl || 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=800&auto=format&fit=crop';
 
     return (
-        <a 
-            href={addin.dashboardUrl} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="block bg-card-bg rounded-2xl overflow-hidden group transition-all duration-300 hover:transform hover:-translate-y-2 hover:shadow-2xl hover:shadow-accent-blue/20 border border-border-color hover:border-accent-blue/50"
+        <div 
+            onClick={() => {
+                if (!addin.dashboardUrl) return;
+                
+                // Check if URL is external (not internal deployment)
+                const isInternalUrl = addin.dashboardUrl && (addin.dashboardUrl.startsWith('/dashboard/') || addin.dashboardUrl.startsWith('/addins/'));
+                
+                if (!isInternalUrl) {
+                    // For external URLs, open directly
+                    window.open(addin.dashboardUrl, '_blank');
+                } else {
+                    // For internal projects, use secure session
+                    const urlParts = addin.dashboardUrl.split('/');
+                    const clientSlug = urlParts[2];
+                    const projectSlug = urlParts[3];
+                    
+                    // Create session data
+                    const sessionData = {
+                        key: `${clientSlug}-${projectSlug}`,
+                        timestamp: Date.now(),
+                        expires: Date.now() + (5 * 60 * 1000), // 5 minutes
+                        token: localStorage.getItem('auth_token')
+                    };
+                    
+                    // Store session
+                    sessionStorage.setItem('dashboard_access_session', JSON.stringify(sessionData));
+                    
+                    // Use the actual dashboardUrl from project
+                    window.open(addin.dashboardUrl, '_blank');
+                }
+            }}
+            className="block bg-card-bg rounded-2xl overflow-hidden group transition-all duration-300 hover:transform hover:-translate-y-2 hover:shadow-2xl hover:shadow-accent-blue/20 border border-border-color hover:border-accent-blue/50 cursor-pointer"
         >
             <div className="aspect-video relative">
                 <img src={addinImage} alt={addin.name} className="w-full h-full object-cover" />
@@ -22,7 +49,7 @@ const UserAddinCard: React.FC<{ addin: Project }> = ({ addin }) => {
                      <ArrowTopRightOnSquareIcon className="w-5 h-5 text-white" />
                 </div>
             </div>
-        </a>
+        </div>
     );
 };
 
