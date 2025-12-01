@@ -270,19 +270,6 @@ const DashboardViewer: React.FC<DashboardViewerProps> = ({ clientName, projectNa
     // Detect mobile devices
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
-    // For mobile devices, redirect directly instead of using iframe
-    if (isMobile) {
-        window.location.replace(dashboardSrc);
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-dark-bg">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-lime mx-auto mb-4"></div>
-                    <p className="text-white">Redirecting to dashboard...</p>
-                </div>
-            </div>
-        );
-    }
-    
     return (
         <div style={{ 
             width: '100vw', 
