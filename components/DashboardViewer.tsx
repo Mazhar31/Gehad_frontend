@@ -232,9 +232,10 @@ const DashboardViewer: React.FC<DashboardViewerProps> = ({ clientName, projectNa
     const authToken = localStorage.getItem('auth_token');
     // Use the actual dashboard URL from the project instead of constructing from slugs
     const dashboardPath = dashboardUrl || `/dashboard/${clientName}/${projectName}`;
-    // Add cache-busting parameter to force reload of updated files
-    const cacheBuster = Date.now();
-    const dashboardSrc = `${API_CONFIG.BASE_URL}/admin/deploy${dashboardPath}?token=${encodeURIComponent(authToken || '')}&v=${cacheBuster}`;
+    // Use deployment timestamp for cache-busting to ensure updated files are loaded
+    const cacheKey = `dashboard_cache_${clientName}_${projectName}`;
+    const deploymentTimestamp = localStorage.getItem(cacheKey) || Date.now();
+    const dashboardSrc = `${API_CONFIG.BASE_URL}/admin/deploy${dashboardPath}?token=${encodeURIComponent(authToken || '')}&v=${deploymentTimestamp}`;
     
     console.log('🎯 Loading dashboard from:', dashboardSrc);
     
