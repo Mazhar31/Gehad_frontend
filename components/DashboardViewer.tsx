@@ -267,17 +267,29 @@ const DashboardViewer: React.FC<DashboardViewerProps> = ({ clientName, projectNa
     
     console.log('🎯 Loading dashboard from:', dashboardSrc);
     
+    // Detect mobile devices
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // For mobile devices, redirect directly instead of using iframe
+    if (isMobile) {
+        window.location.replace(dashboardSrc);
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-dark-bg">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-lime mx-auto mb-4"></div>
+                    <p className="text-white">Redirecting to dashboard...</p>
+                </div>
+            </div>
+        );
+    }
+    
     return (
         <div style={{ 
             width: '100vw', 
             height: '100vh', 
             margin: 0, 
             padding: 0, 
-            overflow: 'hidden',
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            zIndex: 9999
+            overflow: 'hidden'
         }}>
             <iframe
                 src={dashboardSrc}
@@ -292,7 +304,6 @@ const DashboardViewer: React.FC<DashboardViewerProps> = ({ clientName, projectNa
                     display: 'block'
                 }}
                 allowFullScreen
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             />
         </div>
     );
