@@ -147,11 +147,16 @@ const DeployKpiDashboardPage: React.FC = () => {
                 
                 // Store deployed dashboard info for temporary button AFTER loadData
                 const urlParts = result.data.dashboard_url.split('/');
+                const deploymentTimestamp = Date.now();
                 setLastDeployedDashboard({
                     clientSlug: urlParts[2],
                     projectSlug: urlParts[3],
                     dashboardUrl: result.data.dashboard_url
                 });
+                
+                // Store deployment timestamp for cache-busting
+                const cacheKey = `dashboard_cache_${urlParts[2]}_${urlParts[3]}`;
+                localStorage.setItem(cacheKey, deploymentTimestamp.toString());
                 
                 clearFile();
                 setSelectedClientId('');
@@ -406,6 +411,10 @@ const DeployKpiDashboardPage: React.FC = () => {
                                     
                                     // Store session
                                     sessionStorage.setItem('dashboard_access_session', JSON.stringify(sessionData));
+                                    
+                                    // Force cache refresh by updating timestamp
+                                    const cacheKey = `dashboard_cache_${lastDeployedDashboard.clientSlug}_${lastDeployedDashboard.projectSlug}`;
+                                    localStorage.setItem(cacheKey, Date.now().toString());
                                     
                                     // Open dashboard in new tab
                                     const dashboardUrl = `/dashboard/${lastDeployedDashboard.clientSlug}/${lastDeployedDashboard.projectSlug}`;
