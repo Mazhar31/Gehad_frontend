@@ -268,22 +268,31 @@ const DashboardViewer: React.FC<DashboardViewerProps> = ({ clientName, projectNa
     console.log('🎯 Loading dashboard from:', dashboardSrc);
     
     return (
-        <div style={{ width: '100vw', height: '100vh', margin: 0, padding: 0, overflow: 'hidden' }}>
+        <div style={{ 
+            width: '100vw', 
+            height: '100vh', 
+            margin: 0, 
+            padding: 0, 
+            overflow: 'hidden',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            zIndex: 9999
+        }}>
             <iframe
                 src={dashboardSrc}
-                className="w-full h-full border-0 block"
                 title={`${projectName} Dashboard`}
-                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
                 onError={() => setError('Failed to load dashboard')}
                 style={{ 
-                    margin: 0, 
-                    padding: 0, 
+                    width: '100%',
+                    height: '100%',
                     border: 'none',
-                    minWidth: '100%',
-                    minHeight: '100%'
+                    margin: 0,
+                    padding: 0,
+                    display: 'block'
                 }}
-                allow="fullscreen"
-                loading="eager"
+                allowFullScreen
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             />
         </div>
     );
