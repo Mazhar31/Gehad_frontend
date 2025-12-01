@@ -111,6 +111,17 @@ const DeployKpiDashboardPage: React.FC = () => {
                 return;
             }
 
+            // Check if project already has a dashboard
+            const existingDashboard = selectedProject.dashboardUrl;
+            if (existingDashboard) {
+                const confirmReplace = window.confirm(
+                    `Project "${selectedProject.name}" already has a deployed dashboard. Do you want to replace it with the new upload?`
+                );
+                if (!confirmReplace) {
+                    return;
+                }
+            }
+
             setIsDeploying(true);
             setDeploymentProgress('Uploading dashboard files...');
 
@@ -131,16 +142,16 @@ const DeployKpiDashboardPage: React.FC = () => {
                     'success'
                 );
                 
-                // Store deployed dashboard info for temporary button
+                // Refresh projects data to get updated dashboard URLs
+                await loadData();
+                
+                // Store deployed dashboard info for temporary button AFTER loadData
                 const urlParts = result.data.dashboard_url.split('/');
                 setLastDeployedDashboard({
                     clientSlug: urlParts[2],
                     projectSlug: urlParts[3],
                     dashboardUrl: result.data.dashboard_url
                 });
-                
-                // Refresh projects data to get updated dashboard URLs
-                await loadData();
                 
                 clearFile();
                 setSelectedClientId('');
