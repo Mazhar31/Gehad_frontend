@@ -89,6 +89,14 @@ const DashboardViewer: React.FC<DashboardViewerProps> = ({ clientName, projectNa
             setLoading(false);
             return;
         }
+        
+        // Check if this is an external URL (not internal deployment)
+        const isInternalUrl = project.dashboardUrl && (project.dashboardUrl.startsWith('/dashboard/') || project.dashboardUrl.startsWith('/addins/'));
+        if (project.dashboardUrl && !isInternalUrl) {
+            // External URL - redirect directly
+            window.location.href = project.dashboardUrl;
+            return;
+        }
 
         // Check user access permissions
         const effectiveUserRole = userToUse?.user_type || userRole;
@@ -243,6 +251,15 @@ const DashboardViewer: React.FC<DashboardViewerProps> = ({ clientName, projectNa
     const authToken = localStorage.getItem('auth_token');
     // Use the actual dashboard URL from the project instead of constructing from slugs
     const dashboardPath = dashboardUrl || `/dashboard/${clientName}/${projectName}`;
+    
+    // Check if this is an external URL
+    const isInternalUrl = dashboardUrl && (dashboardUrl.startsWith('/dashboard/') || dashboardUrl.startsWith('/addins/'));
+    if (dashboardUrl && !isInternalUrl) {
+        // External URL - redirect directly
+        window.location.href = dashboardUrl;
+        return null;
+    }
+    
     // Use deployment timestamp for cache-busting to ensure updated files are loaded
     const cacheKey = `dashboard_cache_${clientName}_${projectName}`;
     const deploymentTimestamp = localStorage.getItem(cacheKey) || Date.now();

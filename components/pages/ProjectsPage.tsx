@@ -267,7 +267,7 @@ const ProjectForm: React.FC<{
             </div>
             <div>
                 <label className="block text-sm font-medium text-secondary-text mb-1">Website / Dashboard URL</label>
-                <input type="url" name="dashboardUrl" value={formData.dashboardUrl} onChange={handleChange} className="w-full bg-dark-bg border border-border-color rounded-md p-2" placeholder="https://example.com" />
+                <input type="text" name="dashboardUrl" value={formData.dashboardUrl} onChange={handleChange} className="w-full bg-dark-bg border border-border-color rounded-md p-2" placeholder="/dashboard/client/project or https://example.com" />
             </div>
             <div>
                 <label className="block text-sm font-medium text-secondary-text mb-1">Project Type</label>
