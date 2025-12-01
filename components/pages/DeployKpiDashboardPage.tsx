@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useRef, useMemo } from 'react';
-import { ArrowUpTrayIcon, XMarkIcon, CheckCircleIcon, ExclamationTriangleIcon } from '../icons.tsx';
+import { ArrowUpTrayIcon, XMarkIcon, CheckCircleIcon, ExclamationTriangleIcon, ArrowTopRightOnSquareIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
 import { deployAPI } from '../../services/api';
 
@@ -20,6 +20,7 @@ const DeployKpiDashboardPage: React.FC = () => {
     const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
     const [isDeploying, setIsDeploying] = useState(false);
     const [deploymentProgress, setDeploymentProgress] = useState<string>('');
+    const [lastDeployedDashboard, setLastDeployedDashboard] = useState<{clientSlug: string, projectSlug: string, dashboardUrl: string} | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const availableProjects = useMemo(() => {
@@ -89,6 +90,7 @@ const DeployKpiDashboardPage: React.FC = () => {
 
     const clearFile = () => {
         setFile(null);
+        setLastDeployedDashboard(null); // Clear deployed dashboard info when clearing file
         if(fileInputRef.current) {
             fileInputRef.current.value = '';
         }
@@ -128,6 +130,14 @@ const DeployKpiDashboardPage: React.FC = () => {
                     'success'
                 );
                 
+                // Store deployed dashboard info for temporary button
+                const urlParts = result.data.dashboard_url.split('/');
+                setLastDeployedDashboard({
+                    clientSlug: urlParts[2],
+                    projectSlug: urlParts[3],
+                    dashboardUrl: result.data.dashboard_url
+                });
+                
                 // Refresh projects data to get updated dashboard URLs
                 await loadData();
                 
@@ -160,6 +170,7 @@ const DeployKpiDashboardPage: React.FC = () => {
                 
                 clearFile();
                 setSubdomain('');
+                setLastDeployedDashboard(null); // Clear for subdomain deployments
                 
             } catch (error) {
                 console.error('Subdomain deployment failed:', error);
@@ -368,18 +379,44 @@ const DeployKpiDashboardPage: React.FC = () => {
                         </div>
                     )}
 
-                    <div className="mt-8 flex justify-end">
-                        <button 
-                            type="submit"
-                            disabled={!file || !canUpload || isDeploying}
-                            className="bg-accent-blue text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300
-                                       disabled:bg-gray-600 disabled:cursor-not-allowed hover:bg-blue-600 flex items-center space-x-2"
-                        >
-                            {isDeploying && (
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                            )}
-                            <span>{isDeploying ? 'Deploying...' : 'Deploy Dashboard'}</span>
-                        </button>
+                    <div className="mt-8 flex justify-between items-center">
+                        {lastDeployedDashboard && (
+                            <button
+                                onClick={() => {
+                                    // Create session data
+                                    const sessionData = {
+                                        key: `${lastDeployedDashboard.clientSlug}-${lastDeployedDashboard.projectSlug}`,
+                                        timestamp: Date.now(),
+                                        expires: Date.now() + (5 * 60 * 1000), // 5 minutes
+                                        token: localStorage.getItem('auth_token')
+                                    };
+                                    
+                                    // Store session
+                                    sessionStorage.setItem('dashboard_access_session', JSON.stringify(sessionData));
+                                    
+                                    // Open dashboard in new tab
+                                    const dashboardUrl = `/dashboard/${lastDeployedDashboard.clientSlug}/${lastDeployedDashboard.projectSlug}`;
+                                    window.open(dashboardUrl, '_blank');
+                                }}
+                                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300 flex items-center space-x-2"
+                            >
+                                <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+                                <span>Go to Dashboard</span>
+                            </button>
+                        )}
+                        <div className={lastDeployedDashboard ? '' : 'ml-auto'}>
+                            <button 
+                                type="submit"
+                                disabled={!file || !canUpload || isDeploying}
+                                className="bg-accent-blue text-white font-bold py-2 px-6 rounded-lg transition-colors duration-300
+                                           disabled:bg-gray-600 disabled:cursor-not-allowed hover:bg-blue-600 flex items-center space-x-2"
+                            >
+                                {isDeploying && (
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                )}
+                                <span>{isDeploying ? 'Deploying...' : 'Deploy Dashboard'}</span>
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>
