@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useData } from './DataContext.tsx';
 import { clientAPI, projectAPI, authAPI } from '../services/api';
+import { API_CONFIG } from '../config/api';
 
 interface DashboardViewerProps {
     clientName: string;
@@ -231,7 +232,7 @@ const DashboardViewer: React.FC<DashboardViewerProps> = ({ clientName, projectNa
     const authToken = localStorage.getItem('auth_token');
     // Use the actual dashboard URL from the project instead of constructing from slugs
     const dashboardPath = dashboardUrl || `/dashboard/${clientName}/${projectName}`;
-    const dashboardSrc = `http://localhost:8000/api/admin/deploy${dashboardPath}?token=${encodeURIComponent(authToken || '')}`;
+    const dashboardSrc = `${API_CONFIG.BASE_URL}/admin/deploy${dashboardPath}?token=${encodeURIComponent(authToken || '')}`;
     
     console.log('🎯 Loading dashboard from:', dashboardSrc);
     
