@@ -226,13 +226,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onNavigate }) => 
                             onVerified={handleSliderVerified}
                             onReset={handleSliderReset}
                         />
-                        <button 
-                            type="button" 
-                            onClick={() => setStep('credentials')} 
-                            className="w-full text-secondary-text hover:text-white text-sm mt-4"
-                        >
-                            ← Back to login
-                        </button>
                     </div>
                 )}
                 

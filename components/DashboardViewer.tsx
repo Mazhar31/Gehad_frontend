@@ -273,9 +273,17 @@ const DashboardViewer: React.FC<DashboardViewerProps> = ({ clientName, projectNa
                 src={dashboardSrc}
                 className="w-full h-full border-0 block"
                 title={`${projectName} Dashboard`}
-                sandbox="allow-scripts allow-same-origin allow-forms"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
                 onError={() => setError('Failed to load dashboard')}
-                style={{ margin: 0, padding: 0, border: 'none' }}
+                style={{ 
+                    margin: 0, 
+                    padding: 0, 
+                    border: 'none',
+                    minWidth: '100%',
+                    minHeight: '100%'
+                }}
+                allow="fullscreen"
+                loading="eager"
             />
         </div>
     );
