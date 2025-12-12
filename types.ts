@@ -32,6 +32,7 @@ export interface Project {
   currency: string;
   imageUrl?: string;
   projectType: 'Dashboard' | 'Add-ins';
+  dashboardInstanceId?: string;
 }
 
 export interface InvoiceItem {

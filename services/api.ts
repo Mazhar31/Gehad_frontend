@@ -211,7 +211,8 @@ export const projectAPI = {
       imageUrl: refreshCacheBuster(project.image_url),
       projectType: project.project_type,
       currency: project.currency,
-      progress: project.progress
+      progress: project.progress,
+      dashboardInstanceId: project.dashboard_instance_id
     }));
     return transformedData;
   },
@@ -248,7 +249,8 @@ export const projectAPI = {
       imageUrl: refreshCacheBuster(projectData.image_url),
       projectType: projectData.project_type,
       currency: projectData.currency,
-      progress: projectData.progress
+      progress: projectData.progress,
+      dashboardInstanceId: projectData.dashboard_instance_id
     };
   },
 
@@ -265,6 +267,7 @@ export const projectAPI = {
     if (project.imageUrl) backendProject.image_url = project.imageUrl;
     if (project.projectType) backendProject.project_type = project.projectType;
     if (project.currency) backendProject.currency = project.currency;
+    if (project.dashboardInstanceId) backendProject.dashboard_instance_id = project.dashboardInstanceId;
     
     const response = await apiCall<{ success: boolean; data: any }>(`/admin/projects/${id}`, {
       method: 'PUT',
@@ -284,7 +287,8 @@ export const projectAPI = {
       imageUrl: refreshCacheBuster(updatedProject.image_url),
       projectType: updatedProject.project_type,
       currency: updatedProject.currency,
-      progress: updatedProject.progress
+      progress: updatedProject.progress,
+      dashboardInstanceId: updatedProject.dashboard_instance_id
     };
   },
 
