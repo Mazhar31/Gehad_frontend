@@ -1,8 +1,13 @@
 import React, { useState, useMemo } from 'react';
+// FIX: Added file extension to import to resolve module error.
 import { Project, Client } from '../../../types.ts';
+// FIX: Added file extension to import to resolve module error.
 import UserDashboardDetailsPage from './UserProjectDetailsPage.tsx';
+// FIX: Added file extension to import to resolve module error.
 import Modal from '../../Modal.tsx';
+// FIX: Added file extension to import to resolve module error.
 import UserDashboardCard from '../UserProjectCard.tsx';
+// FIX: Added file extension to import to resolve module error.
 import { MagnifyingGlassIcon } from '../../icons.tsx';
 
 const UserDashboardsPage: React.FC<{ dashboards: Project[], client: Client }> = ({ dashboards, client }) => {
@@ -30,9 +35,7 @@ const UserDashboardsPage: React.FC<{ dashboards: Project[], client: Client }> = 
         <div>
             <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-white mb-2">
-                        Dashboards for {dashboards.length > 0 && dashboards[0].client ? dashboards[0].client.company : client.company}
-                    </h1>
+                    <h1 className="text-3xl font-bold text-white mb-2">Dashboards for {client.company}</h1>
                     <p className="text-secondary-text">Here are all the dashboards assigned to your company.</p>
                 </div>
                 <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
@@ -63,18 +66,8 @@ const UserDashboardsPage: React.FC<{ dashboards: Project[], client: Client }> = 
             {filteredDashboards.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredDashboards.map(dashboard => (
-                        <UserDashboardCard 
-                            key={dashboard.id} 
-                            dashboard={dashboard} 
-                            onClick={() => handleDashboardClick(dashboard)}
-                            clientName={client.company}
-                        />
+                        <UserDashboardCard key={dashboard.id} dashboard={dashboard} onClick={() => handleDashboardClick(dashboard)} />
                     ))}
-                </div>
-            ) : dashboards.length === 0 ? (
-                <div className="flex items-center justify-center py-16">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-lime"></div>
-                    <p className="text-white ml-4">Loading your dashboards...</p>
                 </div>
             ) : (
                 <div className="text-center py-16 bg-card-bg rounded-2xl">

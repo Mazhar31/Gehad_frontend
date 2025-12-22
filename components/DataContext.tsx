@@ -45,7 +45,7 @@ interface DataContextType {
     handleDeleteUser: (userId: string) => Promise<void>;
     handleSaveInvoice: (invoice: Invoice) => Promise<void>;
     handleDeleteInvoice: (invoiceId: string) => Promise<void>;
-    handleSaveContactMessage: (message: Omit<ContactMessage, 'id' | 'createdAt'>) => Promise<void>;
+    handleSaveContactMessage: (message: Omit<ContactMessage, 'id' | 'createdAt'>) => void;
     handleSavePortfolioCase: (caseItem: PortfolioCase) => Promise<void>;
     handleDeletePortfolioCase: (caseId: string) => Promise<void>;
     handleSaveCategory: (category: Category) => Promise<void>;

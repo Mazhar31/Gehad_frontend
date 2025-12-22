@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
+// FIX: Added file extension to import to resolve module error.
 import { ArrowLeftOnRectangleIcon, FolderIcon, DocumentTextIcon, UserCircleIcon, PuzzlePieceIcon, Bars3Icon, XMarkIcon } from '../icons.tsx';
+// FIX: Added file extension to import to resolve module error.
 import { User } from '../../types.ts';
-import { getSafeImageUrl } from '../../utils/imageUtils';
 
 const ProjectileLogo: React.FC<{ className?: string }> = ({ className }) => (
     <svg width="32" height="32" viewBox="0 0 32" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
@@ -54,7 +55,7 @@ const UserHeader: React.FC<UserHeaderProps> = ({ userName, userAvatar, currentPa
     const navItems = [
         { page: 'dashboards', label: 'Dashboards', icon: FolderIcon, show: true },
         { page: 'addins', label: 'Add-ins', icon: PuzzlePieceIcon, show: true },
-        { page: 'invoices', label: 'Invoices', icon: DocumentTextIcon, show: true },
+        { page: 'invoices', label: 'Invoices', icon: DocumentTextIcon, show: userRole === 'superuser' },
     ] as const;
 
 
@@ -83,7 +84,7 @@ const UserHeader: React.FC<UserHeaderProps> = ({ userName, userAvatar, currentPa
                     <div className="flex items-center space-x-2">
                          <div className="relative" ref={profileMenuRef}>
                             <button onClick={() => setProfileMenuOpen(!isProfileMenuOpen)} className="flex items-center space-x-2">
-                                <img src={getSafeImageUrl(userAvatar, 'avatar')} alt={userName} className="w-9 h-9 rounded-full" />
+                                <img src={userAvatar} alt={userName} className="w-9 h-9 rounded-full" />
                                 <div className="hidden md:block text-left">
                                     <p className="text-white font-semibold text-sm">{userName}</p>
                                     <p className="text-xs text-secondary-text">Client</p>

@@ -2,11 +2,8 @@ import React, { useState, useMemo, useRef } from 'react';
 import { Client, Group } from '../../types.ts';
 import ClientCard from '../ClientCard.tsx';
 import Modal from '../Modal.tsx';
-import ConfirmDialog from '../ConfirmDialog.tsx';
 import { PlusIcon, EnvelopeIcon, PhoneIcon, MapPinIcon, MagnifyingGlassIcon, FolderIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
-import { getUploadUrl } from '../../config/api';
-import { getSafeImageUrl, refreshCacheBuster } from '../../utils/imageUtils';
 
 const ClientsPage: React.FC = () => {
     const { clients, projects, paymentPlans, groups, handleSaveClient, handleDeleteClient } = useData();
@@ -14,7 +11,7 @@ const ClientsPage: React.FC = () => {
     const [isDetailsModalOpen, setDetailsModalOpen] = useState(false);
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; client: Client | null }>({ isOpen: false, client: null });
+
 
     if (!clients || !projects || !paymentPlans || !groups || !handleSaveClient || !handleDeleteClient) {
         return <div>Loading...</div>
@@ -45,15 +42,8 @@ const ClientsPage: React.FC = () => {
         }
     };
 
-    const onDelete = (client: Client) => {
-        setDeleteConfirm({ isOpen: true, client });
-    };
-
-    const handleConfirmDelete = async () => {
-        if (deleteConfirm.client) {
-            await handleDeleteClient(deleteConfirm.client.id);
-            setDeleteConfirm({ isOpen: false, client: null });
-        }
+    const onDelete = (clientId: string) => {
+        handleDeleteClient(clientId);
     };
 
     const filteredClients = useMemo(() => {
@@ -96,7 +86,7 @@ const ClientsPage: React.FC = () => {
                         groupName={getGroupName(client.groupId)}
                         onViewDetails={() => handleOpenDetailsModal(client)}
                         onEdit={() => handleOpenEditModal(client)}
-                        onDelete={() => onDelete(client)}
+                        onDelete={() => onDelete(client.id)}
                     />
                 ))}
             </div>
@@ -123,15 +113,7 @@ const ClientsPage: React.FC = () => {
                 </Modal>
             )}
             
-            <ConfirmDialog
-                isOpen={deleteConfirm.isOpen}
-                title="Delete Client"
-                message={`Are you sure you want to delete "${deleteConfirm.client?.company}"? This will also delete all related projects, users, and invoices. This action cannot be undone.`}
-                confirmText="Delete Client"
-                onConfirm={handleConfirmDelete}
-                onCancel={() => setDeleteConfirm({ isOpen: false, client: null })}
-                type="danger"
-            />
+
         </div>
     );
 };
@@ -195,18 +177,21 @@ const ClientForm: React.FC<{
         address: client?.address || '',
         groupId: client?.groupId || '',
     });
-    const [avatarPreview, setAvatarPreview] = useState<string>(getSafeImageUrl(client?.avatarUrl, 'avatar'));
-    const [avatarFile, setAvatarFile] = useState<File | null>(null);
-    const [isUploading, setIsUploading] = useState(false);
+    const [avatarPreview, setAvatarPreview] = useState<string>(client?.avatarUrl || 'https://i.pravatar.cc/150');
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const toBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = error => reject(error);
+    });
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            setAvatarFile(file);
-            // Create preview URL with cache-busting
-            const previewUrl = refreshCacheBuster(URL.createObjectURL(file));
-            setAvatarPreview(previewUrl);
+            const base64 = await toBase64(file);
+            setAvatarPreview(base64);
         }
     };
 
@@ -215,44 +200,9 @@ const ClientForm: React.FC<{
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setIsUploading(true);
-        
-        try {
-            let avatarUrl = avatarPreview;
-            
-            // Upload avatar if a new file was selected
-            if (avatarFile) {
-                const formData = new FormData();
-                formData.append('file', avatarFile);
-                formData.append('type', 'logo');
-                formData.append('entity_id', client?.id || `client-${Date.now()}`);
-                
-                const token = localStorage.getItem('auth_token');
-                const response = await fetch(getUploadUrl(), {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
-                    body: formData,
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Upload failed');
-                }
-                
-                const uploadResponse = await response.json();
-                avatarUrl = refreshCacheBuster(uploadResponse.data.public_url);
-            }
-            
-            onSave({ ...formData, id: client?.id || '', avatarUrl });
-        } catch (error) {
-            console.error('Error uploading avatar:', error);
-            alert('Failed to upload avatar. Please try again.');
-        } finally {
-            setIsUploading(false);
-        }
+        onSave({ ...formData, id: client?.id || '', avatarUrl: avatarPreview });
     };
 
     return (
@@ -270,10 +220,9 @@ const ClientForm: React.FC<{
                     <button 
                         type="button" 
                         onClick={() => fileInputRef.current?.click()}
-                        disabled={isUploading}
-                        className="bg-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-700 disabled:opacity-50"
+                        className="bg-gray-600 px-3 py-1 rounded-lg text-sm hover:bg-gray-700"
                     >
-                        {isUploading ? 'Uploading...' : 'Change Logo'}
+                        Change Logo
                     </button>
                     <p className="text-xs text-secondary-text mt-1">PNG, JPG, GIF up to 10MB</p>
                 </div>
@@ -303,8 +252,8 @@ const ClientForm: React.FC<{
             </div>
             <div className="flex justify-end space-x-3 pt-4">
                 <button type="button" onClick={onCancel} className="bg-gray-600 px-4 py-2 rounded-lg hover:bg-gray-700">Cancel</button>
-                <button type="submit" disabled={isUploading} className="bg-accent-blue px-4 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50">
-                    {isUploading ? 'Saving...' : 'Save'}
+                <button type="submit" className="bg-accent-blue px-4 py-2 rounded-lg hover:bg-blue-600">
+                    Save
                 </button>
             </div>
         </form>

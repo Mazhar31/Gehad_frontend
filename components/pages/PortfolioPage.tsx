@@ -4,8 +4,7 @@ import Modal from '../Modal.tsx';
 import PortfolioCard from '../PortfolioCard.tsx';
 import { PlusIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
-import { getUploadUrl } from '../../config/api';
-import { getSafeImageUrl, refreshCacheBuster } from '../../utils/imageUtils';
+
 
 const PortfolioPage: React.FC = () => {
     const { portfolioCases, handleSavePortfolioCase, handleDeletePortfolioCase } = useData();
@@ -81,20 +80,24 @@ const PortfolioForm: React.FC<{
         title: caseItem?.title || '',
         category: caseItem?.category || '',
         description: caseItem?.description || '',
-        imageUrl: getSafeImageUrl(caseItem?.imageUrl, 'portfolio'),
+        imageUrl: caseItem?.imageUrl || '',
         link: caseItem?.link || ''
     });
-    const [imageFile, setImageFile] = useState<File | null>(null);
-    const [isUploading, setIsUploading] = useState(false);
+
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const toBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = error => reject(error);
+    });
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            setImageFile(file);
-            // Create preview URL with cache-busting
-            const previewUrl = refreshCacheBuster(URL.createObjectURL(file));
-            setFormData(prev => ({ ...prev, imageUrl: previewUrl }));
+            const base64 = await toBase64(file);
+            setFormData(prev => ({ ...prev, imageUrl: base64 }));
         }
     };
 
@@ -103,49 +106,13 @@ const PortfolioForm: React.FC<{
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setIsUploading(true);
-        
-        try {
-            let imageUrl = formData.imageUrl;
-            
-            // Upload image if a new file was selected
-            if (imageFile) {
-                const formData = new FormData();
-                formData.append('file', imageFile);
-                formData.append('type', 'portfolio');
-                formData.append('entity_id', caseItem?.id || `portfolio-${Date.now()}`);
-                
-                const token = localStorage.getItem('auth_token');
-                const response = await fetch(getUploadUrl(), {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                    },
-                    body: formData,
-                });
-                
-                if (!response.ok) {
-                    throw new Error('Upload failed');
-                }
-                
-                const uploadResponse = await response.json();
-                imageUrl = refreshCacheBuster(uploadResponse.data.public_url);
-            }
-            
-            onSave({
-                ...caseItem,
-                ...formData,
-                imageUrl,
-                id: caseItem?.id || '',
-            } as PortfolioCase);
-        } catch (error) {
-            console.error('Error uploading portfolio image:', error);
-            alert('Failed to upload portfolio image. Please try again.');
-        } finally {
-            setIsUploading(false);
-        }
+        onSave({
+            ...caseItem,
+            ...formData,
+            id: caseItem?.id || '',
+        } as PortfolioCase);
     };
 
     return (
@@ -154,7 +121,7 @@ const PortfolioForm: React.FC<{
                 <label className="block text-sm font-medium text-secondary-text mb-2">Portfolio Image</label>
                 <div className="flex items-center gap-x-4">
                     <img
-                        src={getSafeImageUrl(formData.imageUrl, 'portfolio')}
+                        src={formData.imageUrl || 'https://storage.googleapis.com/aistudio-hosting/generative-ai-studio/assets/app-placeholder.png'}
                         alt="Portfolio Preview"
                         className="h-24 w-24 object-cover rounded-lg bg-dark-bg border border-border-color"
                     />
@@ -162,10 +129,9 @@ const PortfolioForm: React.FC<{
                     <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        disabled={isUploading}
-                        className="rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-white/20 disabled:opacity-50"
+                        className="rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-white/20"
                     >
-                        {isUploading ? 'Uploading...' : 'Change Image'}
+                        Change Image
                     </button>
                 </div>
             </div>
@@ -187,9 +153,7 @@ const PortfolioForm: React.FC<{
             </div>
             <div className="flex justify-end space-x-3 pt-4">
                 <button type="button" onClick={onCancel} className="bg-gray-600 px-4 py-2 rounded-lg hover:bg-gray-700">Cancel</button>
-                <button type="submit" disabled={isUploading} className="bg-accent-blue px-4 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50">
-                    {isUploading ? 'Saving...' : 'Save Case'}
-                </button>
+                <button type="submit" className="bg-accent-blue px-4 py-2 rounded-lg hover:bg-blue-600">Save Case</button>
             </div>
         </form>
     );

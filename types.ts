@@ -1,3 +1,5 @@
+// FIX: Created type definitions for Client, Project, Invoice, PaymentPlan, and Fund to resolve type errors throughout the application.
+
 export interface Group {
   id: string;
   name: string;
@@ -111,6 +113,7 @@ export interface PortfolioCase {
   link?: string;
 }
 
+// FIX: Added Category interface to resolve module not found error.
 export interface Category {
   id: string;
   name: string;

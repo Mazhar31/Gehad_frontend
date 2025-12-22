@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
+// FIX: Added file extension to import to resolve module error.
 import { Invoice, Client } from '../../../types.ts';
+// FIX: Added file extension to import to resolve module error.
 import Modal from '../../Modal.tsx';
+// FIX: Added file extension to import to resolve module error.
 import InvoiceDetail from '../../InvoiceCard.tsx';
+// FIX: Added file extension to import to resolve module error.
 import { EyeIcon, CreditCardIcon } from '../../icons.tsx';
 
 const getStatusClass = (status: Invoice['status']) => {
@@ -43,7 +47,7 @@ const UserInvoicesPage: React.FC<UserInvoicesPageProps> = ({ invoices, client, o
 
     return (
         <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Invoices for {invoices.length > 0 && invoices[0].client ? invoices[0].client.company : client.company}</h1>
+            <h1 className="text-3xl font-bold text-white mb-2">Invoices for {client.company}</h1>
             <p className="text-secondary-text mb-8">Review your billing history and pay pending invoices.</p>
             
             <div className="bg-card-bg rounded-2xl overflow-x-auto">
@@ -79,12 +83,12 @@ const UserInvoicesPage: React.FC<UserInvoicesPageProps> = ({ invoices, client, o
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex justify-end items-center space-x-2">
                                             <button onClick={() => handleOpenViewModal(invoice)} className="p-1.5 text-secondary-text hover:text-accent-blue"><EyeIcon className="w-5 h-5" /></button>
-                                            {/* {invoice.status === 'Pending' && (
+                                            {invoice.status === 'Pending' && (
                                                 <button onClick={() => handlePayInvoice(invoice)} className="flex items-center space-x-2 bg-green-500/10 text-green-400 px-3 py-1.5 rounded-md text-xs hover:bg-green-500/20">
                                                     <CreditCardIcon className="w-4 h-4"/>
                                                     <span>Pay Now</span>
                                                 </button>
-                                            )} */}
+                                            )}
                                         </div>
                                     </td>
                                 </tr>

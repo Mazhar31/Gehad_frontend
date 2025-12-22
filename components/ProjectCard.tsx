@@ -18,17 +18,10 @@ interface ProjectCardProps {
     onEdit: () => void;
     onDelete: () => void;
     onViewDetails: () => void;
-    onDeleteDashboard?: () => void;
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project, clientCompany, plan, onEdit, onDelete, onViewDetails, onDeleteDashboard }) => {
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, clientCompany, plan, onEdit, onDelete, onViewDetails }) => {
     const [menuOpen, setMenuOpen] = useState(false);
-    
-    const handleDeleteDashboard = async () => {
-        if (onDeleteDashboard && window.confirm('Are you sure you want to remove the dashboard deployment for this project?')) {
-            onDeleteDashboard();
-        }
-    };
     
     const progress = project.progress ?? 0;
     
@@ -64,13 +57,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, clientCompany, plan,
                                 <a href="#" onClick={(e) => { e.preventDefault(); onEdit(); setMenuOpen(false); }} className="flex items-center px-4 py-2 text-sm text-secondary-text hover:bg-white/10 hover:text-white">
                                     <PencilSquareIcon className="w-4 h-4 mr-2" /> Edit
                                 </a>
-                                {project.dashboardUrl && (
-                                    <a href="#" onClick={(e) => { e.preventDefault(); handleDeleteDashboard(); setMenuOpen(false); }} className="flex items-center px-4 py-2 text-sm text-secondary-text hover:bg-white/10 hover:text-white">
-                                        <TrashIcon className="w-4 h-4 mr-2" /> Remove Dashboard
-                                    </a>
-                                )}
                                 <a href="#" onClick={(e) => { e.preventDefault(); onDelete(); setMenuOpen(false); }} className="flex items-center px-4 py-2 text-sm text-secondary-text hover:bg-white/10 hover:text-white">
-                                    <TrashIcon className="w-4 h-4 mr-2" /> Delete Project
+                                    <TrashIcon className="w-4 h-4 mr-2" /> Delete
                                 </a>
                             </div>
                         )}
@@ -96,19 +84,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, clientCompany, plan,
                 <div>
                     <p className="text-xs text-secondary-text">Start Date</p>
                     <p className="font-semibold text-white">{project.startDate}</p>
-                </div>
-                <div className="flex items-center">
-                    {project.dashboardUrl ? (
-                        <div className="flex items-center space-x-1">
-                            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                            <span className="text-xs text-green-400">Dashboard</span>
-                        </div>
-                    ) : (
-                        <div className="flex items-center space-x-1">
-                            <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                            <span className="text-xs text-gray-400">No Dashboard</span>
-                        </div>
-                    )}
                 </div>
             </div>
         </div>

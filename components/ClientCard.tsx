@@ -42,7 +42,7 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, groupName, onViewDetail
                 className="p-5 text-center items-center flex flex-col flex-grow cursor-pointer"
                 onClick={onViewDetails}
             >
-                <img src={getSafeImageUrl(client.avatarUrl, 'avatar')} alt={client.company} className="w-24 h-24 rounded-full mb-4 ring-4 ring-dark-bg" />
+                <img src={client.avatarUrl} alt={client.company} className="w-24 h-24 rounded-full mb-4 ring-4 ring-dark-bg" />
                 <h3 className="font-bold text-white text-lg">{client.company}</h3>
                 {groupName && <p className="text-xs text-secondary-text">{groupName}</p>}
                 <div className="flex-grow"></div>

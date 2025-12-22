@@ -20,7 +20,7 @@ const Router: React.FC = () => {
     const sessionData = sessionStorage.getItem('dashboard_access_session');
     if (!sessionData) {
       console.log('❌ No project session found, redirecting to login');
-      window.location.href = '/?page=login';
+      window.location.href = '/login';
       return null;
     }
     
@@ -30,12 +30,12 @@ const Router: React.FC = () => {
       
       if (session.key !== expectedKey || Date.now() > session.expires || session.token !== localStorage.getItem('auth_token')) {
         console.log('❌ Invalid project session, redirecting to login');
-        window.location.href = '/?page=login';
+        window.location.href = '/login';
         return null;
       }
     } catch {
       console.log('❌ Corrupted project session, redirecting to login');
-      window.location.href = '/?page=login';
+      window.location.href = '/login';
       return null;
     }
     
@@ -50,7 +50,12 @@ const Router: React.FC = () => {
     return <DashboardView />;
   }
   
-  // Default to main app
+  // Handle main app routes: /, /login, /dashboard, /admin, /reset-password
+  if (path === '/' || path === '/login' || path === '/dashboard' || path === '/admin' || path === '/reset-password') {
+    return <App />;
+  }
+  
+  // Default to main app for any other routes
   return <App />;
 };
 

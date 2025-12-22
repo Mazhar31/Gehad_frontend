@@ -1,11 +1,22 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+// FIX: Added file extension to import to resolve module error.
 import { User, Client, Project } from '../../types.ts';
+// FIX: Added file extension to import to resolve module error.
 import Modal from '../Modal.tsx';
+// FIX: Added file extension to import to resolve module error.
 import UserCard from '../UserCard.tsx';
+// FIX: Added file extension to import to resolve module error.
 import { PlusIcon, MagnifyingGlassIcon, ArrowDownTrayIcon } from '../icons.tsx';
 import { useData } from '../DataContext.tsx';
 import { getUploadUrl } from '../../config/api';
 import { getSafeImageUrl, refreshCacheBuster } from '../../utils/imageUtils';
+
+const toBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = error => reject(error);
+});
 
 const UserManagementPage: React.FC = () => {
     const { users, clients, projects, handleSaveUser, handleDeleteUser } = useData();

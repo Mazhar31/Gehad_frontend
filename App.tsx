@@ -67,18 +67,49 @@ function App() {
     }
   };
 
-  // Check URL parameters for auth pages
+  // Handle URL routing
   useEffect(() => {
+    const path = window.location.pathname;
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('token') && window.location.pathname === '/reset-password') {
-      setAuthPage('reset-password');
-      return;
-    }
-    if (urlParams.get('page') === 'login') {
+    
+    // Handle auth pages
+    if (path === '/login' || urlParams.get('page') === 'login') {
       setAuthPage('login');
       return;
     }
+    if (path === '/reset-password' || (urlParams.get('token') && path === '/reset-password')) {
+      setAuthPage('reset-password');
+      return;
+    }
+    
+    // Handle protected routes
+    if (path === '/dashboard') {
+      setCurrentPage('dashboard');
+    } else if (path === '/admin') {
+      setCurrentPage('dashboard');
+    }
   }, []);
+  
+  // Listen for browser navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      if (path === '/login') {
+        setAuthPage('login');
+      } else if (path === '/dashboard') {
+        setCurrentPage('dashboard');
+      } else if (path === '/admin') {
+        setCurrentPage('dashboard');
+      } else if (path === '/') {
+        if (!isLoggedIn) {
+          setAuthPage(null);
+        }
+      }
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isLoggedIn]);
 
   // Check for existing authentication on app startup
   useEffect(() => {
@@ -154,12 +185,20 @@ function App() {
     if (role === 'user') {
       console.log('🔄 User login detected, allowing DataContext to update...');
     }
+    
+    // Update URL based on role
+    if (role === 'admin') {
+      window.history.pushState({}, '', '/admin');
+    } else {
+      window.history.pushState({}, '', '/dashboard');
+    }
   };
 
   const handleLogout = () => {
     authService.logout();
     logout();
     setCurrentPage('dashboard');
+    window.history.pushState({}, '', '/');
   };
 
   // Debug function to clear all localStorage (can be called from browser console)
@@ -170,6 +209,14 @@ function App() {
 
   const handleNavigateAuth = (page: 'login' | 'reset-password' | null) => {
     setAuthPage(page);
+    // Update URL
+    if (page === 'login') {
+      window.history.pushState({}, '', '/login');
+    } else if (page === 'reset-password') {
+      window.history.pushState({}, '', '/reset-password');
+    } else {
+      window.history.pushState({}, '', '/');
+    }
   };
 
   const handleAdminProfileUpdate = (updatedProfile: typeof adminProfile) => {

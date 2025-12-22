@@ -1,6 +1,6 @@
 import React from 'react';
+// FIX: Added file extension to import to resolve module error.
 import { Project } from '../../types.ts';
-import { getSafeImageUrl } from '../../utils/imageUtils';
 
 const getStatusClass = (status: Project['status']) => {
     switch (status) {
@@ -14,12 +14,11 @@ const getStatusClass = (status: Project['status']) => {
 interface UserDashboardCardProps {
     dashboard: Project;
     onClick: () => void;
-    clientName?: string;
 }
 
 const UserDashboardCard: React.FC<UserDashboardCardProps> = ({ dashboard, onClick, clientName }) => {
-    // Use the uploaded dashboard image with cache-busting
-    const dashboardImage = getSafeImageUrl(dashboard.imageUrl, 'project');
+    // Use the uploaded dashboard image, or a fallback if none exists.
+    const dashboardImage = dashboard.imageUrl || 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
 
     return (
         <div 
@@ -28,12 +27,7 @@ const UserDashboardCard: React.FC<UserDashboardCardProps> = ({ dashboard, onClic
         >
             {/* Header: Dashboard Name & Status */}
             <div className="flex justify-between items-start">
-                <div className="flex items-center gap-2 flex-1 pr-4">
-                    <h3 className="font-bold text-white text-lg">{dashboard.name}</h3>
-                    {dashboard.dashboardUrl && (
-                        <div className="w-2 h-2 bg-green-400 rounded-full" title="Dashboard deployed"></div>
-                    )}
-                </div>
+                <h3 className="font-bold text-white text-lg flex-1 pr-4">{dashboard.name}</h3>
                 <div className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusClass(dashboard.status)}`}>
                     {dashboard.status}
                 </div>
@@ -49,12 +43,10 @@ const UserDashboardCard: React.FC<UserDashboardCardProps> = ({ dashboard, onClic
             </div>
 
             {/* Footer: Dates */}
-            <div className="border-t border-border-color pt-4 text-sm mt-auto">
+            <div className="border-t border-border-color pt-4 flex items-center text-sm mt-auto">
                 <div>
                     <p className="text-xs text-secondary-text">Start Date</p>
-                    <p className="font-semibold text-white">
-                        {dashboard.startDate ? new Date(dashboard.startDate).toLocaleDateString() : 'Not set'}
-                    </p>
+                    <p className="font-semibold text-white">{dashboard.startDate}</p>
                 </div>
             </div>
         </div>

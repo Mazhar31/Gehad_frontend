@@ -51,11 +51,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project, client, depart
           }).format(plan.price)}/yr)`
         : 'N/A';
         
-    // Determine button text based on URL type
-    const isInternalUrl = project.dashboardUrl && (project.dashboardUrl.startsWith('/dashboard/') || project.dashboardUrl.startsWith('/addins/'));
-    const linkButtonText = !isInternalUrl 
-        ? 'Open External Link' 
-        : `View as User (${project.projectType})`;
+    const linkButtonText = project.projectType === 'Add-ins' ? 'Open Add-in Link' : 'View as User (Dashboard)';
 
     return (
         <div className="p-2 text-white">
@@ -96,8 +92,12 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project, client, depart
 
             {project.dashboardUrl && (
                 <div className="mt-8 pt-6 border-t border-border-color text-center">
-                    <button
-                        onClick={() => {
+                    <a
+                        href={project.dashboardUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => {
+                            e.preventDefault();
                             // Check if URL is external (not internal deployment)
                             const isInternalUrl = project.dashboardUrl && (project.dashboardUrl.startsWith('/dashboard/') || project.dashboardUrl.startsWith('/addins/'));
                             
@@ -129,7 +129,7 @@ const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project, client, depart
                     >
                         <ArrowTopRightOnSquareIcon className="w-5 h-5" />
                         <span>{linkButtonText}</span>
-                    </button>
+                    </a>
                 </div>
             )}
         </div>

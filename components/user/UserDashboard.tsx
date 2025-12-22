@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
+// FIX: Added file extension to import to resolve module error.
 import UserHeader from './UserHeader.tsx';
+// FIX: Added file extension to import to resolve module error.
 import UserDashboardsPage from './pages/UserProjectsPage.tsx';
+// FIX: Added file extension to import to resolve module error.
 import UserInvoicesPage from './pages/UserInvoicesPage.tsx';
+// FIX: Added file extension to import to resolve module error.
 import UserProfilePage from './pages/UserProfilePage.tsx';
+// FIX: Added file extension to import to resolve module error.
 import UserAddinsPage from './pages/UserAddinsPage.tsx';
 import { useData } from '../DataContext.tsx';
 import { projectAPI, invoiceAPI, userAPI } from '../../services/api';

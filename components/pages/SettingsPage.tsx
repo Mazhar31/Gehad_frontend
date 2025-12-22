@@ -1,9 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
+// FIX: Added file extension to import to resolve module error.
 import { UserCircleIcon, PhotoIcon, EnvelopeIcon, KeyIcon } from '../icons.tsx';
 import { getAdminProfileUrl, getAdminChangePasswordUrl } from '../../config/api';
 import { getSafeImageUrl, refreshCacheBuster } from '../../utils/imageUtils';
 
-// Removed toBase64 function as we're now using Firebase Storage
+const toBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = error => reject(error);
+});
 
 interface SettingsPageProps {
     userProfile: {

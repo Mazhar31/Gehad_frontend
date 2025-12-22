@@ -1,11 +1,11 @@
 import React, { useState, useRef } from 'react';
 
 interface SliderVerificationProps {
-  onVerified: () => void;
-  onReset: () => void;
+  onSuccess: () => void;
+  onReset?: () => void;
 }
 
-const SliderVerification: React.FC<SliderVerificationProps> = ({ onVerified, onReset }) => {
+const SliderVerification: React.FC<SliderVerificationProps> = ({ onSuccess, onReset }) => {
   const [sliderPosition, setSliderPosition] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
@@ -32,11 +32,14 @@ const SliderVerification: React.FC<SliderVerificationProps> = ({ onVerified, onR
     const newPosition = Math.max(0, Math.min(e.clientX - rect.left - 20, rect.width - 40));
     setSliderPosition(newPosition);
     
-    // Check if slider is at the very end (within 10px)
-    if (newPosition >= rect.width - 50) {
+    // Check if slider is at 90-95% completion
+    if (newPosition >= (rect.width - 40) * 0.9) {
       setIsVerified(true);
       setIsDragging(false);
-      onVerified();
+      // Wait 1-2 seconds then call onSuccess
+      setTimeout(() => {
+        onSuccess();
+      }, 1500);
     }
   };
 
@@ -48,11 +51,14 @@ const SliderVerification: React.FC<SliderVerificationProps> = ({ onVerified, onR
     const newPosition = Math.max(0, Math.min(touch.clientX - rect.left - 20, rect.width - 40));
     setSliderPosition(newPosition);
     
-    // Check if slider is at the very end (within 10px)
-    if (newPosition >= rect.width - 50) {
+    // Check if slider is at 90-95% completion
+    if (newPosition >= (rect.width - 40) * 0.9) {
       setIsVerified(true);
       setIsDragging(false);
-      onVerified();
+      // Wait 1-2 seconds then call onSuccess
+      setTimeout(() => {
+        onSuccess();
+      }, 1500);
     }
   };
 
@@ -64,11 +70,11 @@ const SliderVerification: React.FC<SliderVerificationProps> = ({ onVerified, onR
       setTimeout(() => {
         setSliderPosition(0);
         setShowError(false);
-        onReset();
+        onReset?.();
       }, 1000);
     } else if (!isVerified) {
       setSliderPosition(0);
-      onReset();
+      onReset?.();
     }
   };
 
@@ -80,11 +86,11 @@ const SliderVerification: React.FC<SliderVerificationProps> = ({ onVerified, onR
       setTimeout(() => {
         setSliderPosition(0);
         setShowError(false);
-        onReset();
+        onReset?.();
       }, 1000);
     } else if (!isVerified) {
       setSliderPosition(0);
-      onReset();
+      onReset?.();
     }
   };
 

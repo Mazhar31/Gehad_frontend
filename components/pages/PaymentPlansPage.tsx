@@ -10,23 +10,21 @@ const PaymentPlanCard: React.FC<{
     onDelete: () => void;
 }> = ({ plan, onEdit, onDelete }) => {
 
-    const price = typeof plan.price === 'string' ? parseFloat(plan.price) : plan.price;
-    
     const formattedPrice = new Intl.NumberFormat('en-US', {
         style: 'currency',
-        currency: plan.currency || 'USD',
+        currency: plan.currency,
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
-    }).format(price || 0);
+    }).format(plan.price);
 
 
     return (
-        <div className={`bg-card-bg p-6 rounded-2xl border-2 ${(plan.isPopular || plan.is_popular) ? 'border-accent-blue' : 'border-transparent'} relative`}>
-            {(plan.isPopular || plan.is_popular) && <div className="absolute top-0 right-6 bg-accent-blue text-white text-xs font-bold px-3 py-1 rounded-b-lg">POPULAR</div>}
+        <div className={`bg-card-bg p-6 rounded-2xl border-2 ${plan.isPopular ? 'border-accent-blue' : 'border-transparent'} relative`}>
+            {plan.isPopular && <div className="absolute top-0 right-6 bg-accent-blue text-white text-xs font-bold px-3 py-1 rounded-b-lg">POPULAR</div>}
             <h3 className="text-xl font-bold text-white">{plan.name}</h3>
             <p className="text-4xl font-extrabold text-white my-4">{formattedPrice}<span className="text-base font-normal text-secondary-text">/yr</span></p>
             <ul className="space-y-2 text-secondary-text mb-6">
-                {(plan.features || []).map((feature, index) => (
+                {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-center">
                         <svg className="w-4 h-4 text-green-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
                         <span>{feature}</span>
@@ -88,7 +86,7 @@ const PaymentPlansPage: React.FC = () => {
                 </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {(Array.isArray(paymentPlans) ? paymentPlans : []).map((plan) => (
+                {paymentPlans.map((plan) => (
                     <PaymentPlanCard
                         key={plan.id}
                         plan={plan}
@@ -119,8 +117,8 @@ const PlanForm: React.FC<{
         name: plan?.name || '',
         price: plan?.price || 0,
         currency: plan?.currency || 'USD',
-        features: plan?.features?.join(', ') || '',
-        isPopular: plan?.isPopular || plan?.is_popular || false,
+        features: plan?.features.join(', ') || '',
+        isPopular: plan?.isPopular || false,
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

@@ -3,18 +3,11 @@ import {
     ChartTrendingUpIcon,
     CheckCircleIcon,
     ChevronDownIcon,
-    DiscordIcon,
     EnvelopeIcon,
-    GitHubIcon,
-    GitLabIcon,
     MapPinIcon,
     PhoneIcon,
     PuzzlePieceIcon,
-    RedditIcon,
-    SlackIcon,
     Squares2X2Icon,
-    StarIcon,
-    TrelloIcon,
     UsersIcon,
     Bars3Icon,
     XMarkIcon,
@@ -24,9 +17,6 @@ import {
     LinkedInIcon,
     FacebookIcon,
     CpuChipIcon,
-    SignalIcon,
-    ShieldCheckIcon,
-    ArrowTopRightOnSquareIcon,
     PlusIcon
 } from './icons.tsx';
 import { useData } from './DataContext.tsx';
@@ -35,7 +25,6 @@ import PremiumButton from './PremiumButton.tsx';
 import HowItWorks from './HowItWorks.tsx';
 import HeroDashboard from './HeroDashboard.tsx';
 import ProblemsWeSolve from './ProblemsWeSolve.tsx';
-import { contactAPI, portfolioAPI } from '../services/api';
 
 const Logo: React.FC = () => (
     <div className="flex items-center space-x-2">
@@ -68,8 +57,6 @@ const Header: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({ onNa
         { href: '#home', label: 'Home' },
         { href: '#how-it-works', label: 'How it Works' },
         { href: '#problems', label: 'Problems Solved' },
-        { href: '#features', label: 'Features' },
-        { href: '#portfolio', label: 'Portfolio' },
         { href: '#pricing', label: 'Pricing' },
         { href: '#stories', label: 'Stories' },
         { href: '#faq', label: 'FAQ' },
@@ -134,47 +121,7 @@ const FeatureCard: React.FC<{ icon: React.ElementType; title: string; children: 
     </div>
 );
 
-const TestimonialCard: React.FC<{ testimonial: any }> = ({ testimonial }) => (
-    <div className="bg-card-bg p-6 rounded-2xl border border-border-color text-left h-full flex flex-col">
-        <div className="flex items-center mb-4">
-            {[...Array(5)].map((_, i) => (
-                <StarIcon key={i} className={`w-5 h-5 ${i < testimonial.rating ? 'text-yellow-400' : 'text-gray-600'}`} />
-            ))}
-        </div>
-        <blockquote className="text-secondary-text italic mb-4 flex-grow">"{testimonial.quote}"</blockquote>
-        <div className="flex items-center">
-            <img src={testimonial.avatar} alt={testimonial.name} className="w-12 h-12 rounded-full mr-4" />
-            <div>
-                <p className="font-semibold text-white">{testimonial.name}</p>
-                <p className="text-sm text-secondary-text">{testimonial.company}</p>
-            </div>
-        </div>
-    </div>
-);
 
-const testimonials = [
-    {
-        name: 'Sarah K.',
-        company: 'Innovate Inc.',
-        avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d',
-        rating: 5,
-        quote: 'OneQlek has completely transformed how we manage our client projects. The dashboard gives us a crystal-clear overview, and our clients love the transparency. Highly recommended!',
-    },
-    {
-        name: 'Michael B.',
-        company: 'Solutions Co.',
-        avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026705d',
-        rating: 5,
-        quote: "The ability to give our clients their own dashboard access is a game-changer. It's reduced our email back-and-forth by at least 50%. The platform is intuitive and powerful.",
-    },
-    {
-        name: 'Jessica L.',
-        company: 'Creative Minds',
-        avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026706d',
-        rating: 5,
-        quote: 'As a design agency, presentation is everything. OneQlek not only helps us stay organized internally but also impresses our clients with its professional and sleek interface.',
-    },
-];
 
 const FaqItem: React.FC<{ question: string; children: React.ReactNode }> = ({ question, children }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -207,71 +154,28 @@ const SocialButton: React.FC<{ icon: React.ElementType; href: string; label: str
     </a>
 );
 
-const integrations = [
-    { name: 'GitHub', icon: GitHubIcon },
-    { name: 'GitLab', icon: GitLabIcon },
-    { name: 'Slack', icon: SlackIcon },
-    { name: 'Trello', icon: TrelloIcon },
-    { name: 'Discord', icon: DiscordIcon },
-    { name: 'Reddit', icon: RedditIcon },
-];
+
 
 const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({ onNavigate }) => {
-    const { handleSaveContactMessage, portfolioCases } = useData();
+    const { handleSaveContactMessage } = useData();
     const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
     const [isFormSubmitted, setIsFormSubmitted] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [submitError, setSubmitError] = useState<string | null>(null);
-    const [publicPortfolio, setPublicPortfolio] = useState(portfolioCases);
-
-    React.useEffect(() => {
-        const loadPublicPortfolio = async () => {
-            try {
-                const publicCases = await portfolioAPI.getPublic();
-                setPublicPortfolio(publicCases);
-            } catch (error) {
-                console.error('Failed to load public portfolio:', error);
-            }
-        };
-        loadPublicPortfolio();
-    }, [portfolioCases]);
 
     const handleContactChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setContactForm(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleContactSubmit = async (e: React.FormEvent) => {
+    const handleContactSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        setIsSubmitting(true);
-        setSubmitError(null);
+        handleSaveContactMessage(contactForm);
+        
+        setIsFormSubmitted(true);
+        setContactForm({ name: '', email: '', message: '' });
 
-        try {
-            await contactAPI.submit(contactForm);
-            setIsFormSubmitted(true);
-            setContactForm({ name: '', email: '', message: '' });
-        } catch (error) {
-            console.error('Failed to submit contact form via API:', error);
-            setSubmitError('Failed to send message via API, saving locally...');
-            
-            try {
-                await handleSaveContactMessage(contactForm);
-                setIsFormSubmitted(true);
-                setContactForm({ name: '', email: '', message: '' });
-                setSubmitError(null);
-            } catch (localError) {
-                console.error('Failed to save contact form locally:', localError);
-                setSubmitError('Failed to send message. Please try again.');
-            }
-        } finally {
-            setIsSubmitting(false);
-        }
-
-        if (isFormSubmitted) {
-            setTimeout(() => {
-                setIsFormSubmitted(false);
-            }, 5000);
-        }
+        setTimeout(() => {
+            setIsFormSubmitted(false);
+        }, 5000);
     };
 
     const sectionBackgroundClass = "bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-900 via-black to-black";
@@ -295,13 +199,9 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                         </div>
                     </div>
                     
-                    <div className="mt-16 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                        <div className="bg-gradient-to-b from-sidebar-bg to-dark-bg p-2 rounded-3xl shadow-2xl shadow-blue-900/20">
-                            <img 
-                                src="https://firebasestorage.googleapis.com/v0/b/ai-kpi-dashboard.firebasestorage.app/o/hero%2FIMG_3593.jpeg?alt=media&token=5d438439-06dd-406f-bcbd-329e49632109"
-                                alt="OneQlek App Dashboard" 
-                                className="rounded-2xl border border-border-color w-full" 
-                            />
+                    <div className="mt-16 max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                        <div className="bg-gradient-to-b from-gray-900 to-black p-2 rounded-3xl shadow-2xl shadow-blue-900/20">
+                            <HeroDashboard />
                         </div>
                     </div>
 
@@ -322,72 +222,10 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                     <ProblemsWeSolve />
                 </section>
                 
-                {/* Features Section */}
-                <section id="features" className="py-20">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="text-center">
-                            <h2 className="text-4xl font-extrabold tracking-tighter text-white">Why Choose OneQlek?</h2>
-                            <p className="mt-4 text-lg text-secondary-text max-w-2xl mx-auto">
-                                Everything you need to streamline your workflow and keep your clients happy.
-                            </p>
-                        </div>
-                        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <FeatureCard icon={Squares2X2Icon} title="Client Dashboards">
-                                Impress your clients with a dedicated, professional dashboard to track their project's progress in real-time.
-                            </FeatureCard>
-                            <FeatureCard icon={ChartTrendingUpIcon} title="Progress Tracking">
-                                Visualize project milestones, budgets, and timelines with intuitive charts and progress bars.
-                            </FeatureCard>
-                             <FeatureCard icon={UsersIcon} title="User Management">
-                                Assign specific users from your client's team to projects, controlling their access and permissions.
-                            </FeatureCard>
-                        </div>
-                    </div>
-                </section>
-                {/* Integrations Section */}
-                <section className="py-20 bg-sidebar-bg/50">
-                    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                        <h2 className="text-3xl font-bold text-white mb-4">Integrates with Your Favorite Tools</h2>
-                        <p className="text-secondary-text mb-8">OneQlek works seamlessly with the tools you already use, making your workflow smoother.</p>
-                        <div className="flex justify-center items-center flex-wrap gap-x-8 gap-y-4">
-                            {integrations.map(tool => (
-                                <tool.icon key={tool.name} className="w-8 h-8 text-secondary-text hover:text-white transition-colors" />
-                            ))}
-                        </div>
-                    </div>
-                </section>
 
-                {/* Portfolio Section */}
-                <section id="portfolio" className="py-20">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="text-center">
-                            <h2 className="text-4xl font-extrabold tracking-tighter text-white">Our Work in Action</h2>
-                            <p className="mt-4 text-lg text-secondary-text max-w-2xl mx-auto">
-                                We deliver high-quality solutions that solve real-world problems and drive business growth.
-                            </p>
-                        </div>
-                        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {publicPortfolio.map((caseItem, index) => (
-                                <div key={index} className="bg-card-bg rounded-2xl overflow-hidden group transition-all duration-300 hover:shadow-xl hover:shadow-blue-900/20 border border-border-color">
-                                    <div className="aspect-video overflow-hidden">
-                                        <img src={caseItem.imageUrl} alt={caseItem.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                    </div>
-                                    <div className="p-6">
-                                        <p className="text-sm font-medium text-accent-blue mb-2">{caseItem.category}</p>
-                                        <h3 className="text-xl font-bold text-white mb-3">{caseItem.title}</h3>
-                                        <p className="text-secondary-text text-sm mb-6 h-20">
-                                            {caseItem.description}
-                                        </p>
-                                        <a href={caseItem.link} className="inline-flex items-center font-semibold text-white group-hover:text-accent-blue transition-colors">
-                                            View Case Study
-                                            <ArrowTopRightOnSquareIcon className="w-4 h-4 ml-2" />
-                                        </a>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
+
+
+
                 {/* Pricing Section */}
                 <section id="pricing" className={`py-24 ${sectionBackgroundClass} relative overflow-hidden`}>
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none">
@@ -510,20 +348,7 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                     <ClientSuccessStories />
                 </section>
 
-                {/* Testimonials */}
-                <section className="py-20 bg-dark-bg">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="text-center">
-                            <h2 className="text-4xl font-extrabold tracking-tighter text-white">Loved by Teams Everywhere</h2>
-                            <p className="mt-4 text-lg text-secondary-text">Don't just take our word for it. Here's what our customers are saying.</p>
-                        </div>
-                        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {testimonials.map((t, i) => (
-                                <TestimonialCard key={i} testimonial={t} />
-                            ))}
-                        </div>
-                    </div>
-                </section>
+
 
                 {/* FAQ Section */}
                 <section id="faq" className={`py-20 ${sectionBackgroundClass}`}>
@@ -538,20 +363,11 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                             <FaqItem question="How does the AI handle my specific business logic?">
                                 During the one-time setup, we train our AI agents on your specific data structure and business rules. This creates a "Dashboard Blueprint" that ensures every future upload is processed exactly how you need it.
                             </FaqItem>
-                            <FaqItem question="Can I customize the client dashboards?">
-                                Absolutely! While the core layout is standardized for ease of use, you can customize branding, upload logos, and decide which data points and reports are visible to each client.
-                            </FaqItem>
                             <FaqItem question="What happens if I upload a file with mistakes?">
                                 Our AI Validator scans every file before processing. If a column is missing or a date format is wrong, the system blocks the upload and tells you exactly what to fix in plain English.
                             </FaqItem>
-                            <FaqItem question="How does the 'user' pricing work?">
-                                You are billed based on the total number of unique users (both your team members and client-side users) who have active accounts on the platform during a billing cycle.
-                            </FaqItem>
                             <FaqItem question="Is my data secure?">
                                 Yes. We use bank-grade encryption (AES-256) for storage and transmission. Your data models are isolated in secure containers, ensuring total privacy and compliance.
-                            </FaqItem>
-                            <FaqItem question="What kind of support do you offer?">
-                                We offer comprehensive support through email and a dedicated support portal. Our team is always ready to help you with any questions or issues you might have.
                             </FaqItem>
                         </div>
                     </div>
@@ -573,43 +389,33 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                                             <p>Thank you! Your message has been sent successfully.</p>
                                         </div>
                                     ) : (
-                                        <>
-                                            {submitError && (
-                                                <div className="bg-yellow-900/20 border border-yellow-500/50 text-yellow-400 px-4 py-3 rounded-lg mb-4">
-                                                    {submitError}
-                                                </div>
-                                            )}
-                                            <form onSubmit={handleContactSubmit} className="space-y-4">
-                                                <div>
-                                                    <label htmlFor="name" className="block text-sm font-medium text-secondary-text mb-2">Your Name</label>
-                                                    <input type="text" id="name" name="name" value={contactForm.name} onChange={handleContactChange} required className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none" />
-                                                </div>
-                                                <div>
-                                                    <label htmlFor="email" className="block text-sm font-medium text-secondary-text mb-2">Your Email</label>
-                                                    <input type="email" id="email" name="email" value={contactForm.email} onChange={handleContactChange} required className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none" />
-                                                </div>
-                                                <div>
-                                                    <label htmlFor="message" className="block text-sm font-medium text-secondary-text mb-2">Message</label>
-                                                    <textarea id="message" name="message" rows={4} value={contactForm.message} onChange={handleContactChange} required className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none"></textarea>
-                                                </div>
-                                                <PremiumButton 
-                                                    type="submit" 
-                                                    className="w-full" 
-                                                    disabled={isSubmitting}
-                                                >
-                                                    {isSubmitting ? 'Sending...' : 'Send Message'}
-                                                </PremiumButton>
-                                            </form>
-                                        </>
+                                        <form onSubmit={handleContactSubmit} className="space-y-4">
+                                            <div>
+                                                <label htmlFor="name" className="block text-sm font-medium text-secondary-text mb-2">Your Name</label>
+                                                <input type="text" id="name" name="name" value={contactForm.name} onChange={handleContactChange} required className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none" />
+                                            </div>
+                                            <div>
+                                                <label htmlFor="email" className="block text-sm font-medium text-secondary-text mb-2">Your Email</label>
+                                                <input type="email" id="email" name="email" value={contactForm.email} onChange={handleContactChange} required className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none" />
+                                            </div>
+                                            <div>
+                                                <label htmlFor="message" className="block text-sm font-medium text-secondary-text mb-2">Message</label>
+                                                <textarea id="message" name="message" rows={4} value={contactForm.message} onChange={handleContactChange} required className="w-full bg-dark-bg border border-border-color text-white rounded-lg p-3 focus:ring-2 focus:ring-accent-blue focus:outline-none"></textarea>
+                                            </div>
+                                            <PremiumButton type="submit" className="w-full">
+                                                Send Message
+                                            </PremiumButton>
+                                        </form>
                                     )}
                                 </div>
+                                 {/* Map */}
                                 <div className="overflow-hidden rounded-2xl border border-border-color h-full min-h-[450px]">
                                     <iframe
-                                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d462560.6828842949!2d54.897847!3d25.276987!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3e5f43496ad9c645%3A0xbde66e1147b4c5cd!2sDubai%20-%20United%20Arab%20Emirates!5e0!3m2!1sen!2s!4v1639000000000!5m2!1sen!2s"
+                                        src="https://maps.google.com/maps?q=dubai&t=&z=13&ie=UTF8&iwloc=&output=embed"
                                         width="100%"
                                         height="100%"
-                                        style={{ border: 0, minHeight: '450px' }}
-                                        allowFullScreen={true}
+                                        style={{ border: 0, minHeight: '100%' }}
+                                        allowFullScreen={false}
                                         loading="lazy"
                                         referrerPolicy="no-referrer-when-downgrade"
                                         className="grayscale invert-[1] hue-rotate-[180deg]"
@@ -617,43 +423,7 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                                 </div>
                             </div>
 
-                            <div className="mt-12">
-                                <div className="bg-card-bg border border-border-color rounded-2xl p-6">
-                                    <h3 className="text-xl font-bold text-white mb-6">Contact Information</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
-                                        <div className="flex items-start space-x-3">
-                                            <div className="bg-dark-bg p-2 rounded-lg text-accent-blue flex-shrink-0">
-                                                <MapPinIcon className="w-5 h-5" />
-                                            </div>
-                                            <div>
-                                                <h4 className="font-semibold text-white">Our Office</h4>
-                                                <p className="text-secondary-text">
-                                                    123 Innovation Drive, Suite 456<br />
-                                                    Tech City, TX 75001, USA
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-start space-x-3">
-                                            <div className="bg-dark-bg p-2 rounded-lg text-accent-blue flex-shrink-0">
-                                                <PhoneIcon className="w-5 h-5" />
-                                            </div>
-                                            <div>
-                                                <h4 className="font-semibold text-white">Phone</h4>
-                                                <p className="text-secondary-text">(555) 123-4567</p>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-start space-x-3">
-                                            <div className="bg-dark-bg p-2 rounded-lg text-accent-blue flex-shrink-0">
-                                                <EnvelopeIcon className="w-5 h-5" />
-                                            </div>
-                                            <div>
-                                                <h4 className="font-semibold text-white">Email</h4>
-                                                <p className="text-secondary-text">contact@oneqlek.com</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+
                         </div>
                     </div>
                 </section>

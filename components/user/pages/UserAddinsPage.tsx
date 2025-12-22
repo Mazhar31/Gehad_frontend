@@ -1,6 +1,9 @@
 import React, { useState, useMemo } from 'react';
+// FIX: Added file extension to import to resolve module error.
 import { Project } from '../../../types.ts';
+// FIX: Added file extension to import to resolve module error.
 import UserAddinCard from '../UserAddinCard.tsx';
+// FIX: Added file extension to import to resolve module error.
 import { MagnifyingGlassIcon } from '../../icons.tsx';
 
 const UserAddinsPage: React.FC<{ addins: Project[] }> = ({ addins }) => {
