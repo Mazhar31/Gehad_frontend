@@ -1,17 +1,44 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
-const ProjectileLogo: React.FC<{ className?: string }> = ({ className }) => (
-    <svg width="32" height="32" viewBox="0 0 32" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
-        <circle cx="16" cy="16" r="16" fill="url(#logo-gradient)"/>
-        <path d="M19.998 8.5L11.5 23.4975L8 19.9995L16.498 5L19.998 8.5Z" fill="white"/>
-        <path d="M24 12.002L15.502 20.5L12 17.002L20.498 8.50403L24 12.002Z" fill="white"/>
-        <defs>
-            <linearGradient id="logo-gradient" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#D9F99D"/>
-                <stop offset="1" stopColor="#A3E635"/>
-            </linearGradient>
-        </defs>
-    </svg>
+const Logo: React.FC<{ iconOnly?: boolean }> = ({ iconOnly = false }) => (
+    <div className="flex items-center justify-center group cursor-pointer select-none flex-shrink-0">
+        <svg 
+            viewBox="0 0 340 100" 
+            className={`${iconOnly ? 'w-10 h-10' : 'h-10 sm:h-11 md:h-10 w-auto'} transition-transform duration-500 group-hover:scale-105`} 
+            xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="xMidYMid meet"
+        >
+            <defs>
+                <linearGradient id="signupSilverGradient" x1="0" y1="0" x2="0" y2="100" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#FFFFFF" />
+                    <stop offset="25%" stopColor="#E2E8F0" />
+                    <stop offset="50%" stopColor="#94A3B8" />
+                    <stop offset="75%" stopColor="#475569" />
+                    <stop offset="100%" stopColor="#1E293B" />
+                </linearGradient>
+            </defs>
+            {!iconOnly && (
+                <>
+                    <text x="10" y="70" fontFamily="Inter, sans-serif" fontWeight="800" fontSize="58" fill="white" className="md:fill-[url(#signupSilverGradient)]" style={{ letterSpacing: '-3px' }}>One</text>
+                    <text x="210" y="70" fontFamily="Inter, sans-serif" fontWeight="800" fontSize="58" fill="white" className="md:fill-[url(#signupSilverGradient)]" style={{ letterSpacing: '-3px' }}>Lek</text>
+                </>
+            )}
+            <g transform={iconOnly ? "translate(170, 50) scale(1.3)" : "translate(165, 55)"}>
+                <circle r="42" fill="#1E40AF" />
+                <circle r="36" fill="#080C18" />
+                <path d="M0 0 L0 -36 A36 36 0 1 0 36 0 Z" fill="#111827" />
+                <path d="M0 0 L36 0 A36 36 0 0 0 0 -36 Z" fill="#3B82F6" />
+                <line x1="0" y1="0" x2="0" y2="-36" stroke="#080C18" strokeWidth="2" />
+                <line x1="0" y1="0" x2="36" y2="0" stroke="#080C18" strokeWidth="2" />
+                <path 
+                    d="M28 28 L48 48" 
+                    stroke="#3B82F6" 
+                    strokeWidth="16" 
+                    strokeLinecap="round" 
+                />
+            </g>
+        </svg>
+    </div>
 );
 
 interface SignupPageProps {
@@ -20,10 +47,30 @@ interface SignupPageProps {
 }
 
 const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess, onNavigate }) => {
+    // SEO Optimization: Prevent signup page from being indexed but follow links
+    useEffect(() => {
+        const robotsMeta = document.createElement('meta');
+        robotsMeta.name = 'robots';
+        robotsMeta.content = 'noindex, follow';
+        robotsMeta.id = 'auth-robots-meta';
+        document.head.appendChild(robotsMeta);
+        
+        const googleBotMeta = document.createElement('meta');
+        googleBotMeta.name = 'googlebot';
+        googleBotMeta.content = 'noindex, follow';
+        googleBotMeta.id = 'auth-googlebot-meta';
+        document.head.appendChild(googleBotMeta);
+
+        return () => {
+            const r = document.getElementById('auth-robots-meta');
+            const g = document.getElementById('auth-googlebot-meta');
+            if (r) document.head.removeChild(r);
+            if (g) document.head.removeChild(g);
+        };
+    }, []);
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // In a real app, you'd have validation and an API call here.
-        // For this demo, we'll just call the success handler.
         onSignupSuccess();
     };
 
@@ -32,7 +79,7 @@ const SignupPage: React.FC<SignupPageProps> = ({ onSignupSuccess, onNavigate }) 
             <div className="w-full max-w-md">
                 <div className="text-center mb-8">
                     <button onClick={() => onNavigate(null)} className="inline-block">
-                        <ProjectileLogo />
+                        <Logo iconOnly />
                     </button>
                     <h1 className="text-3xl font-bold text-white mt-4">Create an account</h1>
                     <p className="text-secondary-text mt-2">Start managing your projects today.</p>

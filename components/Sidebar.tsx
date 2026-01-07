@@ -1,7 +1,38 @@
-
 import React from 'react';
 // FIX: Added file extension to import to resolve module error.
 import { HomeIcon, FolderIcon, UsersIcon, DocumentTextIcon, TagIcon, CreditCardIcon, Cog6ToothIcon, XMarkIcon, UserGroupIcon, ArrowLeftOnRectangleIcon, CpuChipIcon, PhotoIcon, ChevronDoubleLeftIcon, ChevronDoubleRightIcon } from './icons.tsx';
+
+const Logo3D: React.FC<{ isCollapsed: boolean }> = ({ isCollapsed }) => (
+    <div className="flex items-center group cursor-pointer select-none">
+        <svg viewBox="0 0 340 100" className={`${isCollapsed ? 'w-10 h-10' : 'h-10 w-auto'} drop-shadow-md`} xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="sideSilver" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#ffffff" />
+                    <stop offset="50%" stopColor="#9ca3af" />
+                    <stop offset="100%" stopColor="#4b5563" />
+                </linearGradient>
+                <linearGradient id="sideBlue" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#93c5fd" />
+                    <stop offset="50%" stopColor="#1d4ed8" />
+                    <stop offset="100%" stopColor="#172554" />
+                </linearGradient>
+            </defs>
+            {!isCollapsed && (
+                <>
+                    <text x="10" y="70" fontFamily="Inter, sans-serif" fontWeight="800" fontSize="58" fill="url(#sideSilver)" style={{ letterSpacing: '-3px' }}>One</text>
+                    <text x="210" y="70" fontFamily="Inter, sans-serif" fontWeight="800" fontSize="58" fill="url(#sideSilver)" style={{ letterSpacing: '-3px' }}>Lek</text>
+                </>
+            )}
+            <g transform={isCollapsed ? "translate(170, 50) scale(1.3)" : "translate(165, 55)"}>
+                <circle r="42" fill="url(#sideBlue)" />
+                <circle r="36" fill="#020617" />
+                <path d="M0 0 L0 -36 A36 36 0 1 0 36 0 Z" fill="#0f172a" />
+                <path d="M0 0 L36 0 A36 36 0 0 0 0 -36 Z" fill="url(#sideBlue)" />
+                <path d="M28 28 L48 48" stroke="url(#sideBlue)" strokeWidth="16" strokeLinecap="butt" />
+            </g>
+        </svg>
+    </div>
+);
 
 interface SidebarProps {
   currentPage: string;
@@ -83,15 +114,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPage, onNavigate, isOpen, onCl
                       }}
                       className={`flex items-center p-2 transition-colors duration-200 overflow-hidden text-primary-text hover:text-white ${isCollapsed ? 'justify-center' : ''}`}
                     >
-                      <div className="flex items-center">
-                          <svg className="w-8 h-8 text-white flex-shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-                            <path d="M2 7L12 12M12 22V12M22 7L12 12M16 4.5L6 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-                          </svg>
-                          <span className={`text-xl font-bold whitespace-nowrap transition-all duration-300 ${isCollapsed ? 'w-0 opacity-0' : 'ml-3 opacity-100'}`}>
-                              OneQlek
-                          </span>
-                      </div>
+                      <Logo3D isCollapsed={isCollapsed} />
                     </a>
                     <button onClick={onClose} className="lg:hidden p-1 text-secondary-text hover:text-white">
                         <XMarkIcon className="w-6 h-6" />

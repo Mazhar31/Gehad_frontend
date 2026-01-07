@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     ChartTrendingUpIcon,
     CheckCircleIcon,
     ChevronDownIcon,
+    ChevronUpIcon,
     EnvelopeIcon,
     MapPinIcon,
     PhoneIcon,
@@ -16,6 +17,8 @@ import {
     TwitterIcon,
     LinkedInIcon,
     FacebookIcon,
+    YouTubeIcon,
+    PinterestIcon,
     CpuChipIcon,
     PlusIcon
 } from './icons.tsx';
@@ -26,13 +29,49 @@ import HowItWorks from './HowItWorks.tsx';
 import HeroDashboard from './HeroDashboard.tsx';
 import ProblemsWeSolve from './ProblemsWeSolve.tsx';
 
-const Logo: React.FC = () => (
-    <div className="flex items-center space-x-2">
-        <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-            <path d="M2 7L12 12M12 22V12M22 7L12 12M16 4.5L6 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+const Logo: React.FC<{ iconOnly?: boolean; className?: string }> = ({ iconOnly = false, className }) => (
+    <div className={`flex items-center group cursor-pointer select-none flex-shrink-0 ${className || ''}`}>
+        <svg 
+            viewBox="0 0 340 100" 
+            className={`${iconOnly ? 'w-10 h-10' : 'h-10 sm:h-11 md:h-10 lg:h-12 w-auto'} transition-transform duration-500 group-hover:scale-105`} 
+            xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="xMidYMid meet"
+        >
+            <defs>
+                <linearGradient id="logoSilverGradient" x1="0" y1="0" x2="0" y2="100" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stopColor="#FFFFFF" />
+                    <stop offset="25%" stopColor="#E2E8F0" />
+                    <stop offset="50%" stopColor="#94A3B8" />
+                    <stop offset="75%" stopColor="#475569" />
+                    <stop offset="100%" stopColor="#1E293B" />
+                </linearGradient>
+            </defs>
+            {!iconOnly && (
+                <>
+                    {/* "One" Text - White on Mobile, Silver Gradient on Desktop */}
+                    <text x="10" y="70" fontFamily="Inter, sans-serif" fontWeight="800" fontSize="58" fill="white" className="md:fill-[url(#logoSilverGradient)]" style={{ letterSpacing: '-3px' }}>One</text>
+                    
+                    {/* "Lek" Text - White on Mobile, Silver Gradient on Desktop */}
+                    <text x="210" y="70" fontFamily="Inter, sans-serif" fontWeight="800" fontSize="58" fill="white" className="md:fill-[url(#logoSilverGradient)]" style={{ letterSpacing: '-3px' }}>Lek</text>
+                </>
+            )}
+
+            {/* "Q" Stylized Icon - Blue Theme */}
+            <g transform={iconOnly ? "translate(170, 50) scale(1.3)" : "translate(165, 55)"}>
+                <circle r="42" fill="#1E40AF" />
+                <circle r="36" fill="#080C18" />
+                <path d="M0 0 L0 -36 A36 36 0 1 0 36 0 Z" fill="#111827" />
+                <path d="M0 0 L36 0 A36 36 0 0 0 0 -36 Z" fill="#3B82F6" />
+                <line x1="0" y1="0" x2="0" y2="-36" stroke="#080C18" strokeWidth="2" />
+                <line x1="0" y1="0" x2="36" y2="0" stroke="#080C18" strokeWidth="2" />
+                <path 
+                    d="M28 28 L48 48" 
+                    stroke="#3B82F6" 
+                    strokeWidth="16" 
+                    strokeLinecap="round" 
+                />
+            </g>
         </svg>
-        <span className="font-bold text-xl tracking-tighter">OneQlek</span>
     </div>
 );
 
@@ -66,20 +105,20 @@ const Header: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({ onNa
     const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/10">
+        <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-20">
-                    <div className="flex items-center space-x-8">
+                <div className="flex items-center justify-between h-16 md:h-20">
+                    <div className="flex items-center space-x-4 md:space-x-8 overflow-hidden min-w-0">
                         <Logo />
                         <nav className="hidden md:flex space-x-8">
                             {navLinks.map(link => (
-                                <a key={link.href} href={link.href} onClick={(e) => handleSmoothScroll(e)} className="text-secondary-text hover:text-white transition-colors text-sm font-medium">
+                                <a key={link.href} href={link.href} onClick={(e) => handleSmoothScroll(e)} className="text-secondary-text hover:text-white transition-colors text-sm font-medium whitespace-nowrap">
                                     {link.label}
                                 </a>
                             ))}
                         </nav>
                     </div>
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-4 flex-shrink-0">
                         <button onClick={() => onNavigate('login')} className="text-secondary-text font-semibold px-4 py-2 rounded-full hover:bg-white/10 transition-colors hidden md:block">
                             Sign In
                         </button>
@@ -91,17 +130,20 @@ const Header: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({ onNa
                     </div>
                 </div>
             </div>
+
+            {/* Modern Silver Bottom Border - Increased thickness to 2px */}
+            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-slate-400/40 via-white/50 via-slate-400/40 to-transparent shadow-[0_1px_4px_rgba(255,255,255,0.1)]"></div>
             
             {/* Mobile Menu */}
-            <div className={`absolute top-20 left-0 w-full bg-black/95 backdrop-blur-lg md:hidden transition-all duration-300 ease-in-out transform ${isMobileMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none'}`}>
-                <div className="px-4 py-6 space-y-4">
+            <div className={`absolute top-16 left-0 w-full bg-black/95 backdrop-blur-lg md:hidden transition-all duration-300 ease-in-out transform ${isMobileMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0 pointer-events-none'}`}>
+                <div className="px-4 py-6 space-y-4 shadow-2xl">
                     {navLinks.map(link => (
-                        <a key={link.href} href={link.href} onClick={(e) => handleSmoothScroll(e, closeMobileMenu)} className="block text-center text-secondary-text hover:text-white transition-colors py-2 rounded-md">
+                        <a key={link.href} href={link.href} onClick={(e) => handleSmoothScroll(e, closeMobileMenu)} className="block text-center text-secondary-text hover:text-white transition-colors py-2 rounded-md font-medium">
                             {link.label}
                         </a>
                     ))}
                     <div className="border-t border-border-color pt-4">
-                        <button onClick={() => { onNavigate('login'); closeMobileMenu(); }} className="w-full text-center text-white font-semibold px-4 py-2 rounded-full bg-blue-600 hover:bg-blue-700 transition-colors">
+                        <button onClick={() => { onNavigate('login'); closeMobileMenu(); }} className="w-full text-center text-white font-semibold px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 transition-colors">
                             Sign In
                         </button>
                     </div>
@@ -120,8 +162,6 @@ const FeatureCard: React.FC<{ icon: React.ElementType; title: string; children: 
         <p className="text-secondary-text text-sm">{children}</p>
     </div>
 );
-
-
 
 const FaqItem: React.FC<{ question: string; children: React.ReactNode }> = ({ question, children }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -147,19 +187,31 @@ const SocialButton: React.FC<{ icon: React.ElementType; href: string; label: str
     <a 
         href={href} 
         aria-label={label}
+        target="_blank"
+        rel="noopener noreferrer"
         className="group relative p-3 flex items-center justify-center transition-all duration-300 ease-in-out"
     >
+        {/* Hover Glow Background */}
         <div className={`absolute inset-0 opacity-0 group-hover:opacity-20 rounded-full transition-opacity duration-300 bg-current ${colorClass} blur-md`}></div>
+        
+        {/* Icon */}
         <Icon className={`w-5 h-5 text-neutral-400 transition-all duration-300 group-hover:scale-110 group-hover:text-white z-10`} />
     </a>
 );
-
-
 
 const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({ onNavigate }) => {
     const { handleSaveContactMessage } = useData();
     const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
     const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+    const [showScrollTop, setShowScrollTop] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setShowScrollTop(window.scrollY > 300);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     const handleContactChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -178,7 +230,12 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
         }, 5000);
     };
 
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     const sectionBackgroundClass = "bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-gray-900 via-black to-black";
+
     return (
         <div className="bg-black text-primary-text scroll-smooth">
             <Header onNavigate={onNavigate} />
@@ -186,11 +243,27 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
             <main>
                 {/* Hero Section */}
                 <section id="home" className="relative pt-32 pb-20 text-center overflow-hidden">
+                    {/* Background Patterns */}
                     <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-                    <div className="absolute inset-x-0 top-0 h-96 bg-gradient-to-b from-blue-900/20 to-transparent blur-3xl"></div>
+                    
+                    {/* Premium Spotlight Effect */}
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] pointer-events-none -z-10 select-none overflow-hidden">
+                        {/* Core Beam Line */}
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1px] h-[400px] bg-gradient-to-b from-blue-400/60 via-blue-400/20 to-transparent"></div>
+                        
+                        {/* Primary High-Intensity Glow */}
+                        <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[400px] h-[300px] bg-blue-500/20 rounded-[100%] blur-[60px]"></div>
+                        
+                        {/* Broad Ambience Glow */}
+                        <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-blue-600/10 rounded-[100%] blur-[120px] opacity-70"></div>
+                        
+                        {/* Center Point Flare */}
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[2px] h-[2px] bg-white rounded-full shadow-[0_0_20px_4px_rgba(59,130,246,0.8)]"></div>
+                    </div>
+
                     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                         <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-400">
-                            Turn Your Data Into an AI-Powered Dashboard
+                            Turn Your Data Into Clear, Actionable Stories
                         </h1>
                         <div className="mt-6 text-lg text-secondary-text max-w-3xl mx-auto leading-relaxed space-y-6">
                             <p>
@@ -199,6 +272,7 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                         </div>
                     </div>
                     
+                    {/* Updated Interactive Hero Dashboard */}
                     <div className="mt-16 max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                         <div className="bg-gradient-to-b from-gray-900 to-black p-2 rounded-3xl shadow-2xl shadow-blue-900/20">
                             <HeroDashboard />
@@ -222,12 +296,9 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                     <ProblemsWeSolve />
                 </section>
                 
-
-
-
-
                 {/* Pricing Section */}
                 <section id="pricing" className={`py-24 ${sectionBackgroundClass} relative overflow-hidden`}>
+                    {/* Background elements */}
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-7xl pointer-events-none">
                         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-900/20 rounded-full blur-3xl"></div>
                         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-900/20 rounded-full blur-3xl"></div>
@@ -244,6 +315,7 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+                            {/* One-Time Cost Card */}
                             <div className="lg:col-span-4 bg-card-bg/50 backdrop-blur-sm border border-white/10 rounded-3xl p-8 flex flex-col relative overflow-hidden group hover:border-blue-500/30 transition-colors duration-300">
                                 <div className="absolute inset-0 bg-gradient-to-b from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                                 <div className="relative z-10">
@@ -266,12 +338,14 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                                 </div>
                             </div>
 
+                            {/* Plus Sign (Visual) */}
                             <div className="lg:col-span-1 flex items-center justify-center">
                                 <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50">
                                     <PlusIcon className="w-6 h-6" />
                                 </div>
                             </div>
 
+                            {/* Annual Subscription Container */}
                             <div className="lg:col-span-7 flex flex-col">
                                 <div className="bg-gradient-to-br from-purple-900/20 to-black border border-white/10 rounded-3xl p-8 h-full relative overflow-hidden">
                                     <div className="absolute top-0 right-0 p-8 opacity-10">
@@ -295,7 +369,9 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                                             Your annual fee is calculated based on four key usage factors, ensuring you only pay for the scale and complexity you need.
                                         </p>
 
+                                        {/* Interactive Factors Grid */}
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            {/* Factor 1: Dashboards */}
                                             <div className="bg-white/5 hover:bg-white/10 border border-white/5 hover:border-purple-500/30 rounded-xl p-5 transition-all duration-300 group cursor-default">
                                                 <div className="flex items-center mb-3">
                                                     <Squares2X2Icon className="w-6 h-6 text-purple-400 mr-3 group-hover:scale-110 transition-transform" />
@@ -304,6 +380,7 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                                                 <p className="text-sm text-gray-400">Volume of distinct dashboard views deployed.</p>
                                             </div>
 
+                                            {/* Factor 2: Add-ins */}
                                             <div className="bg-white/5 hover:bg-white/10 border border-white/5 hover:border-pink-500/30 rounded-xl p-5 transition-all duration-300 group cursor-default">
                                                 <div className="flex items-center mb-3">
                                                     <PuzzlePieceIcon className="w-6 h-6 text-pink-400 mr-3 group-hover:scale-110 transition-transform" />
@@ -312,6 +389,7 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                                                 <p className="text-sm text-gray-400">Small creative tools helping in day-to-day tasks.</p>
                                             </div>
 
+                                            {/* Factor 3: Complexity */}
                                             <div className="bg-white/5 hover:bg-white/10 border border-white/5 hover:border-amber-500/30 rounded-xl p-5 transition-all duration-300 group cursor-default">
                                                 <div className="flex items-center mb-3">
                                                     <CpuChipIcon className="w-6 h-6 text-amber-400 mr-3 group-hover:scale-110 transition-transform" />
@@ -320,6 +398,7 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                                                 <p className="text-sm text-gray-400">Depth of calculations and data relationships.</p>
                                             </div>
 
+                                            {/* Factor 4: Users */}
                                             <div className="bg-white/5 hover:bg-white/10 border border-white/5 hover:border-green-500/30 rounded-xl p-5 transition-all duration-300 group cursor-default">
                                                 <div className="flex items-center mb-3">
                                                     <UsersIcon className="w-6 h-6 text-green-400 mr-3 group-hover:scale-110 transition-transform" />
@@ -343,12 +422,11 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                         </div>
                     </div>
                 </section>
+
                 {/* Client Success Stories */}
                 <section id="stories">
                     <ClientSuccessStories />
                 </section>
-
-
 
                 {/* FAQ Section */}
                 <section id="faq" className={`py-20 ${sectionBackgroundClass}`}>
@@ -372,6 +450,7 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                         </div>
                     </div>
                 </section>
+
                 {/* Contact Section */}
                 <section id="contact" className={`py-20 border-t border-white/5 ${sectionBackgroundClass}`}>
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -381,6 +460,7 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                         </div>
                         <div className="mt-12 max-w-6xl mx-auto">
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                                {/* Form Card */}
                                 <div className="bg-card-bg border border-border-color rounded-2xl p-8">
                                     <h3 className="text-2xl font-bold text-white mb-6">Send us a message</h3>
                                     {isFormSubmitted ? (
@@ -422,35 +502,48 @@ const LandingPage: React.FC<{ onNavigate: (page: 'login' | null) => void }> = ({
                                     ></iframe>
                                 </div>
                             </div>
-
-
                         </div>
                     </div>
                 </section>
             </main>
 
-            {/* Footer - Modern Floating Bar */}
-            <footer className="relative py-8 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-6xl mx-auto">
-                    <div className="bg-neutral-900/50 backdrop-blur-xl border border-white/5 rounded-full px-2 py-2 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-[0_0_40px_-10px_rgba(0,0,0,0.5)]">
-                        <div className="flex items-center gap-4 pl-6">
-                             <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 2L2 7V17L12 22L22 17V7L12 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-                                <path d="M2 7L12 12M12 22V12M22 7L12 12M16 4.5L6 9.5" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-                            </svg>
-                            <span className="text-sm text-neutral-400 font-medium">© {new Date().getFullYear()} OneQlek</span>
+            {/* Footer - Modern Floating Bar (Enhanced for Responsiveness) */}
+            <footer className="relative py-12 px-4 sm:px-6 lg:px-8">
+                <div className="max-w-7xl mx-auto">
+                    <div className="bg-neutral-900/80 backdrop-blur-xl border border-white/10 rounded-3xl sm:rounded-full px-6 py-8 sm:py-3 flex flex-col sm:flex-row items-center justify-between gap-8 sm:gap-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-300">
+                        
+                        {/* Copyright */}
+                        <div className="flex items-center text-center sm:text-left order-2 sm:order-1 sm:pl-4">
+                            <span className="text-sm text-neutral-400 font-medium">© {new Date().getFullYear()} OneQlek. All rights reserved.</span>
                         </div>
 
-                        <div className="flex items-center gap-1 pr-2">
-                           <SocialButton href="#" icon={TwitterIcon} label="Twitter" colorClass="text-sky-500" />
-                           <SocialButton href="#" icon={FacebookIcon} label="Facebook" colorClass="text-blue-600" />
-                           <SocialButton href="#" icon={InstagramIcon} label="Instagram" colorClass="text-pink-500" />
-                           <SocialButton href="#" icon={TikTokIcon} label="TikTok" colorClass="text-teal-400" />
-                           <SocialButton href="#" icon={LinkedInIcon} label="LinkedIn" colorClass="text-blue-700" />
+                        {/* Social Icons Bar */}
+                        <div className="flex flex-wrap justify-center items-center gap-1 order-1 sm:order-2">
+                           <SocialButton href="https://x.com/oneqlek?s=21" icon={TwitterIcon} label="X (Twitter)" colorClass="text-sky-500" />
+                           <SocialButton href="https://www.facebook.com/share/1Bx4hQQJq6/?mibextid=wwXIfr" icon={FacebookIcon} label="Facebook" colorClass="text-blue-600" />
+                           <SocialButton href="https://www.instagram.com/oneqlek?igsh=ZzAxNDl1bHNhdmN1&utm_source=qr" icon={InstagramIcon} label="Instagram" colorClass="text-pink-500" />
+                           <SocialButton href="https://www.tiktok.com/@trendsnsale?_r=1&_t=ZS-92lHSa62n49" icon={TikTokIcon} label="TikTok" colorClass="text-teal-400" />
+                           <SocialButton href="https://youtube.com/@oneqlek?si=L3XKZIXs2c79dlOx" icon={YouTubeIcon} label="YouTube" colorClass="text-red-600" />
+                           <SocialButton href="https://www.linkedin.com/company/businessnextstep/" icon={LinkedInIcon} label="LinkedIn" colorClass="text-blue-700" />
+                           <SocialButton href="https://pin.it/3X2fMpJ7w" icon={PinterestIcon} label="Pinterest" colorClass="text-red-500" />
                         </div>
                     </div>
                 </div>
             </footer>
+
+            {/* Modern Floating Scroll Up Arrow */}
+            <button 
+                onClick={scrollToTop}
+                aria-label="Scroll to top"
+                className={`fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50 p-0 transition-all duration-500 ease-in-out hover:scale-110 active:scale-95 ${
+                    showScrollTop ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0 pointer-events-none'
+                }`}
+            >
+                <div className="absolute inset-0 rounded-full bg-blue-500 blur-lg opacity-0 group-hover:opacity-40 transition-opacity duration-300"></div>
+                <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-full border border-white/10 bg-black/60 backdrop-blur-md shadow-2xl flex items-center justify-center group hover:border-blue-500/50 transition-all">
+                    <ChevronUpIcon className="w-6 h-6 md:w-7 md:h-7 text-white/80 group-hover:text-white transition-colors" />
+                </div>
+            </button>
         </div>
     );
 };

@@ -19,6 +19,70 @@ import PortfolioPage from './components/pages/PortfolioPage.tsx';
 import { authService } from './services/auth';
 import { getAdminProfileUrl, getFullUrl, API_CONFIG } from './config/api';
 
+// SEO utility function to update document meta tags
+const updateSEOTags = (title: string, description: string, canonical?: string) => {
+  // Update title
+  document.title = title;
+  
+  // Update meta description
+  const metaDescription = document.querySelector('meta[name="description"]');
+  if (metaDescription) {
+    metaDescription.setAttribute('content', description);
+  }
+  
+  // Update canonical URL
+  if (canonical) {
+    let canonicalLink = document.querySelector('link[rel="canonical"]');
+    if (!canonicalLink) {
+      canonicalLink = document.createElement('link');
+      canonicalLink.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalLink);
+    }
+    canonicalLink.setAttribute('href', canonical);
+  }
+  
+  // Update Open Graph tags
+  const ogTitle = document.querySelector('meta[property="og:title"]');
+  const ogDescription = document.querySelector('meta[property="og:description"]');
+  const ogUrl = document.querySelector('meta[property="og:url"]');
+  
+  if (ogTitle) ogTitle.setAttribute('content', title);
+  if (ogDescription) ogDescription.setAttribute('content', description);
+  if (ogUrl && canonical) ogUrl.setAttribute('content', canonical);
+  
+  // Update Twitter tags
+  const twitterTitle = document.querySelector('meta[property="twitter:title"]');
+  const twitterDescription = document.querySelector('meta[property="twitter:description"]');
+  const twitterUrl = document.querySelector('meta[property="twitter:url"]');
+  
+  if (twitterTitle) twitterTitle.setAttribute('content', title);
+  if (twitterDescription) twitterDescription.setAttribute('content', description);
+  if (twitterUrl && canonical) twitterUrl.setAttribute('content', canonical);
+};
+
+// SEO breadcrumb structured data injection
+const injectBreadcrumbSchema = (breadcrumbs: Array<{name: string, url: string}>) => {
+  const existingSchema = document.querySelector('#breadcrumb-schema');
+  if (existingSchema) existingSchema.remove();
+  
+  const schema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": breadcrumbs.map((crumb, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "name": crumb.name,
+      "item": crumb.url
+    }))
+  };
+  
+  const script = document.createElement('script');
+  script.id = 'breadcrumb-schema';
+  script.type = 'application/ld+json';
+  script.textContent = JSON.stringify(schema);
+  document.head.appendChild(script);
+};
+
 
 function App() {
   const { isLoggedIn, userRole, login, logout, error, loading, currentUser } = useData();
@@ -67,7 +131,7 @@ function App() {
     }
   };
 
-  // Handle URL routing
+  // Handle URL routing and SEO
   useEffect(() => {
     const path = window.location.pathname;
     const urlParams = new URLSearchParams(window.location.search);
@@ -75,10 +139,20 @@ function App() {
     // Handle auth pages
     if (path === '/login' || urlParams.get('page') === 'login') {
       setAuthPage('login');
+      updateSEOTags(
+        'Login | OneQlek - AI-Powered Dashboard Platform',
+        'Sign in to your OneQlek account to access AI-powered financial dashboards and KPI management tools.',
+        'https://oneqlek.com/login'
+      );
       return;
     }
-    if (path === '/reset-password' || (urlParams.get('token') && path === '/reset-password')) {
+    if (path === '/reset-password' || urlParams.get('token')) {
       setAuthPage('reset-password');
+      updateSEOTags(
+        'Reset Password | OneQlek',
+        'Reset your OneQlek account password to regain access to your AI-powered dashboard platform.',
+        'https://oneqlek.com/reset-password'
+      );
       return;
     }
     
@@ -87,6 +161,13 @@ function App() {
       setCurrentPage('dashboard');
     } else if (path === '/admin') {
       setCurrentPage('dashboard');
+    } else {
+      // Default to landing page SEO
+      updateSEOTags(
+        'OneQlek | AI-Powered Financial & KPI Dashboard Platform',
+        'Transform your Excel data into interactive AI-powered financial dashboards. Replace manual spreadsheets with automated business intelligence and real-time KPI storytelling.',
+        'https://oneqlek.com/'
+      );
     }
   }, []);
   
@@ -98,8 +179,8 @@ function App() {
         setAuthPage('login');
       } else if (path === '/dashboard') {
         setCurrentPage('dashboard');
-      } else if (path === '/admin') {
-        setCurrentPage('dashboard');
+      } else if (path === '/reset-password') {
+        setAuthPage('reset-password');
       } else if (path === '/') {
         if (!isLoggedIn) {
           setAuthPage(null);
@@ -288,7 +369,7 @@ function App() {
       return <LoginPage onLoginSuccess={handleLoginSuccess} onNavigate={handleNavigateAuth} />;
     }
     if (authPage === 'reset-password') {
-      return <ResetPasswordPage onSuccess={() => setAuthPage('login')} />;
+      return <ResetPasswordPage onNavigate={handleNavigateAuth} />;
     }
     return <LandingPage onNavigate={handleNavigateAuth} />;
   }

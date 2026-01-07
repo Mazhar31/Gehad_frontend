@@ -1,0 +1,19 @@
+/* TEAM */
+OneQlek Development Team
+Site: https://oneqlek.com
+Contact: help@oneqlek.com
+Location: Dubai, UAE
+
+/* THANKS */
+AI-powered dashboard innovation
+Excel data transformation
+Business intelligence automation
+
+/* SITE */
+Last update: 2026/01/07
+Language: English
+Doctype: HTML5
+IDE: Modern web development stack
+Standards: HTML5, CSS3, ES6+, React, TypeScript
+Components: Tailwind CSS, Vite, Firebase
+Software: AI-powered analytics engine

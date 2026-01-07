@@ -1,0 +1,38 @@
+# OneQlek Robots.txt - SEO Optimized
+User-agent: *
+
+# Allow all public pages
+Allow: /
+Allow: /#how-it-works
+Allow: /#problems
+Allow: /#pricing
+Allow: /#stories
+Allow: /#faq
+Allow: /#contact
+
+# Block private/admin areas
+Disallow: /login
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /kpi
+Disallow: /reset-password
+Disallow: /api/
+
+# Block common non-content files
+Disallow: /*.json$
+Disallow: /node_modules/
+Disallow: /src/
+Disallow: /.env
+
+# Allow important assets
+Allow: /assets/
+Allow: /images/
+Allow: /og-image.jpg
+Allow: /logo.png
+Allow: /favicon.ico
+
+# Crawl delay (optional - helps with server load)
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://oneqlek.com/sitemap.xml

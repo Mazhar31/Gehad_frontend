@@ -1,5 +1,38 @@
 {
-  "name": "Admin Dashboard For Projects",
-  "description": "Manage all your projects in one place with Projectile. View plans, track progress, increase productivity and improve communication.",
+  "name": "OneQlek | AI-Powered Financial & KPI Dashboard Platform",
+  "short_name": "OneQlek",
+  "description": "OneQlek is a smart analytics and KPI dashboard platform that transforms raw Excel data into clear, actionable insights using AI-powered storytelling and automated business intelligence.",
+  "version": "1.0.0",
+  "author": "OneQlek Team",
+  "homepage": "https://oneqlek.com",
+  "keywords": [
+    "OneQlek",
+    "financial dashboard",
+    "KPI management",
+    "AI analytics",
+    "excel to dashboard",
+    "automated reporting",
+    "business intelligence",
+    "storytelling dashboards",
+    "data visualization",
+    "financial reporting",
+    "dashboard automation",
+    "AI-powered analytics"
+  ],
+  "categories": [
+    "Business",
+    "Analytics",
+    "Finance",
+    "Productivity"
+  ],
+  "license": "Proprietary",
+  "repository": {
+    "type": "private",
+    "url": "https://oneqlek.com"
+  },
+  "bugs": {
+    "url": "https://oneqlek.com/#contact",
+    "email": "help@oneqlek.com"
+  },
   "requestFramePermissions": []
 }

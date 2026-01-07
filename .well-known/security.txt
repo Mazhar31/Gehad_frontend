@@ -1,0 +1,7 @@
+Contact: mailto:help@oneqlek.com
+Contact: https://oneqlek.com/#contact
+Expires: 2025-12-31T23:59:59.000Z
+Encryption: https://oneqlek.com/pgp-key.txt
+Acknowledgments: https://oneqlek.com/#contact
+Preferred-Languages: en
+Canonical: https://oneqlek.com/.well-known/security.txt
